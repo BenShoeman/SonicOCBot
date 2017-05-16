@@ -1,0 +1,34 @@
+225 200 177 white
+229 194 152 olive
+228 185 142 olive
+226 185 143 olive
+227 161 115 tan
+217 145 100 tan
+204 132  67 brown
+199 122  88 brown
+165  57   0 red
+134   4   0 black
+113   2   0 black
+ 68   0   0 black
+255 224 196 pale white
+238 207 180 olive
+222 171 127 tan
+224 177 132 tan
+223 166 117 tan
+190 114  60 brown
+100  25   0 red
+ 91   0   0 black
+253 228 200 pale white
+239 214 189 white
+234 189 157 white
+227 194 124 olive
+223 185 151 olive
+208 146 110 tan
+189 151 120 brown
+187 109  74 brown
+148  10   0 black
+225 173 164 pink
+165 136 105 brown
+123   0   0 black
+114   0   0 black
+ 56   0   0 black
