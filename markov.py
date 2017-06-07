@@ -61,6 +61,8 @@ def addText(sqldb, text):
                 # print "Updating edge currword=%s, nextword=%s" % (currword, nextword)
                 cur.execute("update markov_edges set instances = instances + 1 where currword='%s' and nextword='%s';" % (currword, nextword))
 
+            if i % 5000 == 4999: con.commit() # Commit every 5000 words
+
             # Unnecessary, was slowing the program down when we can calculate
             # probabilities in the select query in getRandomString
 

@@ -69,7 +69,7 @@ def getFanfics():
     for i in range(1,1171):
         url = "https://www.fanfiction.net/game/Sonic-the-Hedgehog/?&p=" + str(i)
         try:
-            print "Getting text of fanfics on",url
+            print "Getting text of fanfics on",url+";","Length of file:",len(fanficsTxt)
 
             # Wrapping in sigalrm in case of taking too long to load
             signal.alarm(5)
@@ -79,7 +79,7 @@ def getFanfics():
             soup = BeautifulSoup(content)
             for tag in soup.findAll("a", class_="stitle"):
                 try:
-                    print "\tGetting text of fanfic at",tag.get("href")
+                    print "\tGetting text of fanfic at",tag.get("href")+"...",
 
                     # Go to that link
                     signal.alarm(5)
@@ -87,9 +87,13 @@ def getFanfics():
                     signal.alarm(0)
                     subsoup = BeautifulSoup(subcontent)
 
-                    # If rated M, don't use this because we don't wanna get zucced
-                    if "Fiction M" in subsoup.get_text():
+                    # If rated M, don't use because we don't wanna get zucced
+                    # Also exclude non-English stories, just to decrease bloat
+                    if "Fiction M" in subsoup.get_text() or "English" not in subsoup.get_text():
+                        print "Skipped."
+                        time.sleep(1)
                         continue
+                    print
 
                     # Get the div with ID storytext and get all paragraphs within it
                     for p in subsoup.findAll(id="storytext")[0].findAll("p"):
@@ -111,15 +115,15 @@ def getFanfics():
                 except Exception as e:
                     print e.message
 
-            # If we've exceeded the char limit, exit the loop
-            if len(fanficsTxt) > MAX_CHAR_COUNT:
-                break
-
             time.sleep(1)
         except httplib.BadStatusLine:
             print "Bad status line on",url
         except Exception as e:
             print e.message
+
+        # If we've exceeded the char limit, exit the loop
+        if len(fanficsTxt) > MAX_CHAR_COUNT:
+            break
 
     with open("fanfics.txt","w") as f:
         f.write(fanficsTxt)

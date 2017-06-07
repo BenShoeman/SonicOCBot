@@ -35,7 +35,7 @@ def main():
                 if datetime.datetime.now().hour == 12 and datetime.datetime.now().minute == 0:
                     print "Posting Sonic Sez to FB page..."
 
-                    advice = "Sonic S̶e̶z̶ Says: " + markov.getRandomParagraph("sonicsez.sqlite3")
+                    advice = u"Sonic S̶e̶z̶ Says: " + markov.getRandomParagraph("sonicsez.sqlite3")
                     graph.put_wall_post(message=advice)
 
                     print "Done!"
