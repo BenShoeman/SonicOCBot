@@ -9,7 +9,7 @@ from oc import *
 import markov
 
 FACEBOOK_PAGE_ID = "678135995705395"
-FACEBOOK_ACCESS_TOKEN = "EAAPAhWIFM6kBAKEglxtCQXNMtMQZBswsHeg9TrZCaRxnQiuFjvqijXPce56ePxdwHkWNqc888ZBcZC8cZCt2L2JScWq8wNqdkcvGP49CDffDvbgjtI4GFEuEaCXRm82rxJ8v14uZA85eWZCZACUo7Qw4gd9baDBib5EZD"
+FACEBOOK_ACCESS_TOKEN = ""
 
 # Get the page ID by going onto the page > about; it'll be at the bottom of the page
 # Get access token by going on developer.facebook.com > tools and support > Graph API Explorer > Get token
@@ -35,7 +35,7 @@ def main():
                 if datetime.datetime.now().hour == 12 and datetime.datetime.now().minute == 0:
                     print "Posting Sonic Sez to FB page..."
 
-                    advice = "Sonic Sez: " + markov.getRandomString("sonicsez.sqlite3")
+                    advice = "Sonic S̶e̶z̶ Says: " + markov.getRandomParagraph("sonicsez.sqlite3")
                     graph.put_wall_post(message=advice)
 
                     print "Done!"
@@ -47,7 +47,7 @@ def main():
                     # oc["image"].show()
                     # print getOCDescription(oc)
 
-                    print "Posting", oc["name"], "to FB page...",
+                    print "Posting OC", oc["name"], "to FB page...",
 
                     # Get jpeg of image in memory, then post that image and OC desc. to FB
                     output = io.BytesIO()
