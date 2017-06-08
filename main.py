@@ -35,7 +35,7 @@ def main():
         if currtime.minute % 30 == 0:
             try:
                 # Post Sonic fanfic at midnight and noon on Tuesdays and Fridays
-                if currtime.weekday() in [2,4] and currtime.hour in [0,12] and currtime.minute == 0:
+                if currtime.weekday() in [1,4] and currtime.hour in [0,12] and currtime.minute == 0:
                     ffic = getRandomFanfic()
 
                     print "Posting fanfic", ffic["title"], "to FB page...",
