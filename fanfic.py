@@ -1,8 +1,8 @@
 import random
 from markov import *
 
-MEAN_PARAS_PER_STORY = 61.906843
-STDEV_PARAS_PER_STORY = 72.209921
+MEAN_PARAS_PER_STORY = 41.906843
+STDEV_PARAS_PER_STORY = 37.209921
 MEAN_SENTS_PER_PARA = 4.279888
 STDEV_SENTS_PER_PARA = 4.056850
 
@@ -18,9 +18,9 @@ def getRandomFanfic():
     # fanfic["content"] = "\n\n".join([getRandomParagraph("text/fanfics.sqlite3") for i in range(10)])
 
     fanfic["content"] = ""
-    for i in range(gaussInt(MEAN_PARAS_PER_STORY, STDEV_PARAS_PER_STORY, minval=1)):
+    for i in range(gaussInt(MEAN_PARAS_PER_STORY, STDEV_PARAS_PER_STORY, minval=4)):
         sentNum = gaussInt(MEAN_SENTS_PER_PARA, STDEV_SENTS_PER_PARA, minval=1)
-        fanfic["content"] += getRandomParagraph("text/fanfics.sqlite3") + "\n\n"
+        fanfic["content"] += getRandomParagraph("text/fanfics.sqlite3", sentences=sentNum) + "\n\n"
 
     # Remove trailing newline chars
     fanfic["content"] = fanfic["content"][0:-2]
