@@ -6,6 +6,7 @@ import datetime
 import time
 from PIL import Image, ImageDraw
 from oc import *
+from fanfic import *
 import markov
 
 FACEBOOK_PAGE_ID = "678135995705395"
@@ -22,30 +23,37 @@ def main():
     }
     graph = getGraph(credentials)
 
-    print "Sonic OC Bot starting..."
+    print "Sonic OC Bot started."
 
     # Start the bot process on the start of the minute
     time.sleep(0 if datetime.datetime.now().second == 0 else 60 - datetime.datetime.now().second)
 
     while True:
         # If we're on the hour or half-hour
-        if datetime.datetime.now().minute % 30 == 0:
+        currtime = datetime.datetime.now()
+        if currtime.minute % 30 == 0:
             try:
-                # Post Sonic Sez at noon every day
-                if datetime.datetime.now().hour == 12 and datetime.datetime.now().minute == 0:
-                    print "Posting Sonic Sez to FB page..."
+                # Post Sonic fanfic at midnight and noon on Tuesdays and Fridays
+                if currtime.weekday() in [2,4] and currtime.hour in [0,12] and currtime.minute == 0:
+                    ffic = getRandomFanfic()
 
-                    advice = u"Sonic S̶e̶z̶ Says: " + markov.getRandomParagraph("text/sonicsez.sqlite3")
+                    print "Posting fanfic", ffic["title"], "to FB page...",
+
+                    graph.put_wall_post(message=ffic["title"] + "\n\n-----\n\n" + ffic["content"])
+
+                    print "Done!"
+                # Post Sonic Sez at 6am, noon, and 6pm every day except on fanfic times
+                elif currtime.hour in [6,12,18] and currtime.minute == 0:
+                    advice = u"Sonic S̶e̶z̶ Says: " + markov.getRandomParagraph("text/sonicsez.sqlite3", sentences=gaussInt(4,2,minval=2))
+
+                    print "Posting Sonic Sez to FB page...",
+
                     graph.put_wall_post(message=advice)
 
                     print "Done!"
-                # Most times just post an OC
+                # Otherwise just post an OC
                 else:
                     oc = createOC()
-
-                    # For debug
-                    # oc["image"].show()
-                    # print getOCDescription(oc)
 
                     print "Posting OC", oc["name"], "to FB page...",
 
@@ -58,7 +66,7 @@ def main():
             except (ConnectionError, facebook.GraphAPIError) as e:
                 print "Error:",e.message
 
-        time.sleep(60)
+        time.sleep(60 - datetime.datetime.now().second)
 
     # Debug
     # oc = createOC()
