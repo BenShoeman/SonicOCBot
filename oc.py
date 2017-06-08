@@ -96,7 +96,7 @@ def createOC(templatenum = -1): # templatenum is for debug purposes
             pass
 
     oc["stats"] = getOCStats()
-    oc["info"] = markov.getRandomString("text/descs.sqlite3")
+    oc["info"] = markov.getRandomParagraph("text/descs.sqlite3", sentences=random.randrange(3,7))
 
     return oc
 
