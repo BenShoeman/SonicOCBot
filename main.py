@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import facebook
 import io
@@ -10,7 +11,7 @@ from fanfic import *
 import markov
 
 FACEBOOK_PAGE_ID = "678135995705395"
-FACEBOOK_ACCESS_TOKEN = ""
+FACEBOOK_ACCESS_TOKEN = "EAAPAhWIFM6kBAKEglxtCQXNMtMQZBswsHeg9TrZCaRxnQiuFjvqijXPce56ePxdwHkWNqc888ZBcZC8cZCt2L2JScWq8wNqdkcvGP49CDffDvbgjtI4GFEuEaCXRm82rxJ8v14uZA85eWZCZACUo7Qw4gd9baDBib5EZD"
 
 # Get the page ID by going onto the page > about; it'll be at the bottom of the page
 # Get access token by going on developer.facebook.com > tools and support > Graph API Explorer > Get token
