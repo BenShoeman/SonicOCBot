@@ -5,7 +5,7 @@ import re
 import sqlite3
 import sys
 
-extrapunctregex = re.compile(r"[\/#$%\^\*{}=_`~()\"]")
+extrapunctregex = re.compile(r"[\/#$%\^{}=_`~()\"]")
 wordregex = re.compile(r"([A-Za-z0-9\-\']+|[.,!?&;:])")
 
 def makeTable(sqldb):
