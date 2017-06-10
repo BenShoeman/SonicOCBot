@@ -17,7 +17,7 @@ FACEBOOK_CREDS = {
     "page_id": "678135995705395",
     "access_token": open("keys/fb.txt").read()
 }
-TUMBLR_CREDS = dict([re.split(r": ", e) for e in open("keys/tumblr.txt").readlines()])
+TUMBLR_CREDS = dict([re.split(r": ", e.strip()) for e in open("keys/tumblr.txt").readlines()])
 
 # Facebook:
 # Get the page ID by going onto the page > about; it'll be at the bottom of the page
@@ -54,8 +54,9 @@ def main():
 
                     ffic = getRandomFanfic()
                     print "Posting fanfic", ffic["title"], "to Tumblr blog...",
-                    tumbclient.create_text("sonicocbot", state="published", title=ffic["title"], body=ffic["content"], tags=["sonic", "sanic", "sonic the hedgehog", "sonic fanfic", "sonic fanfiction", "fic", "fiction", "fanfic", "fanfiction", "sega"])
-                    print "Done!"
+                    resp = tumbclient.create_text("sonicocbot", state="published", title=ffic["title"], body=ffic["content"], tags=["sonic", "sanic", "sonic the hedgehog", "sonic fanfic", "sonic fanfiction", "fic", "fiction", "fanfic", "fanfiction", "sega"])
+                    if "errors" in resp: print "Error."
+                    else: print "Done!"
                 # Post Sonic Sez at 6am, noon, and 6pm every day except on fanfic times
                 elif currtime.hour in [6,12,18] and currtime.minute == 0:
                     advice = u"Sonic S̶e̶z̶ Says: " + markov.getRandomParagraph("text/sonicsez.sqlite3", sentences=gaussInt(4,2,minval=2))
@@ -65,8 +66,9 @@ def main():
 
                     advice = markov.getRandomParagraph("text/sonicsez.sqlite3", sentences=gaussInt(4,2,minval=2))
                     print "Posting Sonic Sez to Tumblr blog...",
-                    tumbclient.create_text("sonicocbot", state="published", title=u"Sonic S̶e̶z̶ Says", body=advice, tags=["sonic", "sanic", "sonic the hedgehog", "sonic sez", "sonic says", "sega"])
-                    print "Done!"
+                    resp = tumbclient.create_text("sonicocbot", state="published", title=u"Sonic S̶e̶z̶ Says", body=advice, tags=["sonic", "sanic", "sonic the hedgehog", "sonic sez", "sonic says", "sega"])
+                    if "errors" in resp: print "Error."
+                    else: print "Done!"
                 # Otherwise just post an OC
                 else:
                     oc = createOC()
@@ -80,10 +82,11 @@ def main():
                     oc = createOC()
                     print "Posting OC", oc["name"], "to Tumblr blog...",
                     oc["image"].save("temp.png", format="PNG")
-                    tumbclient.create_photo("sonicocbot", state="published", data=os.getcwd()+"/temp.png", caption=getOCDescription(oc), tags=["sonic", "sanic", "sonic the hedgehog", "fanart", "fan art", "sonic fanart", "sonic fan art", "oc", "sonic oc", "sonic fan character", "illustration", "drawing", "design", "sonic character design", "sega", oc["species"], oc["gender"], "lol"])
+                    resp = tumbclient.create_photo("sonicocbot", state="published", data=os.getcwd()+"/temp.png", caption=getOCDescription(oc), tags=["sonic", "sanic", "sonic the hedgehog", "fanart", "fan art", "sonic fanart", "sonic fan art", "oc", "sonic oc", "sonic fan character", "illustration", "drawing", "design", "sonic character design", "sega", oc["species"], oc["gender"], "lol"])
                     os.remove("temp.png")
-                    print "Done!"
-            except facebook.GraphAPIError as e:#(ConnectionError, facebook.GraphAPIError) as e:
+                    if "errors" in resp: print "Error."
+                    else: print "Done!"
+            except facebook.GraphAPIError as e:
                 print "Error:",e.message
 
         time.sleep(60 - datetime.datetime.now().second)
