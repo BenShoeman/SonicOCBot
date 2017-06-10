@@ -102,6 +102,7 @@ def createOC(templatenum = -1): # templatenum is for debug purposes
 
 def getOCDescription(oc):
     oc_desc = oc["name"] + " the " + oc["species"].title() + "\n\n"
+    oc_desc += oc["info"] + "\n\n"
     # oc_desc += "Name: " + oc["name"] + "\n"
     # oc_desc += "Species: " + oc["species"].title() + "\n"
     oc_desc += "Age: " + str(oc["age"]) + "\n"
@@ -114,5 +115,4 @@ def getOCDescription(oc):
     oc_desc += "\n"
     for k,v in sorted(oc["stats"].iteritems()):
         oc_desc += k + ": " + str(v) + "/10\n"
-    oc_desc += "\n" + oc["info"]
-    return oc_desc
+    return oc_desc[0:-1] # Removing the final newline
