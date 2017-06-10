@@ -4,25 +4,35 @@
 import facebook
 import io
 import datetime
+import os
+import pytumblr
+import re
 import time
 from PIL import Image, ImageDraw
 from oc import *
 from fanfic import *
 import markov
 
-FACEBOOK_PAGE_ID = "678135995705395"
-FACEBOOK_ACCESS_TOKEN = "EAAPAhWIFM6kBAKEglxtCQXNMtMQZBswsHeg9TrZCaRxnQiuFjvqijXPce56ePxdwHkWNqc888ZBcZC8cZCt2L2JScWq8wNqdkcvGP49CDffDvbgjtI4GFEuEaCXRm82rxJ8v14uZA85eWZCZACUo7Qw4gd9baDBib5EZD"
+FACEBOOK_CREDS = {
+    "page_id": "678135995705395",
+    "access_token": open("keys/fb.txt").read()
+}
+TUMBLR_CREDS = dict([re.split(r": ", e) for e in open("keys/tumblr.txt").readlines()])
 
+# Facebook:
 # Get the page ID by going onto the page > about; it'll be at the bottom of the page
 # Get access token by going on developer.facebook.com > tools and support > Graph API Explorer > Get token
 # Make sure to extend access token in this menu!
 
+# Tumblr:
+# Get oauth token and secret using api.tumblr.com/console
+
 def main():
-    credentials = {
-        "page_id": FACEBOOK_PAGE_ID,
-        "access_token": FACEBOOK_ACCESS_TOKEN
-    }
-    graph = getGraph(credentials)
+    fbgraph = getGraph(FACEBOOK_CREDS)
+    tumbclient = pytumblr.TumblrRestClient(
+        TUMBLR_CREDS["consumer_key"], TUMBLR_CREDS["consumer_secret"],
+        TUMBLR_CREDS["oauth_token"], TUMBLR_CREDS["oauth_secret"]
+    )
 
     print "Sonic OC Bot started."
 
@@ -34,37 +44,46 @@ def main():
         currtime = datetime.datetime.now()
         if currtime.minute % 30 == 0:
             try:
-                # Post Sonic fanfic at midnight and noon on Tuesdays and Fridays
-                if currtime.weekday() in [1,4] and currtime.hour in [0,12] and currtime.minute == 0:
+                # Post Sonic fanfic at midnight and noon on Tuesdays, Fridays,
+                # and Saturdays
+                if currtime.weekday() in [1,4,5] and currtime.hour in [0,12] and currtime.minute == 0:
                     ffic = getRandomFanfic()
-
                     print "Posting fanfic", ffic["title"], "to FB page...",
+                    fbgraph.put_wall_post(message=ffic["title"] + "\n\n-----\n\n" + ffic["content"])
+                    print "Done!"
 
-                    graph.put_wall_post(message=ffic["title"] + "\n\n-----\n\n" + ffic["content"])
-
+                    ffic = getRandomFanfic()
+                    print "Posting fanfic", ffic["title"], "to Tumblr blog...",
+                    tumbclient.create_text("sonicocbot", state="published", title=ffic["title"], body=ffic["content"], tags=["sonic", "sanic", "sonic the hedgehog", "sonic fanfic", "sonic fanfiction", "fic", "fiction", "fanfic", "fanfiction", "sega"])
                     print "Done!"
                 # Post Sonic Sez at 6am, noon, and 6pm every day except on fanfic times
                 elif currtime.hour in [6,12,18] and currtime.minute == 0:
                     advice = u"Sonic S̶e̶z̶ Says: " + markov.getRandomParagraph("text/sonicsez.sqlite3", sentences=gaussInt(4,2,minval=2))
-
                     print "Posting Sonic Sez to FB page...",
+                    fbgraph.put_wall_post(message=advice)
+                    print "Done!"
 
-                    graph.put_wall_post(message=advice)
-
+                    advice = markov.getRandomParagraph("text/sonicsez.sqlite3", sentences=gaussInt(4,2,minval=2))
+                    print "Posting Sonic Sez to Tumblr blog...",
+                    tumbclient.create_text("sonicocbot", state="published", title=u"Sonic S̶e̶z̶ Says", body=advice, tags=["sonic", "sanic", "sonic the hedgehog", "sonic sez", "sonic says", "sega"])
                     print "Done!"
                 # Otherwise just post an OC
                 else:
                     oc = createOC()
-
                     print "Posting OC", oc["name"], "to FB page...",
-
                     # Get jpeg of image in memory, then post that image and OC desc. to FB
                     output = io.BytesIO()
                     oc["image"].save(output, format="PNG")
-                    graph.put_photo(message=getOCDescription(oc), image=output.getvalue())
-
+                    fbgraph.put_photo(message=getOCDescription(oc), image=output.getvalue())
                     print "Done!"
-            except (ConnectionError, facebook.GraphAPIError) as e:
+
+                    oc = createOC()
+                    print "Posting OC", oc["name"], "to Tumblr blog...",
+                    oc["image"].save("temp.png", format="PNG")
+                    tumbclient.create_photo("sonicocbot", state="published", data=os.getcwd()+"/temp.png", caption=getOCDescription(oc), tags=["sonic", "sanic", "sonic the hedgehog", "fanart", "fan art", "sonic fanart", "sonic fan art", "oc", "sonic oc", "sonic fan character", "illustration", "drawing", "design", "sonic character design", "sega", oc["species"], oc["gender"], "lol"])
+                    os.remove("temp.png")
+                    print "Done!"
+            except facebook.GraphAPIError as e:#(ConnectionError, facebook.GraphAPIError) as e:
                 print "Error:",e.message
 
         time.sleep(60 - datetime.datetime.now().second)
