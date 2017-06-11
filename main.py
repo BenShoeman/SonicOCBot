@@ -66,7 +66,7 @@ def main():
 
                     advice = markov.getRandomParagraph("text/sonicsez.sqlite3", sentences=gaussInt(4,2,minval=2))
                     print "Posting Sonic Sez to Tumblr blog...",
-                    resp = tumbclient.create_text("sonicocbot", state="published", title="Sonic Says", body=advice, tags=["sonic", "sanic", "sonic the hedgehog", "sonic sez", "sonic says", "sega"])
+                    resp = tumbclient.create_text("sonicocbot", state="published", title="Sonic Sez", body=advice, tags=["sonic", "sanic", "sonic the hedgehog", "sonic sez", "sonic says", "sega"])
                     if "errors" in resp: print "Error."
                     else: print "Done!"
                 # Otherwise just post an OC
