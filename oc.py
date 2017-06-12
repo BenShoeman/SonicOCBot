@@ -31,14 +31,14 @@ def createOC(templatenum = -1): # templatenum is for debug purposes
         template = FILLINFO["templates"][templatenum]
 
     oc["image"] = Image.open("templates/" + template["image"]).convert("RGB")
-    oc["gender"] = template["gender"]
+    oc["sex"] = template["gender"]
     oc["species"] = template["species"]
     oc["age"] = max([int(round(random.gauss(21, 6))), 13])
 
     # Give it a name
-    if oc["gender"] == "female":
+    if oc["sex"] == "female":
         oc["name"] = random.choice(NAMES_FEMALE)
-    elif oc["gender"] == "male":
+    elif oc["sex"] == "male":
         oc["name"] = random.choice(NAMES_MALE)
 
     oc["personality"] = random.choice(PERSONALITIES)
@@ -106,7 +106,7 @@ def getOCDescription(oc):
     # oc_desc += "Name: " + oc["name"] + "\n"
     # oc_desc += "Species: " + oc["species"].title() + "\n"
     oc_desc += "Age: " + str(oc["age"]) + "\n"
-    oc_desc += "Sex: " + oc["gender"].title() + "\n"
+    oc_desc += "Sex: " + oc["sex"].title() + "\n"
     oc_desc += "Personality: " + oc["personality"].title() + "\n"
     oc_desc += "Skills/Passions: " + ", ".join(oc["skills"]).title() + "\n"
     for k,v in sorted(oc.iteritems()):
