@@ -96,7 +96,10 @@ def createOC(templatenum = -1): # templatenum is for debug purposes
             pass
 
     oc["stats"] = getOCStats()
-    oc["info"] = markov.getRandomParagraph("text/descs.sqlite3", sentences=random.randrange(3,7))
+    if oc["sex"] == "male":
+        oc["info"] = markov.getRandomParagraph("text/malocdescs.sqlite3", sentences=random.randrange(3,7))
+    else:
+        oc["info"] = markov.getRandomParagraph("text/femocdescs.sqlite3", sentences=random.randrange(3,7))
 
     return oc
 
