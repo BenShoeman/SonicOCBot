@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import random
 from markov import *
 
@@ -29,3 +31,19 @@ def getRandomFanfic():
 
 def gaussInt(mean, stdev, minval = 0):
     return max([minval, int(round(random.gauss(mean,stdev)))])
+
+# Run in console to get a md file of the fanfic
+def main():
+    import re
+    print "Generating fanfic...",
+    ffic = getRandomFanfic()
+    print "Done!"
+    fname = re.sub(r"[\.,:;!?'\" ]","",ffic["title"]) + ".md"
+    print "Writing fanfic to",fname,
+    with open(fname,"w") as f:
+        f.write("## " + ffic["title"] + "\n\n")
+        f.write(ffic["content"])
+    print "Done!"
+
+if __name__=="__main__":
+    main()
