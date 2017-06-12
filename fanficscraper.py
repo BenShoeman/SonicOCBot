@@ -10,6 +10,10 @@ import socket
 import time
 import urllib2
 
+# Suppress pointless (for my purposes) bs4 warning
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
+
 def main():
     choice = raw_input("Title extraction (t), fanfic extraction (f), or fanfic stats (s)? ")
     if choice == "t":
