@@ -113,7 +113,7 @@ def getOCDescription(oc):
     oc_desc += "Personality: " + oc["personality"].title() + "\n"
     oc_desc += "Skills/Passions: " + ", ".join(oc["skills"]).title() + "\n"
     for k,v in sorted(oc.iteritems()):
-        if k not in ["name", "gender", "image", "species", "age", "personality", "skills", "stats", "info"]:
+        if k not in ["name", "sex", "image", "species", "age", "personality", "skills", "stats", "info"]:
             oc_desc += k.title() + " Color: " + v.title() + "\n"
     oc_desc += "\n"
     for k,v in sorted(oc["stats"].iteritems()):
