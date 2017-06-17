@@ -7,6 +7,7 @@ import datetime
 import os
 import pytumblr
 import re
+import requests
 import time
 from PIL import Image, ImageDraw
 from oc import *
@@ -86,7 +87,7 @@ def main():
                     os.remove("temp.png")
                     if "errors" in resp: print "Error."
                     else: print "Done!"
-            except facebook.GraphAPIError as e:
+            except (facebook.GraphAPIError, requests.exceptions.ConnectionError) as e:
                 print "Error:",e.message
 
         time.sleep(60 - datetime.datetime.now().second)
