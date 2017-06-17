@@ -103,6 +103,7 @@
         gender: prompt("Enter sex/gender of template.").toLowerCase(),
         fill: []
       };
+      undostack = [];
       document.getElementById("tempinfo").style.display = "block";
       document.getElementById("tempinfo").innerHTML = "Species: " + tmp.species.replace(/^[a-z]/, function (x) {return x.toUpperCase()}) + "<br>Sex: " + tmp.gender.replace(/^[a-z]/, function (x) {return x.toUpperCase()}) + "<br><a href='javascript:;' onclick='undoFill()'>Undo Last Fill</a><br><a href='javascript:;' onclick='loadTemplate()'>Reset Template</a>";
       document.getElementById("colorregion").style.display = "block";
