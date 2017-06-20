@@ -33,6 +33,54 @@ def hsv2rgb(hsv):
     # Return RGB values in range 0..255
     return (int(round(r*255)), int(round(g*255)), int(round(b*255)))
 
+def rgb2hsl(rgb):
+    # Get RGB values and put them in range 0..1
+    r = rgb[0]/255.0; g = rgb[1]/255.0; b = rgb[2]/255.0
+    cmax = max([r,g,b]); cmin = min([r,g,b])
+    delta = cmax - cmin
+
+    l = (cmax + cmin) / 2
+    if delta == 0:
+        return (0, 0, round(l*100,2))
+
+    s = delta / (1 - abs(2*l - 1))
+
+    if cmax == r:
+        h = 60 * (((g-b) / delta) % 6)
+    elif cmax == g:
+        h = 60 * (((b-r) / delta) + 2)
+    else:
+        h = 60 * (((r-g) / delta) + 4)
+
+    # Return HSL values in the range 0..360 for hue, 0..100 otherwise
+    return (round(h,1),round(s*100,2),round(l*100,2))
+
+def hsl2rgb(hsl):
+    # Get saturation and lightness in range 0..1
+    h = float(hsl[0]); s = hsl[1]/100.0; l = hsl[2]/100.0
+
+    c = (1 - abs(2*l - 1)) * s
+    hh = float(h) / 60
+    x = c * (1 - abs(hh % 2 - 1))
+    m = l - c/2
+
+    r = 0; g = 0; b = 0
+    if hh >= 5:
+        r = c; b = x
+    elif hh >= 4:
+        r = x; b = c
+    elif hh >= 3:
+        g = x; b = c
+    elif hh >= 2:
+        g = c; b = x
+    elif hh >= 1:
+        r = x; g = c
+    else:
+        r = c; g = x
+
+    # Return RGB values in the range 0..255
+    return (int(round((r+m)*255)), int(round((g+m)*255)), int(round((b+m)*255)))
+
 def getColorsList(filename):
     colors = []
     with open(filename,"r") as f:

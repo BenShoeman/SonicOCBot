@@ -12,6 +12,7 @@ import time
 from PIL import Image, ImageDraw
 from oc import *
 from fanfic import *
+from followerpost import *
 import markov
 
 FACEBOOK_CREDS = {
@@ -27,6 +28,9 @@ TUMBLR_CREDS = dict([re.split(r": ", e.strip()) for e in open("keys/tumblr.txt")
 
 # Tumblr:
 # Get oauth token and secret using api.tumblr.com/console
+
+LIKE_MILESTONES = [int(x) for x in open("data/likemilestones.txt")]
+FOLLOWER_MILESTONES = [int(x) for x in open("data/followermilestones.txt")]
 
 def main():
     fbgraph = getGraph(FACEBOOK_CREDS)
@@ -45,9 +49,53 @@ def main():
         currtime = datetime.datetime.now()
         if currtime.minute % 30 == 0:
             try:
+                # Get like and follower counts on FB and Tumblr
+                likes = fbgraph.get_object(FACEBOOK_CREDS["page_id"], fields="fan_count")["fan_count"]
+                followers = tumbclient.followers("sonicocbot")["total_users"]
+
+                # If we have reached a milestone, post about it
+                if likes >= LIKE_MILESTONES[0] or followers >= FOLLOWER_MILESTONES[0]:
+                    if likes >= LIKE_MILESTONES[0]:
+                        print "Posting like milestone:",LIKE_MILESTONES[0],"likes! ...",
+                        likes = LIKE_MILESTONES[0]
+                        del LIKE_MILESTONES[0]
+                        # Update the new milestones
+                        with open("data/likemilestones.txt","w") as f:
+                            f.write("\n".join([str(x) for x in LIKE_MILESTONES]))
+
+                        likeimg = getFollowerThanksImg(likes, "likes")
+
+                        # Get jpeg of image in memory, then post that image to FB
+                        output = io.BytesIO()
+                        likeimg.save(output, format="PNG")
+                        fbgraph.put_photo(message="We've reached %d likes on Facebook! Thanks for the support; we'll defeat Eggman in no time!" % likes, image=output.getvalue())
+                        likeimg.save("temp.png", format="PNG")
+                        resp = tumbclient.create_photo("sonicocbot", state="published", data=os.getcwd()+"/temp.png", caption="We've reached %d likes on Facebook! Thanks for the support; we'll defeat Eggman in no time!" % likes, tags=["thanks"])
+                        os.remove("temp.png")
+
+                        print "Done!"
+                    if followers >= FOLLOWER_MILESTONES[0]:
+                        print "Posting follower milestone:",LIKE_MILESTONES[0],"followers! ...",
+                        followers = FOLLOWER_MILESTONES[0]
+                        del FOLLOWER_MILESTONES[0]
+                        # Update the new milestones
+                        with open("data/followermilestones.txt","w") as f:
+                            f.write("\n".join([str(x) for x in FOLLOWER_MILESTONES]))
+
+                        followerimg = getFollowerThanksImg(followers, "followers")
+
+                        # Get jpeg of image in memory, then post that image to FB
+                        output = io.BytesIO()
+                        followerimg.save(output, format="PNG")
+                        fbgraph.put_photo(message="We've reached %d followers on Tumblr! Thanks for the support; now who's down for some chili dogs?" % followers, image=output.getvalue())
+                        followerimg.save("temp.png", format="PNG")
+                        resp = tumbclient.create_photo("sonicocbot", state="published", data=os.getcwd()+"/temp.png", caption="We've reached %d followers on Tumblr! Thanks for the support; now who's down for some chili dogs?" % followers, tags=["thanks"])
+                        os.remove("temp.png")
+
+                        print "Done!"
                 # Post Sonic fanfic at midnight and noon on Tuesdays, Fridays,
                 # and Saturdays
-                if currtime.weekday() in [1,4,5] and currtime.hour in [0,12] and currtime.minute == 0:
+                elif currtime.weekday() in [1,4,5] and currtime.hour in [0,12] and currtime.minute == 0:
                     ffic = getRandomFanfic()
                     print "Posting fanfic", ffic["title"], "to FB page...",
                     fbgraph.put_wall_post(message=ffic["title"] + "\n\n-----\n\n" + ffic["content"])
