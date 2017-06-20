@@ -58,10 +58,11 @@ def getColorsList(filename):
     colors = []
     with open(filename,"r") as f:
         for l in f.readlines():
-            colorinfo = re.split(r"\s+", l.strip())
-            currColor = (int(colorinfo[0]), int(colorinfo[1]), int(colorinfo[2]))
-            currName = " ".join(colorinfo[3:])
-            colors.append({ "name": currName, "color": currColor })
+            if l.strip() != "":
+                colorinfo = re.split(r"\s+", l.strip())
+                currColor = (int(colorinfo[0]), int(colorinfo[1]), int(colorinfo[2]))
+                currName = " ".join(colorinfo[3:])
+                colors.append({ "name": currName, "color": currColor })
     return colors
 
 def randomizeColor(rgb):
