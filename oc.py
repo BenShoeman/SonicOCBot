@@ -19,6 +19,12 @@ SKILLS = [x.replace("\n","") for x in open("data/skills.txt").readlines()]
 GENERAL_COLORS = getColorsList("data/generalcolors.txt")
 SKIN_TONES = getColorsList("data/skintones.txt")
 
+def createOC(n_original = 0.6):
+    if random.uniform(0,1) < n_original:
+        return createOCFromSonicMaker()
+    else:
+        return createOCFromTemplate()
+
 def createOCFromTemplate(templatenum = -1): # templatenum is for debug purposes
     oc = {}
 
