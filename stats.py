@@ -13,7 +13,7 @@ def getOCStats(maxtotal = 40):
     }
 
     # Some OCs can't have maxtotal for stats, so some will have decrease
-    randDecrease = int(round(random.gauss(2, 2)))
+    randDecrease = int(abs(round(random.gauss(2, 2))))
     # Making sure randDecrease is in the correct range
     randDecrease = randDecrease if randDecrease >= 0 else 0
     randDecrease = randDecrease if randDecrease <= maxtotal else maxtotal
@@ -26,6 +26,6 @@ def getOCStats(maxtotal = 40):
     # Now scale to the maximum total
     statsSum = sum(stats.values())
     for k in stats:
-        stats[k] = int(round(stats[k] / statsSum * (maxtotal - 0.5)))
+        stats[k] = int(min([10,round(stats[k] / statsSum * (maxtotal - 0.5))]))
 
     return stats

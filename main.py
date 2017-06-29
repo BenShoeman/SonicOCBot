@@ -120,7 +120,7 @@ def main():
                     else: print "Done!"
                 # Otherwise just post an OC
                 else:
-                    oc = createOC()
+                    oc = createOCFromTemplate()
                     print "Posting OC", oc["name"], "to FB page...",
                     # Get jpeg of image in memory, then post that image and OC desc. to FB
                     output = io.BytesIO()
@@ -128,7 +128,7 @@ def main():
                     fbgraph.put_photo(message=getOCDescription(oc), image=output.getvalue())
                     print "Done!"
 
-                    oc = createOC()
+                    oc = createOCFromTemplate()
                     print "Posting OC", oc["name"], "to Tumblr blog...",
                     oc["image"].save("temp.png", format="PNG")
                     resp = tumbclient.create_photo("sonicocbot", format="markdown", state="published", data=os.getcwd()+"/temp.png", caption="## "+re.sub(r"(\S)\n(\S)","\\1<br/>\n\\2",getOCDescription(oc)), tags=["sonic", "sanic", "sonic the hedgehog", "fanart", "fan art", "sonic fanart", "sonic fan art", "oc", "sonic oc", "sonic fan character", "illustration", "drawing", "design", "sonic character design", "sega", oc["species"], oc["sex"], "bot", "lol"])
@@ -141,7 +141,7 @@ def main():
         time.sleep(60 - datetime.datetime.now().second)
 
     # Debug
-    # oc = createOC()
+    # oc = createOCFromTemplate()
     # print getOCDescription(oc)
     # oc["image"].show()
 
