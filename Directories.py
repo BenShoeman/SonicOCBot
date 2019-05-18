@@ -1,0 +1,6 @@
+DATA_DIR = "data"
+CREDENTIALS_DIR = "keys"
+MODELS_DIR = "text"
+FONTS_DIR = "fonts"
+SONICMAKER_DIR = "sonicmaker"
+TEMPLATES_DIR = "templates"
