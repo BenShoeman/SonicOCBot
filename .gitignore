@@ -122,6 +122,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# VSCode extra crap
+.vscode
+
 # Specific to Sonic OC Bot
 data/
 keys/
