@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 import json
+import os
 from PIL import Image, ImageDraw
 import random
 
@@ -9,17 +10,17 @@ import Directories
 from SQLiteMarkovModel import SQLiteMarkovModel
 
 class OC(ABC):
-    _NAMES_WOMAN = [line.strip() for line in open(f"{Directories.DATA_DIR}/names_woman.txt")]
-    _NAMES_MAN = [line.strip() for line in open(f"{Directories.DATA_DIR}/names_man.txt")]
-    _SPECIES = [line.strip() for line in open(f"{Directories.DATA_DIR}/animals.txt")]
-    _PERSONALITIES = [line.strip() for line in open(f"{Directories.DATA_DIR}/personalities.txt")]
-    _SKILLS = [line.strip() for line in open(f"{Directories.DATA_DIR}/skills.txt")]
+    _NAMES_WOMAN = [line.strip() for line in open(os.path.join(Directories.DATA_DIR, "names_woman.txt"))]
+    _NAMES_MAN = [line.strip() for line in open(os.path.join(Directories.DATA_DIR, "names_man.txt"))]
+    _SPECIES = [line.strip() for line in open(os.path.join(Directories.DATA_DIR, "animals.txt"))]
+    _PERSONALITIES = [line.strip() for line in open(os.path.join(Directories.DATA_DIR, "personalities.txt"))]
+    _SKILLS = [line.strip() for line in open(os.path.join(Directories.DATA_DIR, "skills.txt"))]
 
-    _GENERAL_COLORS = Color.get_colors_list(f"{Directories.DATA_DIR}/generalcolors.txt")
-    _SKIN_TONES = Color.get_colors_list(f"{Directories.DATA_DIR}/skintones.txt")
+    _GENERAL_COLORS = Color.get_colors_list(os.path.join(Directories.DATA_DIR, "generalcolors.txt"))
+    _SKIN_TONES = Color.get_colors_list(os.path.join(Directories.DATA_DIR, "skintones.txt"))
 
-    _DESCS_MAN = SQLiteMarkovModel(f"{Directories.MODELS_DIR}/ocdescs_man.sqlite3")
-    _DESCS_WOMAN = SQLiteMarkovModel(f"{Directories.MODELS_DIR}/ocdescs_woman.sqlite3")
+    _DESCS_MAN = SQLiteMarkovModel(os.path.join(Directories.MODELS_DIR, "ocdescs_man.sqlite3"))
+    _DESCS_WOMAN = SQLiteMarkovModel(os.path.join(Directories.MODELS_DIR, "ocdescs_woman.sqlite3"))
 
     _TRANSFORM_MAP = {
         "norm": lambda color: color,
@@ -133,7 +134,7 @@ class OC(ABC):
 
 class SonicMakerOC(OC):
     __SONICMAKER_FILL = json.load(
-        open(f"{Directories.SONICMAKER_DIR}/fill.json"),
+        open(os.path.join(Directories.SONICMAKER_DIR, "fill.json")),
         object_pairs_hook=OrderedDict
     )
     
@@ -150,7 +151,7 @@ class SonicMakerOC(OC):
             )
             if img_num > 0:
                 current_img = Image.open(
-                    f"{Directories.SONICMAKER_DIR}/{region_key}-{img_num}.png"
+                    os.path.join(Directories.SONICMAKER_DIR, f"{region_key}-{img_num}.png")
                 ).convert("RGBA")
                 # Only fill if we have stuff to fill
                 if str(img_num) in region["fill"]:
@@ -200,7 +201,7 @@ class SonicMakerOC(OC):
         self._image = self._image.resize((int(width*resz_ratio), 500), Image.BICUBIC)
 
 class TemplateOC(OC):
-    __TEMPLATES = json.load(open(f"{Directories.TEMPLATES_DIR}/fill.json"))
+    __TEMPLATES = json.load(open(os.path.join(Directories.TEMPLATES_DIR, "fill.json")))
     
     def __init__(self, template_num=-1):
         if template_num < 0:
@@ -211,7 +212,7 @@ class TemplateOC(OC):
     
     def _generate_image(self):
         self._image = Image.open(
-            f"{Directories.TEMPLATES_DIR}/{self.__template['image']}"
+            os.path.join(Directories.TEMPLATES_DIR, self.__template['image'])
         ).convert("RGBA")
         # Fill each region in with a random color
         for region in self.__template["fill"]:

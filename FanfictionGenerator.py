@@ -1,3 +1,4 @@
+import os
 import random
 
 import Directories
@@ -15,8 +16,8 @@ class FanfictionGenerator:
         return max([min_val, round(random.gauss(mean,stdev))])
 
     def __init__(self,
-        text_database=f"{Directories.MODELS_DIR}/fanfics.sqlite3",
-        titles_database=f"{Directories.MODELS_DIR}/fanfic-titles.sqlite3",
+        text_database=os.path.join(Directories.MODELS_DIR, "fanfics.sqlite3"),
+        titles_database=os.path.join(Directories.MODELS_DIR, "fanfic-titles.sqlite3"),
         **kwargs
     ):
         self.__text_model = SQLiteMarkovModel(text_database)

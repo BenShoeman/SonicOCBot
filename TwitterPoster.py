@@ -1,12 +1,13 @@
 import io
 import json
+import os
 import twitter
 
 import Directories
 
 class TwitterPoster:
     def __init__(self,
-        key_file=f"{Directories.CREDENTIALS_DIR}/twitter.json"
+        key_file=os.path.join(Directories.CREDENTIALS_DIR, "twitter.json")
     ):
         key_info = json.load(open(key_file))
         self.__api = twitter.Api(

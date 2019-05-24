@@ -1,3 +1,4 @@
+import os
 import random
 
 import Directories
@@ -5,7 +6,7 @@ from SQLiteMarkovModel import SQLiteMarkovModel
 
 class SonicSezGenerator:
     def __init__(self,
-        text_database=f"{Directories.MODELS_DIR}/sonicsez.sqlite3"
+        text_database=os.path.join(Directories.MODELS_DIR, "sonicsez.sqlite3")
     ):
         self.__text_model = SQLiteMarkovModel(text_database)
 

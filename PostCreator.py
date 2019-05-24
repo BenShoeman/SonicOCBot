@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import datetime
+import os
 
 from BitmapFont import *
 import Directories
@@ -8,8 +9,8 @@ class PostCreator(ABC):
     __DEFAULT_KWARGS = {
         "lightmode_bg": (255, 255, 255),
         "darkmode_bg": (21, 32, 43),
-        "lightmode_font": BitmapFont(f"{Directories.FONTS_DIR}/defaultsanslight.json"),
-        "darkmode_font": BitmapFont(f"{Directories.FONTS_DIR}/defaultsansdark.json")
+        "lightmode_font": BitmapFont(os.path.join(Directories.FONTS_DIR, "defaultsanslight.json")),
+        "darkmode_font": BitmapFont(os.path.join(Directories.FONTS_DIR, "defaultsansdark.json"))
     }
 
     def __time_in_range(time, start, end):
