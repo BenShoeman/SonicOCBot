@@ -40,9 +40,13 @@ def make_post(post_probability=post_probability):
     else:
         oc = OC.generate_oc()
         post_creator = OCPostCreator(oc=oc)
+    print(f"Making a {post_typ} post... ", end="")
     twit_poster.make_tweet(post_creator)
+    print("Done.")
 
 def main():
+    print("Starting Sonic OC Bot.")
+
     schedule.every().hour.at(":00").do(make_post)
     schedule.every().hour.at(":30").do(make_post)
 
