@@ -35,7 +35,7 @@ def make_post(post_probability=post_probability):
     elif post_typ == "sonicsez":
         text = ssez_generator.get_text()
         post_creator = TweetPostCreator(
-            text=text, tags=("#SonicSez",)
+            text=text
         )
     else:
         oc = OC.generate_oc()

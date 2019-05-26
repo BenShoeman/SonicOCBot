@@ -11,6 +11,6 @@ class SonicSezGenerator:
         self.__text_model = SQLiteMarkovModel(text_database)
 
     def get_text(self):
-        return "Sonic Sez: " + self.__text_model.get_random_paragraph(
+        return "#SonicSez: " + self.__text_model.get_random_paragraph(
             sentences=random.randint(1,3)
         )
