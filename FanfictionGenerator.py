@@ -59,6 +59,6 @@ class FanfictionGenerator:
 class TwitterFanfictionGenerator(FanfictionGenerator):
     def __init__(self):
         super().__init__(
-            mean_paragraphs=2.5, stdev_paragraphs=0.75,
+            mean_paragraphs=3.25, stdev_paragraphs=0.75,
             mean_sentences=4.5, stdev_sentences=2
         )

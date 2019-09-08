@@ -13,12 +13,13 @@ class OCPostCreator(PostCreator):
         oc_img = self.__oc.image
         width, height = oc_img.size
         post_img = Image.new(
-            "RGB", (int(width*1.7)+5, height),
+            "RGB", (int((height if height > width else width)*1.78)+5, height),
             self._get_bgcolor_for_time(current_time)
         )
+        post_width, post_height = post_img.size
         post_img.paste(oc_img, (0,0), oc_img)
         font = self._get_font_for_time(current_time)
-        text_img = font.get_text(self.__get_oc_text(), int(width*0.7)-10)
+        text_img = font.get_text(self.__get_oc_text(), post_width-width-15)
         # Squish text_img to fit height if it exceeds height
         ti_width, ti_height = text_img.size
         if ti_height > height - 20:

@@ -13,7 +13,7 @@ class TextImagePostCreator(PostCreator):
     
     def get_image(self):
         current_time = datetime.datetime.now().time()
-        img_width, img_height = 500, 500
+        img_width, img_height = 700, 420
         post_img = Image.new(
             "RGB", (img_width, img_height),
             self._get_bgcolor_for_time(current_time)

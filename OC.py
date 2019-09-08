@@ -95,17 +95,43 @@ class OC(ABC):
         self._personality = random.choice(OC._PERSONALITIES)
     
     def _generate_height(self):
-        feet = round(random.gauss(5,1.25))
-        inches = round(random.randint(0,11))
-        self._height = f"{feet}'{inches}"
+        total_inches = round(random.gauss(68, 16))
+        # Prevent zero/negative height
+        if total_inches <= 0: total_inches = -total_inches + random.randint(1,12)
+        # Randomly give imperial or metric units
+        if random.random() < 0.5:
+            cm = round(total_inches * 2.54)
+            self._height = f"{cm} cm"
+        else:
+            feet = total_inches // 12
+            inches = total_inches % 12
+            self._height = f"{feet}'{inches}"
     
-    # Assumes standard height string in format FT'IN
+    # Assumes standard height string in format FT'IN or CM cm. If it's not, then
+    # just have a completely random weight
     def _generate_weight(self):
-        feet, inches = self._height.split("'")
-        inches_from_avg = int(feet)*12 + int(inches) - 66
-        weight = round(random.gauss(136, 18) +
-            random.gauss(4, 0.25) * inches_from_avg)
-        self._weight = f"{weight} lbs."
+        is_metric = False
+        if self._height.endswith(" cm"):
+            total_inches = int(self._height[:-2]) // 2.54
+            feet = total_inches // 12
+            inches = total_inches % 12
+            is_metric = True
+        elif "'" in self._height:
+            feet, inches = map(int, self._height.split("'"))
+        else:
+            total_inches = round(random.gauss(68, 16))
+            feet = total_inches // 12
+            inches = total_inches % 12
+        inches_from_avg = int(feet)*12 + int(inches) - 68
+        weight = round(random.gauss(140 + random.gauss(2.5, 0.75) * inches_from_avg,
+            18*(random.random()+0.5)))
+        # Prevent zero/negative weight
+        if weight <= 0: weight = -weight + random.randint(1,25)
+        if is_metric:
+            weight = round(weight * 0.454)
+            self._weight = f"{weight} kg"
+        else:
+            self._weight = f"{weight} lbs."
     
     def _generate_skills(self):
         self._skills = []
@@ -116,7 +142,7 @@ class OC(ABC):
                 self._skills.append(new_skill)
     
     def _generate_description(self):
-        sentences = random.randint(2,4)
+        sentences = random.randint(2,6)
         if self._gender == "woman":
             model = OC._DESCS_WOMAN
         elif self._gender == "man":
