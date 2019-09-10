@@ -1,0 +1,16 @@
+{
+  "light_probability": {
+    "arimo-black.json": 0.35,
+    "comic-black.json": 0.05,
+    "gelasio-black.json": 0.15,
+    "gothic-black.json": 0.1,
+    "selawik-black.json": 0.35
+  },
+  "dark_probability": {
+    "arimo-white.json": 0.35,
+    "comic-white.json": 0.05,
+    "gelasio-white.json": 0.15,
+    "gothic-white.json": 0.1,
+    "selawik-white.json": 0.35
+  }
+}
