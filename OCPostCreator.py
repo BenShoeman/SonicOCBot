@@ -13,7 +13,7 @@ class OCPostCreator(PostCreator):
         oc_img = self.__oc.image
         width, height = oc_img.size
         post_img = Image.new(
-            "RGB", (int((height if height > width else width)*1.78)+5, height),
+            "RGB", (int((height if height > width else width)*1.78)+15, height),
             self._get_bgcolor_for_time(current_time)
         )
         post_width, post_height = post_img.size
@@ -24,7 +24,7 @@ class OCPostCreator(PostCreator):
         ti_width, ti_height = text_img.size
         if ti_height > height - 20:
             text_img = text_img.resize((ti_width, height-20), Image.BICUBIC)
-        post_img.paste(text_img, (width+5, height//2-text_img.size[1]//2), text_img)
+        post_img.paste(text_img, (width+15, height//2-text_img.size[1]//2), text_img)
         return post_img
     
     def get_text(self):
