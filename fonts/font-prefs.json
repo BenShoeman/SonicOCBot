@@ -1,16 +1,30 @@
 {
   "light_probability": {
-    "arimo-black.json": 0.35,
-    "comic-black.json": 0.05,
-    "gelasio-black.json": 0.15,
-    "gothic-black.json": 0.1,
-    "selawik-black.json": 0.35
+    "ajihand-black.json": 0.01,
+    "caladea-black.json": 0.05,
+    "carlito-black.json": 0.073,
+    "comic-black.json": 0.01,
+    "gelasio-black.json": 0.05,
+    "gentium-black.json": 0.05,
+    "gothic-black.json": 0.05,
+    "mono-black.json": 0.01,
+    "roman-black.json": 0.05,
+    "sans-black.json": 0.074,
+    "selawik-black.json": 0.5,
+    "tahomey-black.json": 0.073
   },
   "dark_probability": {
-    "arimo-white.json": 0.35,
-    "comic-white.json": 0.05,
-    "gelasio-white.json": 0.15,
-    "gothic-white.json": 0.1,
-    "selawik-white.json": 0.35
+    "ajihand-white.json": 0.01,
+    "caladea-white.json": 0.05,
+    "carlito-white.json": 0.073,
+    "comic-white.json": 0.01,
+    "gelasio-white.json": 0.05,
+    "gentium-white.json": 0.05,
+    "gothic-white.json": 0.05,
+    "mono-white.json": 0.01,
+    "roman-white.json": 0.05,
+    "sans-white.json": 0.074,
+    "selawik-white.json": 0.5,
+    "tahomey-white.json": 0.073
   }
 }
