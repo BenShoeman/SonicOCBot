@@ -127,11 +127,22 @@ dmypy.json
 .vs
 
 # Specific to Sonic OC Bot
-data/
+corpus/*.txt
+data/*.json
+data/*.png
+data/*.txt
+!data/dictionary*.txt
+!data/schedule-colors.json
+fonts/*.ttf
+images/**/*.png
+images/*svg/
+images/fanficlogo/
+images/sonicmaker/
+images/sonicsez/
+images/template/
 keys/
-sonicmaker/
-templates/
-text/
-sonicsez.*
-descs.*
-fanfics.*
+keys.json
+models/*.h5
+models/*.json
+scraper-files/
+scraper-texts/
