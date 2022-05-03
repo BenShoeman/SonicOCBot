@@ -31,7 +31,7 @@ post_probabilities = {
 
 
 def make_post(post_probabilities: dict[str, float] = post_probabilities) -> None:
-    post_probs = [ 
+    post_probs = [
         (post, pr) for post, pr in post_probabilities.items()
     ]
     posts = [post for post, pr in post_probs]
