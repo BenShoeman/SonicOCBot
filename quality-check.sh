@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd $(dirname "${BASH_SOURCE[0]}")
+
 # MyPy type checking
 echo "--- MyPy type checking ---"
 mypy --config-file mypy.ini -p src
