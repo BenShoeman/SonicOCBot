@@ -22,7 +22,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          conda create --name sonicocbot --file $GITHUB_WORKSPACE/requirements-conda.txt
+          conda create --name sonicocbot --file $GITHUB_WORKSPACE/requirements-conda.txt --channel conda-forge
           pip3 install -r $GITHUB_WORKSPACE/requirements-pip.txt
 
       - name: Run quality checks

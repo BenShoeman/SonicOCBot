@@ -10,7 +10,7 @@ The easiest way to get set up with this repository is to use [Conda](https://www
 
 ```sh
 $ CONDA_ENV_NAME=<environment name>
-$ conda create --name $CONDA_ENV_NAME --file requirements-conda.txt
+$ conda create --name $CONDA_ENV_NAME --file requirements-conda.txt --channel conda-forge
 $ conda activate $CONDA_ENV_NAME
 $ pip3 install -r requirements-pip.txt
 ```
