@@ -4,7 +4,7 @@ cd $(dirname "${BASH_SOURCE[0]}")
 
 # MyPy type checking
 echo "--- MyPy type checking ---"
-mypy --config-file mypy.ini -p src
+mypy --ignore-missing-imports --config-file mypy.ini -p src
 mypy_exit_code=$?
 echo
 
