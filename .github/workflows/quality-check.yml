@@ -17,13 +17,9 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Add Conda to PATH
-        run: echo $CONDA/bin >> $GITHUB_PATH
-
       - name: Install dependencies
         run: |
-          conda create --name sonicocbot --file $GITHUB_WORKSPACE/requirements-conda.txt
-          pip3 install -r $GITHUB_WORKSPACE/requirements-pip.txt
+          pip install mypy black
 
       - name: Run quality checks
         run: bash $GITHUB_WORKSPACE/quality-check.sh
