@@ -19,8 +19,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install mypy black
-          mypy --install-types
+          pip install mypy black types-Markdown types-Pillow
 
       - name: Run quality checks
         run: bash $GITHUB_WORKSPACE/quality-check.sh
