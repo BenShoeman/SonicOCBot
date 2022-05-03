@@ -20,6 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install mypy black
+          mypy --install-types
 
       - name: Run quality checks
         run: bash $GITHUB_WORKSPACE/quality-check.sh
