@@ -1,10 +1,9 @@
 import json
 import numpy as np
 from numpy.typing import ArrayLike
+import onnxruntime as ort
 import os
 import random
-import tensorflow.keras as keras
-from tensorflow.keras import models
 from typing import Optional
 
 import src.Directories as Directories
@@ -17,7 +16,7 @@ class RNNTextModel(TextModel):
     Parameters
     ----------
     model_name : str
-        name of the model, which requires files `models/{model_name}.model.h5` and `models/{model_name}.wordmap.json`
+        name of the model, which requires files `models/{model_name}.model.onnx` and `models/{model_name}.wordmap.json`
     predict_temperature : float
         temperature of the next word prediction, where a higher temperature will get more random results
     sequence_length : int
@@ -29,7 +28,7 @@ class RNNTextModel(TextModel):
     def __init__(self, model_name: str, predict_temperature: float = 0.45, sequence_length: int = 20, seed: Optional[list] = None):
         self.__sequence_length = sequence_length  # Defined in the training notebook, make sure these match
         self.__temperature = predict_temperature
-        self.__model = models.load_model(os.path.join(Directories.MODELS_DIR, f"{model_name}.model.h5"))
+        self.__onnx_session = ort.InferenceSession(os.path.join(Directories.MODELS_DIR, f"{model_name}.model.onnx"))
         with open(os.path.join(Directories.MODELS_DIR, f"{model_name}.wordmap.json")) as f:
             # Fix JSON requiring keys to be strings by making them ints again
             self.__idx_word = {int(key): val for key, val in json.load(f).items()}
@@ -82,9 +81,9 @@ class RNNTextModel(TextModel):
             next word from the model
         """
         # Run prediction through the model and get the index of the prediction
-        input_sequence = np.reshape(self.__pattern, (1, len(self.__pattern)))
-        prediction = self.__model.predict(input_sequence, verbose=0)
-        idx = self.__sample(prediction)
+        input_sequence = np.reshape(self.__pattern, (1, len(self.__pattern))).astype(np.float32)
+        prediction = self.__onnx_session.run(None, {"input": input_sequence})
+        idx = self.__sample(prediction[0])
 
         # Adjust current pattern to include newly generated word
         self.__pattern.append(idx)

@@ -7,10 +7,11 @@ import tweepy
 
 import src.Directories as Directories
 from src.PostCreator.PostCreator import PostCreator
+from src.Poster.Poster import Poster
 
 
-class TwitterPoster:
-    """Easy interface for Twitter API. Uses consumer and access token key/secret defined in the following environment variables:
+class TwitterPoster(Poster):
+    """Easy poster for Twitter API. Uses consumer and access token key/secret defined in the following environment variables:
 
     - `twitter_consumer_key`
     - `twitter_consumer_secret`
@@ -20,14 +21,14 @@ class TwitterPoster:
 
     def __init__(self):
         auth = tweepy.OAuth1UserHandler(
-            consumer_key=os.environ["twitter_consumer_key"],
-            consumer_secret=os.environ["twitter_consumer_secret"],
-            access_token=os.environ["twitter_access_token"],
-            access_token_secret=os.environ["twitter_access_token_secret"],
+            consumer_key=os.environ.get("twitter_consumer_key", ""),
+            consumer_secret=os.environ.get("twitter_consumer_secret", ""),
+            access_token=os.environ.get("twitter_access_token"),
+            access_token_secret=os.environ.get("twitter_access_token_secret"),
         )
         self.__api: tweepy.API = tweepy.API(auth, wait_on_rate_limit=True)
 
-    def make_tweet(self, post_creator: PostCreator) -> None:
+    def make_post(self, post_creator: PostCreator) -> None:
         # Get the image and text from the post creator
         img = post_creator.get_image()
         img_filepath = os.path.join(tempfile.gettempdir(), f"sonicocbot-{datetime.now().strftime('%Y%m%d-%H%M%S')}.png") if img is not None else None

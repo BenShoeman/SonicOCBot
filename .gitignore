@@ -144,5 +144,6 @@ keys/
 keys.json
 models/*.h5
 models/*.json
+models/*.onnx
 scraper-files/
 scraper-texts/
