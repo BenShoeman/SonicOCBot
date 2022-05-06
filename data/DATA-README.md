@@ -1,18 +1,18 @@
 # Data File Structure
 
 - `animals.txt`: List of animal species.
-- `colors.{general,skintones}.txt`: List of colors with their RGB triplets, in the following format:
+- `colors.{general,skintones}.txt`: Provided in repo. List of colors with their RGB triplets, in the following format:
   ```
   ...
   RRR,GGG,BBB:color name
   ...
   ```
-- `colors.skintones.gradient.png`: Gradient of various skin tones to pick from.
-- `dictionary.txt`: Dictionary of words to be used when cleaning corpora.
-- `dictionary.propernouns.txt`: Dictionary of proper nouns (and other capitalized words) to be used when constructing new sentences.
+- `colors.skintones.gradient.png`: Provided in repo. Gradient of various skin tones to pick from.
+- `dictionary.txt`: Provided in repo. Dictionary of words to be used when cleaning corpora.
+- `dictionary.propernouns.txt`: Provided in repo. Dictionary of proper nouns (and other capitalized words) to be used when constructing new sentences.
 - `names.{m,f,x}.txt`: List of names to pull from, for men/women/nonbinary names respectively.
 - `personalities.txt`: List of personality traits.
-- `schedule-colors.json`: JSON file defining background and text colors for image posts starting at the given start times. They don't need to be in order, but the order of the times will be taken into account when figuring the color out.
+- `schedule-colors.json`: Provided in repo. JSON file defining background and text colors for image posts starting at the given start times. They don't need to be in order, but the order of the times will be taken into account when figuring the color out.
 - `skills.txt`: List of skills.
 - `sonicmaker-fill.json`: JSON file defining positioning of body parts and where to flood fill them. Note that the body parts are placed *in the same order* as they are in the file. Below is the format for this file:
   ```json
