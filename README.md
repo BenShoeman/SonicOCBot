@@ -29,7 +29,6 @@ A Chromium-based web browser is also a requirement if you want to run the scrape
 
 This repo requires a good amount of data to run. Please see each of the following guides to see what files are required:
 
-- `keys/keys.json`: JSON file containing APIs and relevant keys (for now, just Twitter).
 - [Files in /corpus](corpus/CORPUS-README.md)
 - [Files in /data](data/DATA-README.md)
 - [Files in /fonts](fonts/FONTS-README.md)
