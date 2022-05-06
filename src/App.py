@@ -3,7 +3,6 @@ import os
 import random
 
 import src.Directories as Directories
-import src.EnvironmentSetter as EnvironmentSetter
 from src.OC import generate_oc
 from src.PostCreator.PostCreator import PostCreator
 from src.PostCreator.OCPostCreator import OCPostCreator
