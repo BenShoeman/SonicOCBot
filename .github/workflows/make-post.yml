@@ -14,7 +14,7 @@ env:
   TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
 
 jobs:
-  quality-checks:
+  make-post:
     runs-on: ubuntu-latest
 
     steps:
@@ -31,7 +31,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          conda env update --file $GITHUB_WORKSPACE/requirements-conda-min.txt --name base
+          conda env update --file $GITHUB_WORKSPACE/requirements-conda-min.txt --name base --channel conda-forge
           pip install -r $GITHUB_WORKSPACE/requirements-pip-min.txt
 
       - name: Clone private assets repo and copy into checked out directory
