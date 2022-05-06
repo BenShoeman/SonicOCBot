@@ -7,9 +7,6 @@ PROJECT_DIR = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__f
 DATA_DIR = os.path.join(PROJECT_DIR, "data")
 """Path for text data not associated with models (e.g. name list, animal list, fill info)"""
 
-CREDENTIALS_DIR = os.path.join(PROJECT_DIR, "keys")
-"""Path for keys/tokens needed for social media authentication"""
-
 IMAGES_DIR = os.path.join(PROJECT_DIR, "images")
 """Path for Sonic Maker images"""
 

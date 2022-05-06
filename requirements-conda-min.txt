@@ -1,0 +1,7 @@
+markdown=3.3.6
+nltk=3.6.7
+onnx=1.11.0
+# onnxruntime=1.7.0 # Using onnxruntime pulled by pip for nnsplit
+pillow=9.1.0
+pip=22.0.4
+tweepy=4.8.0

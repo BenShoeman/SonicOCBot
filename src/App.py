@@ -3,7 +3,6 @@ import os
 import random
 
 import src.Directories as Directories
-import src.EnvironmentSetter as EnvironmentSetter
 from src.OC import generate_oc
 from src.PostCreator.PostCreator import PostCreator
 from src.PostCreator.OCPostCreator import OCPostCreator
@@ -14,8 +13,6 @@ from src.Poster.DummyPoster import DummyPoster
 from src.Poster.TwitterPoster import TwitterPoster
 from src.TextModel.RNNTextModel import RNNTextModel
 
-
-EnvironmentSetter.set_environment_from_json(os.path.join(Directories.CREDENTIALS_DIR, "keys.json"))
 
 ffic_generator = TwitterFanfictionGenerator(body_text_model_name="fanfics.bodies", titles_model_name="fanfics.titles", model_class=RNNTextModel)
 ssez_generator = SonicSezGenerator(body_text_model_name="sonicsez", model_class=RNNTextModel)
