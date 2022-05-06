@@ -15,8 +15,6 @@ from src.Poster.TwitterPoster import TwitterPoster
 from src.TextModel.RNNTextModel import RNNTextModel
 
 
-EnvironmentSetter.set_environment_from_json(os.path.join(Directories.CREDENTIALS_DIR, "keys.json"))
-
 ffic_generator = TwitterFanfictionGenerator(body_text_model_name="fanfics.bodies", titles_model_name="fanfics.titles", model_class=RNNTextModel)
 ssez_generator = SonicSezGenerator(body_text_model_name="sonicsez", model_class=RNNTextModel)
 
