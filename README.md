@@ -21,7 +21,9 @@ Type and formatting checking are done using `mypy` and `black`, both of which ar
 
 A Chromium-based web browser is also a requirement if you want to run the scrapers, for Selenium. You *may* also need to change the `browser` parameter in the `Html2Image` constructor if you are having problems with it (this is present in the file `src/util/MDtoImage.py`).
 
-**Note**: this repo uses Tensorflow to create text generation models. If you want GPU acceleration, replace `tensorflow` in `requirements-conda.txt` with `tensorflow-gpu` and make sure you have the proper CUDA/ROCm drivers set up for your system. This repo also uses ONNX to run inference from these models. If you want GPU acceleration for that, add `onnxruntime-gpu` in the `requirements-pip.txt` file (NOT `requirements-conda.txt` -- this causes issues with the `nnsplit` module).
+**Note about GPU Acceleration**: this repo uses Tensorflow to create text generation models. If you want GPU acceleration, replace `tensorflow` in `requirements-conda.txt` with `tensorflow-gpu` and make sure you have the proper CUDA/ROCm drivers set up for your system. This repo also uses ONNX to run inference from these models. If you want GPU acceleration for that, add `onnxruntime-gpu` in the `requirements-pip.txt` file (NOT `requirements-conda.txt` -- this causes issues with the `nnsplit` module).
+
+**Note about Minimal Requirements Files**: There are two other conda and pip install requirements files labeled `requirements-*-min.txt`. These only include the dependencies needed for running the main application (`main.py` and everything under the `src` directory).
 
 ### Required Data
 
