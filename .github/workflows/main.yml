@@ -1,0 +1,75 @@
+name: Generate documentation
+
+on:
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-docs:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+      - name: Set timezone to US Central
+        uses: szenius/set-timezone@v1.0
+        with:
+          timezoneLinux: "America/Chicago"
+
+      - name: Checkout commit
+        uses: actions/checkout@v3
+
+      - name: Clone private assets repo into checked out directory
+        run: |
+          eval "$(ssh-agent -s)"
+          ssh-add - <<< "${{ secrets.PRIVATE_ASSETS_PRIVATE_KEY }}"
+          git clone git@github.com:BenShoeman/SonicOCBot-private-assets.git $GITHUB_WORKSPACE/../PrivateAssets
+          rsync -a $GITHUB_WORKSPACE/../PrivateAssets/ $GITHUB_WORKSPACE/
+
+      - name: Set up Conda cache
+        uses: actions/cache@v2
+        env:
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key:
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('requirements/ghactions/conda.txt') }}
+
+      - name: Set up Miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: sonicocbot
+          environment-file: requirements/ghactions/conda.txt
+          channels: conda-forge
+          allow-softlinks: true
+          channel-priority: strict
+          use-only-tar-bz2: true
+      - run: |
+          conda install pdoc
+          pdoc --docformat numpy --logo "https://pbs.twimg.com/profile_images/1520858641775022080/HRp3_Dhl_400x400.jpg" -o docs/ src
+
+      - run: tar --directory docs/ -hcf artifact.tar .
+      - uses: actions/upload-artifact@v3
+        with:
+          name: github-pages
+          path: ./artifact.tar
+
+  deploy-docs:
+    needs: generate-docs
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v1
