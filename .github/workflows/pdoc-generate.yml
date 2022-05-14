@@ -53,7 +53,7 @@ jobs:
           use-only-tar-bz2: true
       - run: |
           conda install pdoc
-          pdoc --docformat numpy --logo "https://pbs.twimg.com/profile_images/1520858641775022080/HRp3_Dhl_400x400.jpg" -o docs/ src
+          pdoc --docformat numpy -o docs/ src
 
       - run: tar --directory docs/ -hcf artifact.tar .
       - uses: actions/upload-artifact@v3
