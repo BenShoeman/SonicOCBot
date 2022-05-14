@@ -15,6 +15,9 @@ env:
 jobs:
   make-post:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
 
     steps:
       - name: Set timezone to US Central
@@ -50,4 +53,4 @@ jobs:
           allow-softlinks: true
           channel-priority: strict
           use-only-tar-bz2: true
-      - run: python3 $GITHUB_WORKSPACE/main.py
+      - run: python $GITHUB_WORKSPACE/main.py
