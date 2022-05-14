@@ -29,12 +29,13 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: 3.9
-      
+
       - name: Add Conda to PATH
         run: echo $CONDA/bin >> $GITHUB_PATH
 
       - name: Install dependencies
         run: |
+          conda config --set channel_priority false
           conda install --file $GITHUB_WORKSPACE/requirements/ghactions/conda.txt --channel conda-forge
 
       - name: Clone private assets repo and copy into checked out directory
@@ -43,6 +44,6 @@ jobs:
           ssh-add - <<< "${{ secrets.PRIVATE_ASSETS_PRIVATE_KEY }}"
           git clone git@github.com:BenShoeman/SonicOCBot-private-assets.git $GITHUB_WORKSPACE/../PrivateAssets
           rsync -a $GITHUB_WORKSPACE/../PrivateAssets/ $GITHUB_WORKSPACE/
-      
+
       - name: Run main script
         run: python $GITHUB_WORKSPACE/main.py
