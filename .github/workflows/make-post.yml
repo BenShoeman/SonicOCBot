@@ -38,7 +38,6 @@ jobs:
         uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: sonicocbot
-          python-version: 3.9
           environment-file: requirements/ghactions/conda.txt
           channels: conda-forge
           allow-softlinks: true
