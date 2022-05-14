@@ -25,6 +25,13 @@ jobs:
       - name: Checkout commit
         uses: actions/checkout@v3
 
+      - name: Clone private assets repo into checked out directory
+        run: |
+          eval "$(ssh-agent -s)"
+          ssh-add - <<< "${{ secrets.PRIVATE_ASSETS_PRIVATE_KEY }}"
+          git clone git@github.com:BenShoeman/SonicOCBot-private-assets.git $GITHUB_WORKSPACE/../PrivateAssets
+          rsync -a $GITHUB_WORKSPACE/../PrivateAssets/ $GITHUB_WORKSPACE/
+
       - name: Set up Conda cache
         uses: actions/cache@v2
         env:
@@ -43,15 +50,4 @@ jobs:
           allow-softlinks: true
           channel-priority: strict
           use-only-tar-bz2: true
-
-      - name: Clone private assets repo and copy into checked out directory
-        run: |
-          eval "$(ssh-agent -s)"
-          ssh-add - <<< "${{ secrets.PRIVATE_ASSETS_PRIVATE_KEY }}"
-          git clone git@github.com:BenShoeman/SonicOCBot-private-assets.git $GITHUB_WORKSPACE/../PrivateAssets
-          rsync -a $GITHUB_WORKSPACE/../PrivateAssets/ $GITHUB_WORKSPACE/
-
-      - name: Run main script
-        run: |
-          conda activate sonicocbot
-          python $GITHUB_WORKSPACE/main.py
+      - run: python $GITHUB_WORKSPACE/main.py
