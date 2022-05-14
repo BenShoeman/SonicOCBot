@@ -25,18 +25,19 @@ jobs:
       - name: Checkout commit
         uses: actions/checkout@v3
 
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v3
+      - name: Set up Miniconda
+      - uses: conda-incubator/setup-miniconda@v2
         with:
+          activate-environment: sonicocbot
           python-version: 3.9
-
-      - name: Add Conda to PATH
-        run: echo $CONDA/bin >> $GITHUB_PATH
+          channels: conda-forge
+          allow-softlinks: true
+          channel-priority: strict
+          use-only-tar-bz2: true
 
       - name: Install dependencies
         run: |
-          conda config --prepend channels conda-forge
-          conda install --file $GITHUB_WORKSPACE/requirements/ghactions/conda.txt --channel conda-forge
+          conda install --file $GITHUB_WORKSPACE/requirements/ghactions/conda.txt
 
       - name: Clone private assets repo and copy into checked out directory
         run: |
