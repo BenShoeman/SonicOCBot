@@ -32,7 +32,7 @@ jobs:
         with:
           path: ~/conda_pkgs_dir
           key:
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles("requirements/ghactions/conda.txt") }}
+            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('requirements/ghactions/conda.txt') }}
 
       - name: Set up Miniconda
         uses: conda-incubator/setup-miniconda@v2
