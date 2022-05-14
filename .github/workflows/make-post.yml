@@ -33,8 +33,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          conda install --file $GITHUB_WORKSPACE/requirements-conda-actions.txt --channel conda-forge
-          pip install -r $GITHUB_WORKSPACE/requirements-pip-min.txt
+          conda install --file $GITHUB_WORKSPACE/requirements/ghactions/conda.txt --channel conda-forge
 
       - name: Clone private assets repo and copy into checked out directory
         run: |

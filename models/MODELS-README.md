@@ -7,3 +7,5 @@ Note that `h5` files are created as part of the training process, but the only t
 - `fanfics.titles.model.{onnx,json}`: Model and index-to-word mapping for titles from all the fanfictions.
 - `ocdescriptions.{m,f,x}.model.{onnx,json}`: Model and index-to-word mapping for text content from OC descriptions, for men/women/nonbinary descriptions respectively.
 - `sonicsez.model.{onnx,json}`: Model and index-to-word mapping for text content from all Sonic Says segments.
+- `punctuation.probabilities.json`: Provided in repo. Probabilities for each part of speech's following punctuation.
+- `sentence.sequences.txt`: Provided in repo. Part-of-speech sequences that make up sentences.

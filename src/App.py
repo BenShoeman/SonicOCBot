@@ -1,33 +1,40 @@
 import glob
 import os
 import random
+from typing import Literal
 
 import src.Directories as Directories
 from src.OC import generate_oc
-from src.PostCreator.PostCreator import PostCreator
-from src.PostCreator.OCPostCreator import OCPostCreator
-from src.PostCreator.TextImagePostCreator import TextImagePostCreator
+from src.PostCreator import PostCreator, OCPostCreator, TextImagePostCreator
 from src.FanfictionGenerator import TwitterFanfictionGenerator
 from src.SonicSezGenerator import SonicSezGenerator
-from src.Poster.DummyPoster import DummyPoster
-from src.Poster.TwitterPoster import TwitterPoster
-from src.TextModel.RNNTextModel import RNNTextModel
+from src.Poster import DummyPoster, TwitterPoster
+from src.TextModel import RNNTextModel
 
 
-ffic_generator = TwitterFanfictionGenerator(body_text_model_name="fanfics.bodies", titles_model_name="fanfics.titles", model_class=RNNTextModel)
-ssez_generator = SonicSezGenerator(body_text_model_name="sonicsez", model_class=RNNTextModel)
+_ffic_generator = TwitterFanfictionGenerator(body_text_model_name="fanfics.bodies", titles_model_name="fanfics.titles", model_class=RNNTextModel)
+_ssez_generator = SonicSezGenerator(body_text_model_name="sonicsez", model_class=RNNTextModel)
 
-ffic_logo_images = glob.glob(os.path.join(Directories.IMAGES_DIR, "fanficlogo", "*.png"))
-ssez_bg_images = glob.glob(os.path.join(Directories.IMAGES_DIR, "sonicsez", "*.png"))
+_ffic_logo_images = glob.glob(os.path.join(Directories.IMAGES_DIR, "fanficlogo", "*.png"))
+_ssez_bg_images = glob.glob(os.path.join(Directories.IMAGES_DIR, "sonicsez", "*.png"))
 
-post_probabilities = {
+_post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], float] = {
     "oc": 0.85,
     "sonicsez": 0.075,
     "fanfic": 0.075,
 }
 
 
-def make_post(post_probabilities: dict[str, float] = post_probabilities, dummy_post: bool = False) -> None:
+def make_post(post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], float] = _post_probabilities, dummy_post: bool = False) -> None:
+    """Create a post randomly based on given post probabilities.
+
+    Parameters
+    ----------
+    post_probabilities : dict[Literal["oc", "sonicsez", "fanfic"], float], optional
+        dict describing probabilities of each post; default values are picked if not provided
+    dummy_post : bool, optional
+        whether the post is a dummy post, by default False
+    """
     poster = DummyPoster() if dummy_post else TwitterPoster()
     post_probs = [(post, pr) for post, pr in post_probabilities.items()]
     posts = [post for post, pr in post_probs]
@@ -36,16 +43,16 @@ def make_post(post_probabilities: dict[str, float] = post_probabilities, dummy_p
 
     post_creator: PostCreator
     if post_typ == "fanfic":
-        title, text = ffic_generator.get_fanfiction()
+        title, text = _ffic_generator.get_fanfiction()
         post_creator = TextImagePostCreator(text=text, title=title, tags=("#ocbot", "#fanficbot"))
-        if len(ffic_logo_images) > 0:
-            post_creator.set_banner(random.choices(ffic_logo_images, k=1)[0])
+        if len(_ffic_logo_images) > 0:
+            post_creator.set_banner(random.choices(_ffic_logo_images, k=1)[0])
     elif post_typ == "sonicsez":
-        text = ssez_generator.get_text()
+        text = _ssez_generator.get_text()
         post_creator = TextImagePostCreator(text=text)
         post_creator.set_font_size(64)
-        if len(ssez_bg_images) > 0:
-            post_creator.set_overlay(random.choices(ssez_bg_images, k=1)[0], alpha=56)
+        if len(_ssez_bg_images) > 0:
+            post_creator.set_overlay(random.choices(_ssez_bg_images, k=1)[0], alpha=56)
     else:
         oc = generate_oc()
         post_creator = OCPostCreator(oc=oc)
@@ -55,4 +62,11 @@ def make_post(post_probabilities: dict[str, float] = post_probabilities, dummy_p
 
 
 def main(dummy_post: bool = False):
+    """Main app function.
+
+    Parameters
+    ----------
+    dummy_post : bool, optional
+        whether the post is a dummy post, by default False
+    """
     make_post(dummy_post=dummy_post)

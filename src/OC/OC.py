@@ -4,10 +4,9 @@ from PIL import Image
 import random
 from typing import Callable, Optional, Union
 
-import src.util.ColorUtil as ColorUtil
+import src.Util.ColorUtil as ColorUtil
 import src.Directories as Directories
-from src.TextModel.TextModel import TextModel
-from src.TextModel.RNNTextModel import RNNTextModel
+from src.TextModel import TextModel, RNNTextModel
 
 
 def _read_standard_list(filepath: Union[str, os.PathLike]) -> list[str]:
@@ -74,13 +73,7 @@ def _load_rnn_model(model_name: str) -> Optional[TextModel]:
 
 
 class OC(ABC):
-    """Represents an original character with all the information about it.
-
-    Parameters
-    ----------
-    auto_populate : bool, optional
-        whether all fields should be automatically populated, by default True
-    """
+    """Represents an original character with all the information about it."""
 
     _NAMES = {
         gender: _read_name_list(os.path.join(Directories.DATA_DIR, f"names.{gender}.txt"))
@@ -108,6 +101,13 @@ class OC(ABC):
     """Dict mapping transformation operations to `ColorUtil` functions."""
 
     def __init__(self, auto_populate: bool = True):
+        """Create an `OC`.
+
+        Parameters
+        ----------
+        auto_populate : bool, optional
+            whether all fields should be automatically populated, by default True
+        """
         self._color_regions: dict[str, str] = {}
         # Start as dummy image that will be populated later
         self._image = Image.new("RGB", (1, 1))
@@ -126,7 +126,7 @@ class OC(ABC):
         self._generate_weight()
         self._generate_skills()
         self._generate_description()
-        self._generate_image()
+        self.generate_image()
 
     @property
     def name(self) -> str:
@@ -228,15 +228,12 @@ class OC(ABC):
         """
         return self._color_regions.copy()
 
-    # generate_image must define self._image and self._color_regions, where
-    # self._image is a Pillow Image and self._color_regions is a dict of region
-    # names to color names, e.g. {"fur": "red"}
     @abstractmethod
-    def _generate_image(self) -> None:
+    def generate_image(self) -> None:
         """Generate the OC image.
 
-        This must define self._image and self._color_regions, where self._image is an Image
-        and self._color_regions is a dict of region names to color names, e.g. {"fur": "red"}.
+        This must define `self._image` and `self._color_regions`, where `self._image` is a PIL.Image.Image
+        and `self._color_regions` is a dict of region names to color names, e.g. {"fur": "red"}.
         See `SonicMakerOC` and `TemplateOC` for more details.
         """
         pass

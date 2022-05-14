@@ -3,41 +3,15 @@ import random
 from typing import Union
 
 import src.Directories as Directories
-from src.TextModel.TextModel import TextModel
+from src.TextModel import TextModel
 
 
-def gauss_int(mean: float, stdev: float, min_val: int = 0) -> int:
-    """Return a normally distributed random number as an integer, with a specified minimum value.
-
-    Parameters
-    ----------
-    mean : float
-        mean of the normal distribution
-    stdev : float
-        standard deviation of the normal distribution
-    min_val : int, optional
-        minimum value of the output, by default 0
-
-    Returns
-    -------
-    int
-        randomly generated output
-    """
+def _gauss_int(mean: float, stdev: float, min_val: int = 0) -> int:
     return max(min_val, round(random.gauss(mean, stdev)))
 
 
 class FanfictionGenerator:
-    """Generates fanfictions using text models.
-
-    Parameters
-    ----------
-    body_text_model_model_name : str
-        body text model name
-    titles_model_model_name : str
-        title model name
-    model_class : type[TextModel]
-        class of the text model to use
-    """
+    """Generates fanfictions using text models."""
 
     __DEFAULT_KWARGS = {
         "mean_paragraphs": 40,
@@ -49,6 +23,28 @@ class FanfictionGenerator:
     }
 
     def __init__(self, body_text_model_name: str, titles_model_name: str, model_class: type[TextModel], **kwargs):
+        """Create a `FanfictionGenerator`.
+
+        Parameters
+        ----------
+        body_text_model_name : str
+            body text model name
+        titles_model_name : str
+            title model name
+        model_class : type[TextModel]
+            class of the text model to use
+
+        Other Parameters
+        ----------------
+        **kwargs : dict
+            Other keyword arguments to define how much text is generated. Below are the available options:
+            - mean_paragraphs
+            - stdev_paragraphs
+            - mean_body_words
+            - stdev_body_words
+            - mean_title_words
+            - stdev_title_words
+        """
         self.__body_text_model: TextModel = model_class(body_text_model_name)
         self.__titles_model: TextModel = model_class(titles_model_name)
         self.__mean_paragraphs = kwargs.get("mean_paragraphs", FanfictionGenerator.__DEFAULT_KWARGS["mean_paragraphs"])
@@ -63,13 +59,15 @@ class FanfictionGenerator:
 
         Returns
         -------
-        tuple[str, str]
-            title and body text of the fanfiction
+        title : str
+            title of the fanfiction
+        body_text : str
+            body text of the fanfiction
         """
         title = self.__titles_model.get_text_block(mean_words=self.__mean_title_words, stdev_words=self.__stdev_title_words)
         body_text = "\n".join(
             self.__body_text_model.get_text_block(mean_words=self.__mean_body_words, stdev_words=self.__stdev_body_words)
-            for _ in range(gauss_int(mean=self.__mean_paragraphs, stdev=self.__stdev_paragraphs, min_val=1))
+            for _ in range(_gauss_int(mean=self.__mean_paragraphs, stdev=self.__stdev_paragraphs, min_val=1))
         )
         # Remove punctuation 4/5 of the time, if title ends with punctuation
         if title[-1] in ".,:;!?" and random.random() < 0.8:

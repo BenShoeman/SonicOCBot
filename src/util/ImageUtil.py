@@ -1,8 +1,10 @@
+"""Utilities for reading and manipulating images."""
+
 from math import sqrt
 from PIL import Image
 import random
 
-from src.util.ColorUtil import ColorTuple, get_rgb_delta, multiply_colors
+from .ColorUtil import ColorTuple, get_rgb_delta, multiply_colors
 
 
 def get_random_color_from_image(img: Image.Image) -> ColorTuple:
@@ -15,7 +17,7 @@ def get_random_color_from_image(img: Image.Image) -> ColorTuple:
 
     Returns
     -------
-    tuple[float, float, float]
+    ColorTuple
         3-tuple of colors in RGB
     """
     img = img.convert("RGB")

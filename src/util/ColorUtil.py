@@ -1,3 +1,16 @@
+"""Utilities for reading and manipulating colors.
+
+This module has 4 constants defined that contain colors to use. They are:
+- **BASIC_COLORS**: list[ColorDict]<br>
+  List of color dictionaries, containing only the most basic colors and their RGB 3-tuples.
+- **GENERAL_COLORS**: list[ColorDict]<br>
+  List of color dictionaries, containing general color names and their RGB 3-tuples.
+- **SKIN_TONE_COLORS**: list[ColorDict]<br>
+  List of color dictionaries, containing skin tone color names and their RGB 3-tuples.
+- **SKIN_TONE_GRADIENT**: PIL.Image.Image<br>
+  Image containing many different skin tones to pick from.
+"""
+
 import random
 import re
 import os
@@ -6,85 +19,20 @@ from typing import Any, TypedDict, Union
 
 import src.Directories as Directories
 
-ColorTuple = tuple[Union[int, float], Union[int, float], Union[int, float]]
-
-
-class ColorDict(TypedDict):
-    """Dictionary containing color names and their corresponding RGB 3-tuples"""
-
-    name: str
-    color: ColorTuple
-
 
 def _clamp(n: Union[int, float], min_val: Union[int, float], max_val: Union[int, float]) -> Union[int, float]:
     return min_val if n < min_val else (max_val if n > max_val else n)
 
 
-def get_colors_list(filename: Union[str, os.PathLike]) -> list[ColorDict]:
-    """Reads a text file containing RGB triplets and their corresponding names into a list.
-
-    The input list will be in the following format:
-    ```
-    RRR,GGG,BBB:color name
-    ```
-
-    For example, below could be a color list:
-    ```
-    255,  0,  0:red
-      0,255,255:cyan
-    ```
-
-    The output list contains dictionaries with keys `"name"` and `"color"` for each color.
-    See `ColorDict` type for more information on this.
-
-    Parameters
-    ----------
-    filename : str
-        filename of the input text file
-
-    Returns
-    -------
-    list[ColorDict]
-        list of dictionaries containing name and color information for each color
-    """
-
-    try:
-        with open(filename, "r") as f:
-            colorlist: list[list[Any]] = [line.strip().split(":") for line in f.readlines()]
-            # Convert the first half of each line into color triplets
-            for i in range(len(colorlist)):
-                colorlist[i][0] = tuple(_clamp(float(value.strip()), 0, 255) for value in colorlist[i][0].split(","))
-            # Finally, create the list of ColorDicts
-            colors = [ColorDict(name=color_name, color=color_tuple) for color_tuple, color_name in colorlist]
-    except FileNotFoundError:
-        print("Error: colors list not found. Loading a basic colors list")
-        colors = BASIC_COLORS
-    return colors
+ColorTuple = tuple[Union[int, float], Union[int, float], Union[int, float]]
+"""Type that describes a triplet of color values, for RGB, HSL, XYZ, and CIE-Lab color spaces."""
 
 
-BASIC_COLORS = [
-    ColorDict(name="red", color=(255.0, 0.0, 0.0)),
-    ColorDict(name="yellow", color=(255.0, 255.0, 0.0)),
-    ColorDict(name="green", color=(0.0, 255.0, 0.0)),
-    ColorDict(name="cyan", color=(0.0, 255.0, 255.0)),
-    ColorDict(name="blue", color=(0.0, 0.0, 255.0)),
-    ColorDict(name="magenta", color=(255.0, 0.0, 255.0)),
-    ColorDict(name="black", color=(0.0, 0.0, 0.0)),
-    ColorDict(name="white", color=(255.0, 255.0, 255.0)),
-]
-"""List of color dictionaries, containing only the most basic colors and their RGB 3-tuples"""
+class ColorDict(TypedDict):
+    """Dictionary type containing color names and their corresponding RGB 3-tuples."""
 
-GENERAL_COLORS = get_colors_list(os.path.join(Directories.DATA_DIR, "colors.general.txt"))
-"""List of color dictionaries, containing general color names and their RGB 3-tuples"""
-
-SKIN_TONE_COLORS = get_colors_list(os.path.join(Directories.DATA_DIR, "colors.skintones.txt"))
-"""List of color dictionaries, containing skin tone color names and their RGB 3-tuples"""
-
-if os.path.exists((_skin_tone_gradient_file := os.path.join(Directories.DATA_DIR, "colors.skintones.gradient.png"))):
-    SKIN_TONE_GRADIENT = Image.open(_skin_tone_gradient_file)
-else:
-    print("Error: skin tones gradient not found. Loading a dummy image")
-    SKIN_TONE_GRADIENT = Image.new("RGB", (1, 1), (128, 128, 128))
+    name: str
+    color: ColorTuple
 
 
 def hex_to_rgb(hex_val: str) -> ColorTuple:
@@ -618,3 +566,79 @@ def multiply_colors(rgb1: ColorTuple, rgb2: ColorTuple) -> tuple:
         blended color
     """
     return tuple(color1 * color2 / 255 for color1, color2 in zip(rgb1, rgb2))
+
+
+def get_colors_list(filename: Union[str, os.PathLike]) -> list[ColorDict]:
+    """Reads a text file containing RGB triplets and their corresponding names into a list.
+
+    The input list will be in the following format:
+    ```
+    RRR,GGG,BBB:color name
+    ```
+
+    For example, below could be a color list:
+    ```
+    255,  0,  0:red
+      0,255,255:cyan
+    ```
+
+    The output list contains dictionaries with keys `"name"` and `"color"` for each color.
+    See `ColorDict` type for more information on this.
+
+    Parameters
+    ----------
+    filename : str
+        filename of the input text file
+
+    Returns
+    -------
+    list[ColorDict]
+        list of dictionaries containing name and color information for each color
+    """
+
+    try:
+        with open(filename, "r") as f:
+            colorlist: list[list[Any]] = [line.strip().split(":") for line in f.readlines()]
+            # Convert the first half of each line into color triplets
+            for i in range(len(colorlist)):
+                colorlist[i][0] = tuple(_clamp(float(value.strip()), 0, 255) for value in colorlist[i][0].split(","))
+            # Finally, create the list of ColorDicts
+            colors = [ColorDict(name=color_name, color=color_tuple) for color_tuple, color_name in colorlist]
+    except FileNotFoundError:
+        print("Error: colors list not found. Loading a basic colors list")
+        colors = _BASIC_COLORS
+    return colors
+
+
+# Module constants defined below
+
+_BASIC_COLORS = [
+    ColorDict(name="red", color=(255.0, 0.0, 0.0)),
+    ColorDict(name="yellow", color=(255.0, 255.0, 0.0)),
+    ColorDict(name="green", color=(0.0, 255.0, 0.0)),
+    ColorDict(name="cyan", color=(0.0, 255.0, 255.0)),
+    ColorDict(name="blue", color=(0.0, 0.0, 255.0)),
+    ColorDict(name="magenta", color=(255.0, 0.0, 255.0)),
+    ColorDict(name="black", color=(0.0, 0.0, 0.0)),
+    ColorDict(name="white", color=(255.0, 255.0, 255.0)),
+]
+_GENERAL_COLORS = get_colors_list(os.path.join(Directories.DATA_DIR, "colors.general.txt"))
+_SKIN_TONE_COLORS = get_colors_list(os.path.join(Directories.DATA_DIR, "colors.skintones.txt"))
+if os.path.exists((_skin_tone_gradient_file := os.path.join(Directories.DATA_DIR, "colors.skintones.gradient.png"))):
+    _SKIN_TONE_GRADIENT = Image.open(_skin_tone_gradient_file)
+else:
+    print("Error: skin tones gradient not found. Loading a dummy image")
+    _SKIN_TONE_GRADIENT = Image.new("RGB", (1, 1), (128, 128, 128))
+
+
+def __getattr__(name):
+    attrs = {
+        "BASIC_COLORS": _BASIC_COLORS,
+        "GENERAL_COLORS": _GENERAL_COLORS,
+        "SKIN_TONE_COLORS": _SKIN_TONE_COLORS,
+        "SKIN_TONE_GRADIENT": _SKIN_TONE_GRADIENT,
+    }
+    if name in attrs:
+        return attrs[name]
+    else:
+        raise AttributeError(f"module '{__name__}' has no attribute '{name}'")

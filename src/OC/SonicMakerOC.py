@@ -3,12 +3,12 @@ import json
 import os
 import random
 from PIL import Image
-from typing import Callable
+from typing import Callable, ClassVar
 
-import src.util.ColorUtil as ColorUtil
-import src.util.ImageUtil as ImageUtil
+from .OC import OC
+import src.Util.ColorUtil as ColorUtil
+import src.Util.ImageUtil as ImageUtil
 import src.Directories as Directories
-from src.OC.OC import OC
 
 
 def _json_load_or_fallback(filepath: str, fallback_factory: Callable) -> OrderedDict:
@@ -25,12 +25,12 @@ def _json_load_or_fallback(filepath: str, fallback_factory: Callable) -> Ordered
 
 
 class SonicMakerOC(OC):
-    __SONICMAKER_FILL = _json_load_or_fallback(os.path.join(Directories.DATA_DIR, "sonicmaker-fill.json"), OrderedDict)
+    SONICMAKER_FILL: ClassVar[OrderedDict]
     """Data that contains information on how to create and fill the regions of the OC.
 
-    `sonicmaker-fill.json` is a JSON file in the following format:
+    `data/sonicmaker-fill.json` is a JSON file in the following format:
 
-    ```json
+    ```
     {
         "image-size": [<template-width>, <template-height>],
         "part-1": {
@@ -79,8 +79,25 @@ class SonicMakerOC(OC):
                   The value for this is a list of x,y coordinates indicating the points to flood fill the template at (like flood filling in MS Paint).
     """
 
-    def _generate_image(self, fill_threshold: int = 96) -> None:
-        sonicmaker_fill = SonicMakerOC.__SONICMAKER_FILL
+    @classmethod
+    def __initialize_fill(cls):
+        cls.SONICMAKER_FILL = _json_load_or_fallback(os.path.join(Directories.DATA_DIR, "sonicmaker-fill.json"), OrderedDict)
+
+    def generate_image(self, fill_threshold: int = 96) -> None:
+        """Implements `generate_image` from `OC` by using Sonic Maker template parts.
+
+        Parameters
+        ----------
+        fill_threshold : int, optional
+            threshold of difference in color when flood filling, by default 96
+        """
+        # Make sure fill dict is initialized
+        try:
+            SonicMakerOC.SONICMAKER_FILL
+        except AttributeError:
+            SonicMakerOC.__initialize_fill()
+
+        sonicmaker_fill = SonicMakerOC.SONICMAKER_FILL
         part_image_extension = ".png"
         image_width, image_height = sonicmaker_fill.get("image-size", [500, 500])
         image_size = (image_width, image_height)

@@ -2,22 +2,28 @@ from datetime import datetime
 from PIL import Image
 from typing import Optional
 
+from .PostCreator import PostCreator
 from src.OC import OC
-from src.PostCreator.PostCreator import PostCreator
-from src.util.ColorUtil import rgb_to_hex
-from src.util.MDtoImage import md_to_image
+from src.Util.ColorUtil import rgb_to_hex
+from src.Util.HTMLtoImage import md_to_image
 
 
 class OCPostCreator(PostCreator):
-    """Creates a post involving an OC.
-
-    Parameters
-    ----------
-    oc : OC
-        `OC` object to create a post for
-    """
+    """`PostCreator` that creates a post involving an OC."""
 
     def __init__(self, oc: OC, **kwargs):
+        """Create a `OCPostCreator`.
+
+        Parameters
+        ----------
+        oc : OC
+            `OC` object to create a post for
+
+        Other Parameters
+        ----------------
+        **kwargs : dict
+            Same as in `PostCreator`.
+        """
         self.__oc = oc
         super().__init__(**kwargs)
 

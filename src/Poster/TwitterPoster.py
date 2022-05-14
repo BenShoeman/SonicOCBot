@@ -5,9 +5,9 @@ from PIL import Image
 import tempfile
 import tweepy
 
+from .Poster import Poster
 import src.Directories as Directories
-from src.PostCreator.PostCreator import PostCreator
-from src.Poster.Poster import Poster
+from src.PostCreator import PostCreator
 
 
 class TwitterPoster(Poster):
@@ -20,6 +20,7 @@ class TwitterPoster(Poster):
     """
 
     def __init__(self):
+        """Create the Twitter poster using the environment variables described above."""
         auth = tweepy.OAuth1UserHandler(
             consumer_key=os.environ.get("TWITTER_CONSUMER_KEY", ""),
             consumer_secret=os.environ.get("TWITTER_CONSUMER_SECRET", ""),
@@ -29,6 +30,13 @@ class TwitterPoster(Poster):
         self.__api: tweepy.API = tweepy.API(auth, wait_on_rate_limit=True)
 
     def make_post(self, post_creator: PostCreator) -> None:
+        """Make a post to Twitter using the given `PostCreator`.
+
+        Parameters
+        ----------
+        post_creator : PostCreator
+            post creator to make the post
+        """
         # Get the image and text from the post creator
         img = post_creator.get_image()
         img_filepath = os.path.join(tempfile.gettempdir(), f"sonicocbot-{datetime.now().strftime('%Y%m%d-%H%M%S')}.png") if img is not None else None

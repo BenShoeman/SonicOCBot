@@ -2,21 +2,22 @@ import os
 import random
 
 import src.Directories as Directories
-from src.TextModel.TextModel import TextModel
+from src.TextModel import TextModel
 
 
 class SonicSezGenerator:
-    """Generates Sonic Sez segments using a text model.
-
-    Parameters
-    ----------
-    body_text_model_name : str
-        body text model name
-    model_class : type[TextModel]
-        class of the text model to use
-    """
+    """Generates Sonic Sez segments using a text model."""
 
     def __init__(self, body_text_model_name: str, model_class: type[TextModel]):
+        """Create a `SonicSezGenerator`.
+
+        Parameters
+        ----------
+        body_text_model_name : str
+            body text model name
+        model_class : type[TextModel]
+            class of the text model to use
+        """
         self.__body_text_model: TextModel = model_class(body_text_model_name)
 
     def get_text(self) -> str:

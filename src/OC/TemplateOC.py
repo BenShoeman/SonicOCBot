@@ -2,12 +2,12 @@ import json
 import os
 import random
 from PIL import Image, ImageDraw
-from typing import Callable, Optional
+from typing import Callable, ClassVar, Optional
 
+from .OC import OC
 import src.Directories as Directories
-from src.OC.OC import OC
-import src.util.ColorUtil as ColorUtil
-import src.util.ImageUtil as ImageUtil
+import src.Util.ColorUtil as ColorUtil
+import src.Util.ImageUtil as ImageUtil
 
 
 def _json_load_or_fallback(filepath: str, fallback_factory: Callable) -> dict:
@@ -24,12 +24,12 @@ def _json_load_or_fallback(filepath: str, fallback_factory: Callable) -> dict:
 
 
 class TemplateOC(OC):
-    __TEMPLATES = _json_load_or_fallback(os.path.join(Directories.DATA_DIR, "template-fill.json"), dict)
+    TEMPLATES: ClassVar[dict]
     """Data that contains information on how to create and fill the regions of the OC.
 
-    `template-fill.json` is a JSON file in the following format:
+    `data/template-fill.json` is a JSON file in the following format:
 
-    ```json
+    ```
     {
         "template-1": {
             "species": <species-name>,
@@ -60,14 +60,40 @@ class TemplateOC(OC):
     """
 
     def __init__(self, template_name: Optional[str] = None, auto_populate: bool = True):
+        """Create a `TemplateOC`, optionally with a template name.
+
+        Parameters
+        ----------
+        template_name : Optional[str], optional
+            if not None, use the template defined here, by default None
+        auto_populate : bool, optional
+            whether all the fields should be automatically populated, by default True
+        """
+        # Make sure template dict is initialized
+        try:
+            TemplateOC.TEMPLATES
+        except AttributeError:
+            TemplateOC.__initialize_templates()
+
         if template_name is None:
-            self.__template_name = random.choice(list(TemplateOC.__TEMPLATES.keys()))
+            self.__template_name = random.choice(list(TemplateOC.TEMPLATES.keys()))
         else:
             self.__template_name = template_name
-        self.__template = TemplateOC.__TEMPLATES[self.__template_name]
+        self.__template = TemplateOC.TEMPLATES[self.__template_name]
         super().__init__(auto_populate=auto_populate)
 
-    def _generate_image(self, fill_threshold: int = 96) -> None:
+    @classmethod
+    def __initialize_templates(cls):
+        cls.TEMPLATES = _json_load_or_fallback(os.path.join(Directories.DATA_DIR, "template-fill.json"), dict)
+
+    def generate_image(self, fill_threshold: int = 96) -> None:
+        """Implements `generate_image` from `OC` by using full templates.
+
+        Parameters
+        ----------
+        fill_threshold : int, optional
+            threshold of difference in color when flood filling, by default 96
+        """
         part_image_extension = ".png"
         self._image = Image.open(os.path.join(Directories.IMAGES_DIR, "template", self.__template_name + part_image_extension)).convert("RGBA")
 

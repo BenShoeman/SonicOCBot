@@ -126,6 +126,9 @@ dmypy.json
 .vscode
 .vs
 
+# macOS crap
+*.DS_Store
+
 # Specific to Sonic OC Bot
 corpus/*.txt
 data/*.json
@@ -146,5 +149,6 @@ keys.json
 models/*.h5
 models/*.json
 models/*.onnx
+!models/punctuation.probabilities.json
 scraper-files/
 scraper-texts/

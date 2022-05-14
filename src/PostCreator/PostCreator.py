@@ -8,7 +8,7 @@ import random
 from typing import Literal, Optional, Union
 
 import src.Directories as Directories
-from src.util.ColorUtil import ColorTuple, hex_to_rgb, rgb_to_hex
+from src.Util.ColorUtil import ColorTuple, hex_to_rgb, rgb_to_hex
 
 
 def _get_font_choices(fonts_dir: str) -> dict:
@@ -62,6 +62,16 @@ class PostCreator(ABC):
     """Abstract class for post creators."""
 
     def __init__(self, **kwargs):
+        """Post creator default constructor, setting optional kwargs parameters. This should be called in subclass constructors.
+
+        Other Parameters
+        ----------------
+        **kwargs : dict
+            Other keyword arguments to define how the images are created. If omitted, they will get randomly populated.
+            Below are the available options:
+            - regular_font_file
+            - italic_font_file
+        """
         self.__schedule_colors = _get_color_schedule(os.path.join(Directories.DATA_DIR, "schedule-colors.json"))
         # If no font file provided, pick a random one from fonts directory
         self.regular_font_file = kwargs.get("regular_font_file")
@@ -88,7 +98,6 @@ class PostCreator(ABC):
                 {
                     "font-family": "customfont",
                     "src": f"url('file://{self.regular_font_file}')",
-                    "font-style": "normal",
                 },
             ],
             "*": {
@@ -113,13 +122,15 @@ class PostCreator(ABC):
                 "font-style": "normal",
                 "font-weight": "normal",
             },
+            "em, i": {
+                "font-family": "customfontitalic, customfont",
+            },
         }
         if self.italic_font_file != self.regular_font_file:
             self._md_css["@font-face"].append(
                 {
-                    "font-family": "customfont",
+                    "font-family": "customfontitalic",
                     "src": f"url('file://{self.italic_font_file}')",
-                    "font-style": "italic",
                 }
             )
 
@@ -199,12 +210,12 @@ class PostCreator(ABC):
 
     @abstractmethod
     def get_alt_text(self) -> Optional[str]:
-        """Returns alt text for the post image, if there is one.
+        """Returns alt text for the post image, if there is alt text.
 
         Returns
         -------
         Optional[str]
-            alt text for the post's image, if there is one
+            alt text for the post's image, or None if there is none
         """
 
     @abstractmethod

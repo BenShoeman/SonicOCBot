@@ -1,16 +1,22 @@
+"""Utilities to convert HTML and Markdown documents to images."""
+
 from datetime import datetime
-from html2image import Html2Image
+import glob
 import markdown
 import os
+from pdf2image import convert_from_path
 from PIL import Image
 import tempfile
 from typing import Union
+from weasyprint import HTML, CSS
+from weasyprint.text.fonts import FontConfiguration
 
 CSSDict = dict[str, Union[dict[str, str], list[dict[str, str]]]]
+"""Dictionary type containing CSS attributes and values."""
 
 
 def html_to_image(html: str, css: Union[str, CSSDict] = "", width: int = 1000) -> Image.Image:
-    """Convert HTML to an image.
+    """Convert HTML to an image using `weasyprint` and `pdf2image`.
 
     Parameters
     ----------
@@ -27,17 +33,25 @@ def html_to_image(html: str, css: Union[str, CSSDict] = "", width: int = 1000) -
         HTML and CSS converted to an image
     """
     css_str = dict_to_css(css).strip() if isinstance(css, dict) else css
-    html2img = Html2Image(output_path=tempfile.gettempdir(), size=(width, width * 5))
-    tempfile_name = f"html2img-{datetime.now().strftime('%Y%m%d-%H%M%S')}.png"
-    text_img_path = os.path.join(tempfile.gettempdir(), tempfile_name)
-    html2img.screenshot(html_str=html, css_str=css_str if len(css) > 0 else [], save_as=tempfile_name)
-    text_img = Image.open(text_img_path)
-    os.remove(text_img_path)
+    # Add page size details to CSS
+    height = width * 5
+    css_str += f"@page {{ size: {width}px {height}px; margin: 0; }}\n"
+    html_obj = HTML(string=html, media_type="screen")
+    font_config = FontConfiguration()
+    css_obj = CSS(string=css_str, font_config=font_config)
+    with tempfile.NamedTemporaryFile(suffix=".pdf") as f:
+        html_obj.write_pdf(f.name, stylesheets=[css_obj], font_config=font_config)
+        images = convert_from_path(f.name, fmt="tiff", transparent=True)
+        text_img = images[0]
+    # Resize image to match expected width if it doesn't match, for hidpi issues
+    text_img_width, text_img_height = text_img.size
+    resize_ratio = width / text_img_width
+    text_img = text_img.resize((width, int(text_img_height * resize_ratio)))
     return text_img
 
 
 def md_to_image(md: str, css: Union[str, CSSDict] = "", width: int = 1000) -> Image.Image:
-    """Convert Markdown to an image.
+    """Convert Markdown to an image using `html_to_image`.
 
     Parameters
     ----------

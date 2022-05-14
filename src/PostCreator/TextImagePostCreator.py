@@ -2,25 +2,31 @@ from datetime import datetime
 from PIL import Image, ImageDraw
 from typing import cast, Optional, Union
 
-from src.PostCreator.PostCreator import PostCreator
-from src.util.MDtoImage import md_to_image
-from src.util.ColorUtil import ColorTuple, rgb_to_hex
+from .PostCreator import PostCreator
+from src.Util.HTMLtoImage import md_to_image
+from src.Util.ColorUtil import ColorTuple, rgb_to_hex
 
 
 class TextImagePostCreator(PostCreator):
-    """Creates a post that is an image with text on it.
-
-    Parameters
-    ----------
-    text : str
-        text to make image of
-    title : Optional[str], optional
-        title of the text in the image, by default None
-    tags : Optional[Union[list[str], tuple[str, ...]]], optional
-        list of tags to be used in the text of the post, by default None
-    """
+    """`PostCreator` that creates a post having an image with text on it."""
 
     def __init__(self, text: str, title: Optional[str] = None, tags: Optional[Union[list[str], tuple[str, ...]]] = None, **kwargs):
+        """Create a `TextImagePostCreator`.
+
+        Parameters
+        ----------
+        text : str
+            text to make image of
+        title : Optional[str], optional
+            title of the text in the image, by default None
+        tags : Optional[Union[list[str], tuple[str, ...]]], optional
+            list of tags to be used in the text of the post, by default None
+
+        Other Parameters
+        ----------------
+        **kwargs : dict
+            Same as in `PostCreator`.
+        """
         self.__text = text
         self.__title = title
         self.__tags = tags

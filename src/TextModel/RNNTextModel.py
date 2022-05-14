@@ -6,26 +6,37 @@ import os
 import random
 from typing import Optional
 
+from .SentenceRestorer import SentenceRestorer
+from .TextModel import TextModel
 import src.Directories as Directories
-from src.TextModel.TextModel import TextModel
 
 
 class RNNTextModel(TextModel):
-    """Text model that uses a RNN to generate text. This is based off the RNNs generated from the `models/training.ipynb` notebook.
+    """Text model that uses a RNN to generate text, based off the models generated from the `models/training.ipynb` notebook."""
 
-    Parameters
-    ----------
-    model_name : str
-        name of the model, which requires files `models/{model_name}.model.onnx` and `models/{model_name}.wordmap.json`
-    predict_temperature : float
-        temperature of the next word prediction, where a higher temperature will get more random results
-    sequence_length : int
-        length of the input sequences to the model, defined in the training notebook
-    seed : Optional[list]
-        optional seed to provide the model for text generation; if not provided, this is randomly generated
-    """
+    def __init__(
+        self,
+        model_name: str,
+        sentence_restorer: Optional[SentenceRestorer] = None,
+        predict_temperature: float = 0.45,
+        sequence_length: int = 20,
+        seed: Optional[list] = None,
+    ):
+        """Create a `RNNTextModel`.
 
-    def __init__(self, model_name: str, predict_temperature: float = 0.45, sequence_length: int = 20, seed: Optional[list] = None):
+        Parameters
+        ----------
+        model_name : str
+            name of the model, which requires files `models/{model_name}.model.onnx` and `models/{model_name}.wordmap.json`
+        sentence_restorer : Optional[SentenceRestorer]
+            sentence restorer to use; if None, creates default one to use
+        predict_temperature : float
+            temperature of the next word prediction, where a higher temperature will get more random results
+        sequence_length : int
+            length of the input sequences to the model, defined in the training notebook
+        seed : Optional[list]
+            optional seed to provide the model for text generation; if not provided, this is randomly generated
+        """
         self.__sequence_length = sequence_length  # Defined in the training notebook, make sure these match
         self.__temperature = predict_temperature
         self.__onnx_session = ort.InferenceSession(os.path.join(Directories.MODELS_DIR, f"{model_name}.model.onnx"))
@@ -34,6 +45,7 @@ class RNNTextModel(TextModel):
             self.__idx_word = {int(key): val for key, val in json.load(f).items()}
             self.__max_word_idx = max(key for key in self.__idx_word.keys())
         self.__initialize_pattern_seed(seed)
+        super().__init__(model_name, sentence_restorer)
 
     def __initialize_pattern_seed(self, seed: Optional[list] = None) -> None:
         """Initialize the seed of the RNN.
