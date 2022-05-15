@@ -10,7 +10,7 @@ from src.Util.ColorUtil import ColorTuple, rgb_to_hex
 class TextImagePostCreator(PostCreator):
     """`PostCreator` that creates a post having an image with text on it."""
 
-    def __init__(self, text: str, title: Optional[str] = None, tags: Optional[Union[list[str], tuple[str, ...]]] = None, **kwargs):
+    def __init__(self, text: str, title: Optional[str] = None, tags: Optional[Union[list[str], tuple[str, ...]]] = None, post_char_limit: int = 280, **kwargs):
         """Create a `TextImagePostCreator`.
 
         Parameters
@@ -21,6 +21,8 @@ class TextImagePostCreator(PostCreator):
             title of the text in the image, by default None
         tags : Optional[Union[list[str], tuple[str, ...]]], optional
             list of tags to be used in the text of the post, by default None
+        post_char_limit : int, optional
+            character limit of the post's text, by default 280
 
         Other Parameters
         ----------------
@@ -30,6 +32,7 @@ class TextImagePostCreator(PostCreator):
         self.__text = text
         self.__title = title
         self.__tags = tags
+        self.__char_limit = post_char_limit
         self.__banner_img: Optional[Image.Image] = None
         self.__banner_bgcolor: Optional[tuple[int, int, int]] = None
         self.__banner_height = 0
@@ -173,13 +176,15 @@ class TextImagePostCreator(PostCreator):
         str
             text of the post
         """
+        tags_suffix = "" if self.__tags is None else " " + " ".join(self.__tags)
         if self.__title is not None:
+            # If there is a title, just use the title
             content = self.__title
         else:
-            # Get first five words from text then add ellipsis
-            content_words = self.__text.split(maxsplit=5)
-            content = " ".join(content_words) + "..."
-        # Then add hashtags
-        if self.__tags is not None:
-            content += " " + " ".join(self.__tags)
+            # Otherwise, use the text used in the image
+            content = self.__text
+        # Truncate to character limit if it exceeds it
+        if len(content) + len(tags_suffix) > self.__char_limit:
+            content = content[:self.__char_limit - len(tags_suffix) - 3] + "..."
+        content += tags_suffix
         return content
