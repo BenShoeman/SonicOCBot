@@ -72,7 +72,7 @@ class SentenceRestorer:
 
     _DEFAULT_FLOAT_KWARGS: dict[str, float] = {
         "mean_words_per_sentence": 10.5,
-        "stdev_words_per_sentence": 4.75,
+        "stdev_words_per_sentence": 4.5,
     }
 
     def __init__(self, sent_seqs_file: Optional[str] = None, punc_probs_file: Optional[str] = None, proper_nouns_file: Optional[str] = None, **kwargs):

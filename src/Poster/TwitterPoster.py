@@ -39,17 +39,15 @@ class TwitterPoster(Poster):
         """
         # Get the image and text from the post creator
         img = post_creator.get_image()
-        img_filepath = os.path.join(tempfile.gettempdir(), f"sonicocbot-{datetime.now().strftime('%Y%m%d-%H%M%S')}.png") if img is not None else None
-        if img is not None and img_filepath is not None:
-            # Create a temporary file to post
-            img.save(img_filepath, format="PNG")
-        else:
-            img = None
         post_txt = post_creator.get_text()
         alt_txt = post_creator.get_alt_text()
-        media = self.__api.media_upload(img_filepath)
-        if alt_txt is not None:
-            self.__api.create_media_metadata(media.media_id, alt_txt)
-        self.__api.update_status(status=post_txt, media_ids=[media.media_id])
-        if img_filepath is not None:
-            os.remove(img_filepath)
+        if img is None:
+            self.__api.update_status(status=post_txt)
+        else:
+            with tempfile.NamedTemporaryFile(suffix=".png") as f:
+                # Create a temporary file to post
+                img.save(f.name, format="PNG")
+                media = self.__api.media_upload(f.name)
+                if alt_txt is not None:
+                    self.__api.create_media_metadata(media.media_id, alt_txt)
+                self.__api.update_status(status=post_txt, media_ids=[media.media_id])

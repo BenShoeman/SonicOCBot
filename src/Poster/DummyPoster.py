@@ -14,6 +14,7 @@ class DummyPoster(Poster):
             post creator to make the post
         """
         print(post_creator.get_text())
+        print("Alt Text:", post_creator.get_alt_text())
         img = post_creator.get_image()
         if img is not None:
             img.show()

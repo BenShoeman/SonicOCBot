@@ -5,7 +5,7 @@ from typing import Literal
 
 import src.Directories as Directories
 from src.OC import generate_oc
-from src.PostCreator import PostCreator, OCPostCreator, TextImagePostCreator
+from src.PostCreator import PostCreator, OCPostCreator, TextImagePostCreator, TwitterPostCreator
 from src.FanfictionGenerator import TwitterFanfictionGenerator
 from src.SonicSezGenerator import SonicSezGenerator
 from src.Poster import DummyPoster, TwitterPoster
@@ -56,6 +56,8 @@ def make_post(post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], floa
     else:
         oc = generate_oc()
         post_creator = OCPostCreator(oc=oc)
+    # Wrap in a TwitterPostCreator to apply character limits
+    post_creator = TwitterPostCreator(post_creator)
     print(f"Making a {post_typ} post... ", end="")
     poster.make_post(post_creator)
     print("Done.")
