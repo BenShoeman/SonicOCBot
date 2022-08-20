@@ -7,6 +7,7 @@ import re
 from typing import Callable, Optional, Union
 
 import src.Directories as Directories
+import src.Util.FileUtil as FileUtil
 
 nltk.download("averaged_perceptron_tagger", quiet=True)
 nltk.download("punkt", quiet=True)
@@ -14,27 +15,6 @@ nltk.download("punkt", quiet=True)
 
 def _gauss_int(mean: float, stdev: float, min_val: int = 0) -> int:
     return max(min_val, round(random.gauss(mean, stdev)))
-
-
-def _list_load_or_fallback(filepath: str, fallback_factory: Callable) -> list:
-    if os.path.exists(filepath):
-        with open(filepath) as f:
-            return [line.strip() for line in f.readlines()]
-    else:
-        return fallback_factory()
-
-
-def _json_load_or_fallback(filepath: str, fallback_factory: Callable) -> dict:
-    if os.path.exists(filepath):
-        try:
-            with open(filepath) as f:
-                return json.load(f)
-        except json.JSONDecodeError:
-            print(f"JSON decode error reading {filepath}, falling back to empty dict")
-            return fallback_factory()
-    else:
-        print(f"{filepath} does not exist, falling back to empty dict")
-        return fallback_factory()
 
 
 def _read_list_to_regex(filepath: Union[str, os.PathLike]) -> tuple[re.Pattern, dict[str, str]]:
@@ -98,8 +78,8 @@ class SentenceRestorer:
         sent_seqs_file = sent_seqs_file or str(SentenceRestorer._DEFAULT_STR_KWARGS["sent_seqs_file"])
         punc_probs_file = punc_probs_file or str(SentenceRestorer._DEFAULT_STR_KWARGS["punc_probs_file"])
         proper_nouns_file = proper_nouns_file or str(SentenceRestorer._DEFAULT_STR_KWARGS["proper_nouns_file"])
-        self._sent_seqs = [tuple(seq.split(",")) for seq in _list_load_or_fallback(os.path.join(Directories.MODELS_DIR, sent_seqs_file), list)]
-        self._punc_probs = _json_load_or_fallback(os.path.join(Directories.MODELS_DIR, punc_probs_file), dict)
+        self._sent_seqs = [tuple(seq.split(",")) for seq in FileUtil.list_load_or_fallback(os.path.join(Directories.MODELS_DIR, sent_seqs_file))]
+        self._punc_probs = FileUtil.json_load_or_fallback(os.path.join(Directories.MODELS_DIR, punc_probs_file))
         self._proper_nouns_regex, self._proper_nouns_map = _read_list_to_regex(os.path.join(Directories.DATA_DIR, proper_nouns_file))
         self._mean_words_per_sentence = kwargs.get("mean_words_per_sentence") or SentenceRestorer._DEFAULT_FLOAT_KWARGS["mean_words_per_sentence"]
         self._stdev_words_per_sentence = kwargs.get("stdev_words_per_sentence") or SentenceRestorer._DEFAULT_FLOAT_KWARGS["stdev_words_per_sentence"]

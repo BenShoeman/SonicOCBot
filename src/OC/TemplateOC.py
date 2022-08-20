@@ -1,52 +1,37 @@
-import json
 import os
 import random
 from PIL import Image, ImageDraw
 from typing import Callable, ClassVar, Optional
+import yaml
 
 from .OC import OC
 import src.Directories as Directories
 import src.Util.ColorUtil as ColorUtil
+import src.Util.FileUtil as FileUtil
 import src.Util.ImageUtil as ImageUtil
-
-
-def _json_load_or_fallback(filepath: str, fallback_factory: Callable) -> dict:
-    if os.path.exists(filepath):
-        try:
-            with open(filepath) as f:
-                return json.load(f)
-        except json.JSONDecodeError:
-            print(f"JSON decode error reading {f}, falling back to empty dict")
-            return fallback_factory()
-    else:
-        print(f"{f} does not exist, falling back to empty dict")
-        return fallback_factory()
 
 
 class TemplateOC(OC):
     TEMPLATES: ClassVar[dict]
     """Data that contains information on how to create and fill the regions of the OC.
 
-    `data/template-fill.json` is a JSON file in the following format:
+    `data/template-fill.yml` is a YAML file in the following format:
 
     ```
-    {
-        "template-1": {
-            "species": <species-name>,
-            "gender": <gender letter or string>,
-            "fill": {
-                "fill-operation": {
-                    "region-name-1": [ [<fill x-coord 1>, <fill y-coord 1>], [<fill x-coord 2>, <fill y-coord 2>], ... ],
-                    "region-name-2": [ ... ],
-                    ...
-                },
-                "another-fill-op": { ... },
+    template-1:
+        species: <species-name>
+        gender: <gender letter or string>
+        fill:
+            fill-operation:
+                region-name-1: [ [<fill x-coord 1>, <fill y-coord 1>], [<fill x-coord 2>, <fill y-coord 2>], ... ]
+                region-name-2: [ ... ]
                 ...
-            }
-        },
-        "part-2": { ... },
+            another-fill-op:
+                ...
+            ...
+    template-2:
         ...
-    }
+    ...
     ```
 
     Explanation for each part:
@@ -84,7 +69,7 @@ class TemplateOC(OC):
 
     @classmethod
     def __initialize_templates(cls):
-        cls.TEMPLATES = _json_load_or_fallback(os.path.join(Directories.DATA_DIR, "template-fill.json"), dict)
+        cls.TEMPLATES = FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, "template-fill.yml"))
 
     def generate_image(self, fill_threshold: int = 96) -> None:
         """Implements `generate_image` from `OC` by using full templates.

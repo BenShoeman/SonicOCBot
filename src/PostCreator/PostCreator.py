@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
 from datetime import time
 import glob
-import json
 import os
 from PIL import Image
 import random
 from typing import Literal, Optional, Union
+import yaml
 
 import src.Directories as Directories
 from src.Util.ColorUtil import ColorTuple, hex_to_rgb, rgb_to_hex
@@ -33,7 +33,7 @@ def _get_font_choices(fonts_dir: str) -> dict:
 def _get_color_schedule(schedule_path: str) -> dict:
     if os.path.exists(schedule_path):
         with open(schedule_path) as f:
-            schedule_dict = json.load(f)
+            schedule_dict = yaml.safe_load(f)
         converted_schedule = {}
         for time_str, colors_dict in schedule_dict.items():
             hr, minute = time_str.split(":")[:2]
@@ -72,7 +72,7 @@ class PostCreator(ABC):
             - regular_font_file
             - italic_font_file
         """
-        self.__schedule_colors = _get_color_schedule(os.path.join(Directories.DATA_DIR, "schedule-colors.json"))
+        self.__schedule_colors = _get_color_schedule(os.path.join(Directories.DATA_DIR, "schedule-colors.yml"))
         # If no font file provided, pick a random one from fonts directory
         self.regular_font_file = kwargs.get("regular_font_file")
         self.italic_font_file = kwargs.get("italic_font_file")

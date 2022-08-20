@@ -1,58 +1,42 @@
 from collections import OrderedDict
-import json
 import os
 import random
 from PIL import Image
 from typing import Callable, ClassVar
 
 from .OC import OC
-import src.Util.ColorUtil as ColorUtil
-import src.Util.ImageUtil as ImageUtil
 import src.Directories as Directories
-
-
-def _json_load_or_fallback(filepath: str, fallback_factory: Callable) -> OrderedDict:
-    if os.path.exists(filepath):
-        try:
-            with open(filepath) as f:
-                return json.load(f, object_pairs_hook=OrderedDict)
-        except json.JSONDecodeError:
-            print(f"JSON decode error reading {f}, falling back to empty dict")
-            return fallback_factory()
-    else:
-        print(f"{f} does not exist, falling back to empty dict")
-        return fallback_factory()
+import src.Util.ColorUtil as ColorUtil
+import src.Util.FileUtil as FileUtil
+import src.Util.ImageUtil as ImageUtil
 
 
 class SonicMakerOC(OC):
     SONICMAKER_FILL: ClassVar[OrderedDict]
     """Data that contains information on how to create and fill the regions of the OC.
 
-    `data/sonicmaker-fill.json` is a JSON file in the following format:
+    `data/sonicmaker-fill.yml` is a YAML file in the following format:
 
     ```
-    {
-        "image-size": [<template-width>, <template-height>],
-        "part-1": {
-            "optional": <true|false>,
-            "position": [<x-coord of this part>, <y-coord of this part>],
-            "fill": {
-                "type-1": {
-                    "fill-operation": {
-                        "region-name-1": [ [<fill x-coord 1>, <fill y-coord 1>], [<fill x-coord 2>, <fill y-coord 2>], ... ],
-                        "region-name-2": [ ... ],
-                        ...
-                    },
-                    "another-fill-op": { ... },
+    image-size: [<template-width>, <template-height>]
+    part-1:
+        optional: <true|false>
+        position: [<x-coord of this part>, <y-coord of this part>]
+        fill:
+            type-1:
+                fill-operation:
+                    region-name-1: [ [<fill x-coord 1>, <fill y-coord 1>], [<fill x-coord 2>, <fill y-coord 2>], ... ]
+                    region-name-2: [ ... ]
                     ...
-                },
-                "type-2": { ... },
+                another-fill-op:
+                    ...
                 ...
-            }
-        },
-        "part-2": { ... },
+            type-2:
+                ...
+            ...
+    part-2:
         ...
-    }
+    ...
     ```
 
     Explanation for each part:
@@ -64,6 +48,7 @@ class SonicMakerOC(OC):
         - `position`: Upper-left corner of where this part should be placed.
         - `fill` contains the actual information on where to fill this part.
             - `type-1` is one of the possible types of this part to choose. This image should be placed in `/images/sonicmaker/part-1-type-1.png`.
+                - If you want no fill, leave this field blank (i.e. null).
                 - `fill-operation` is what operation you want to do to the color when filling.
                   This is to account for colors that should be shaded or brightened in certain areas, for instance.
                   Below are the available types of operations:
@@ -81,7 +66,7 @@ class SonicMakerOC(OC):
 
     @classmethod
     def __initialize_fill(cls):
-        cls.SONICMAKER_FILL = _json_load_or_fallback(os.path.join(Directories.DATA_DIR, "sonicmaker-fill.json"), OrderedDict)
+        cls.SONICMAKER_FILL = FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, "sonicmaker-fill.yml"))
 
     def generate_image(self, fill_threshold: int = 96) -> None:
         """Implements `generate_image` from `OC` by using Sonic Maker template parts.
@@ -126,7 +111,7 @@ class SonicMakerOC(OC):
 
             type_name = random.choice(part_types)
             type_img = Image.open(os.path.join(Directories.IMAGES_DIR, "sonicmaker", f"{part_name}-{type_name}{part_image_extension}")).convert("RGBA")
-            fill_ops = part["fill"][type_name]
+            fill_ops = part["fill"][type_name] or {} # Coalesce to empty dict if None
 
             # Now start filling with the list of coords to fill
             for operation in fill_ops:
