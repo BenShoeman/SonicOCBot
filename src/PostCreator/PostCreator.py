@@ -144,7 +144,7 @@ class PostCreator(ABC):
         """
         self.__font_size = font_size
 
-    def __get_schedule_color_for_time(self, typ: Literal["bg", "text"], current_time: time) -> ColorTuple:
+    def __get_schedule_color_for_time(self, typ: Literal["bg", "text"], current_time: time) -> tuple[int, int, int]:
         """Return background color ("bg") or text color ("text") based on the schedule.
 
         Parameters
@@ -156,7 +156,7 @@ class PostCreator(ABC):
 
         Returns
         -------
-        ColorTuple
+        tuple[int, int, int]
             3-tuple of colors in RGB, in interval [0, 255]
         """
         schedule = sorted(self.__schedule_colors.items(), key=lambda item: item[0], reverse=True)
@@ -168,7 +168,7 @@ class PostCreator(ABC):
         time_val, colors_dict = schedule[0]
         return colors_dict.get(typ, (0, 0, 0))
 
-    def _get_bgcolor_for_time(self, current_time: time) -> ColorTuple:
+    def _get_bgcolor_for_time(self, current_time: time) -> tuple[int, int, int]:
         """Return background color based on the schedule.
 
         Parameters
@@ -178,12 +178,12 @@ class PostCreator(ABC):
 
         Returns
         -------
-        ColorTuple
+        tuple[int, int, int]
             3-tuple of colors in RGB, in interval [0, 255]
         """
         return self.__get_schedule_color_for_time("bg", current_time)
 
-    def _get_textcolor_for_time(self, current_time: time) -> ColorTuple:
+    def _get_textcolor_for_time(self, current_time: time) -> tuple[int, int, int]:
         """Return text color based on the schedule.
 
         Parameters
@@ -193,7 +193,7 @@ class PostCreator(ABC):
 
         Returns
         -------
-        ColorTuple
+        tuple[int, int, int]
             3-tuple of colors in RGB, in interval [0, 255]
         """
         return self.__get_schedule_color_for_time("text", current_time)

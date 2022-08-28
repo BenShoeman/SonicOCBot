@@ -160,9 +160,9 @@ def hsl_to_rgb(hsl: ColorTuple) -> ColorTuple:
         g = x
 
     # Return RGB values in the range [0,255]
-    r_standard = float(round((r + m) * 255))
-    g_standard = float(round((g + m) * 255))
-    b_standard = float(round((b + m) * 255))
+    r_standard = round((r + m) * 255)
+    g_standard = round((g + m) * 255)
+    b_standard = round((b + m) * 255)
     return (r_standard, g_standard, b_standard)
 
 
@@ -297,7 +297,7 @@ def lab_to_xyz(lab: ColorTuple) -> ColorTuple:
         z = (z - 16 / 116) / 7.787
 
     x = x * 95.047
-    y = y * 100
+    y = y * 100.0
     z = z * 108.883
     return (x, y, z)
 
@@ -342,9 +342,9 @@ def xyz_to_rgb(xyz: ColorTuple) -> ColorTuple:
     else:
         b = 12.92 * b
 
-    standard_r = r * 255
-    standard_g = g * 255
-    standard_b = b * 255
+    standard_r = round(r * 255)
+    standard_g = round(g * 255)
+    standard_b = round(b * 255)
     return (standard_r, standard_g, standard_b)
 
 
@@ -565,7 +565,7 @@ def multiply_colors(rgb1: ColorTuple, rgb2: ColorTuple) -> tuple:
     ColorTuple
         blended color
     """
-    return tuple(color1 * color2 / 255 for color1, color2 in zip(rgb1, rgb2))
+    return tuple(round(color1 * color2 / 255) for color1, color2 in zip(rgb1, rgb2))
 
 
 def get_colors_list(filename: Union[str, os.PathLike]) -> list[ColorDict]:
@@ -601,7 +601,7 @@ def get_colors_list(filename: Union[str, os.PathLike]) -> list[ColorDict]:
             colorlist: list[list[Any]] = [line.strip().split(":") for line in f.readlines()]
             # Convert the first half of each line into color triplets
             for i in range(len(colorlist)):
-                colorlist[i][0] = tuple(_clamp(float(value.strip()), 0, 255) for value in colorlist[i][0].split(","))
+                colorlist[i][0] = tuple(_clamp(int(value.strip()), 0, 255) for value in colorlist[i][0].split(","))
             # Finally, create the list of ColorDicts
             colors = [ColorDict(name=color_name, color=color_tuple) for color_tuple, color_name in colorlist]
     except FileNotFoundError:
@@ -613,14 +613,14 @@ def get_colors_list(filename: Union[str, os.PathLike]) -> list[ColorDict]:
 # Module constants defined below
 
 _BASIC_COLORS = [
-    ColorDict(name="red", color=(255.0, 0.0, 0.0)),
-    ColorDict(name="yellow", color=(255.0, 255.0, 0.0)),
-    ColorDict(name="green", color=(0.0, 255.0, 0.0)),
-    ColorDict(name="cyan", color=(0.0, 255.0, 255.0)),
-    ColorDict(name="blue", color=(0.0, 0.0, 255.0)),
-    ColorDict(name="magenta", color=(255.0, 0.0, 255.0)),
-    ColorDict(name="black", color=(0.0, 0.0, 0.0)),
-    ColorDict(name="white", color=(255.0, 255.0, 255.0)),
+    ColorDict(name="red", color=(255, 0, 0)),
+    ColorDict(name="yellow", color=(255, 255, 0)),
+    ColorDict(name="green", color=(0, 255, 0)),
+    ColorDict(name="cyan", color=(0, 255, 255)),
+    ColorDict(name="blue", color=(0, 0, 255)),
+    ColorDict(name="magenta", color=(255, 0, 255)),
+    ColorDict(name="black", color=(0, 0, 0)),
+    ColorDict(name="white", color=(255, 255, 255)),
 ]
 _GENERAL_COLORS = get_colors_list(os.path.join(Directories.DATA_DIR, "colors.general.txt"))
 _SKIN_TONE_COLORS = get_colors_list(os.path.join(Directories.DATA_DIR, "colors.skintones.txt"))

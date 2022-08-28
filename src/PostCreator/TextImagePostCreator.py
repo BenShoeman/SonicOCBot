@@ -34,7 +34,7 @@ class TextImagePostCreator(PostCreator):
         self.__banner_bgcolor: Optional[tuple[int, int, int]] = None
         self.__banner_height = 0
         self.__overlay_img: Optional[Image.Image] = None
-        self.__overlay_alpha = 0.0
+        self.__overlay_alpha = 0
         super().__init__(**kwargs)
 
     def set_banner(self, img: Optional[Union[str, Image.Image]] = None, bgcolor: Optional[ColorTuple] = None, height: int = 80) -> None:
