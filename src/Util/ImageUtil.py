@@ -1,8 +1,10 @@
 """Utilities for reading and manipulating images."""
 
-from math import sqrt
+import numpy as np
 from PIL import Image
 import random
+from scipy.ndimage import label
+from typing import Callable, Optional, Union
 
 from .ColorUtil import ColorTuple, get_rgb_delta, multiply_colors
 
@@ -24,64 +26,133 @@ def get_random_color_from_image(img: Image.Image) -> ColorTuple:
     width, height = img.size
     random_x = random.randrange(0, width)
     random_y = random.randrange(0, height)
-    r, g, b = img.getpixel((random_x, random_y))
-    return (float(r), float(g), float(b))
+    return img.getpixel((random_x, random_y))
 
 
-def multiply_floodfill(img: Image.Image, xy: tuple[int, int], color: tuple[int, int, int], threshold: int = 16) -> None:
-    """Flood fill a region in the image by using multiply blending.
+def tile_image_to_size(img: Union[Image.Image, np.ndarray], size: tuple[int, int]) -> Union[Image.Image, np.ndarray]:
+    """Tile the input image to a given size.
 
     Parameters
     ----------
-    img : Image.Image
-        image to flood fill
+    img : Union[Image.Image, np.ndarray]
+        image to tile
+    size : tuple[int, int]
+        size to tile to
+
+    Returns
+    -------
+    Union[Image.Image, np.ndarray]
+        a new PIL image or numpy array of the tiled image
+    """
+    img_arr = np.array(img)
+    w_tgt, h_tgt = size
+    h_fill, w_fill = img_arr.shape[:2]
+    # Tile so that the fill pattern is larger than the image we are filling
+    extra_dims = (1,) * (img_arr.ndim - 2)
+    if h_fill < h_tgt:
+        img_arr = np.tile(img_arr, (int(np.ceil(h_tgt / h_fill)), 1) + extra_dims)
+    if w_fill < w_tgt:
+        img_arr = np.tile(img_arr, (1, int(np.ceil(w_tgt / w_fill))) + extra_dims)
+    # Then return cropped and tiled image
+    img_arr = img_arr[:h_tgt, :w_tgt, :]
+    return Image.fromarray(img_arr) if isinstance(img, Image.Image) else img_arr
+
+
+def floodfill(
+    img: Union[Image.Image, np.ndarray],
+    xy: tuple[int, int],
+    fill: Union[ColorTuple, Image.Image, np.ndarray],
+    threshold: int = 16,
+    method: Optional[Callable[[np.ndarray, np.ndarray], np.ndarray]] = None,
+    in_place: bool = False,
+) -> Union[Image.Image, np.ndarray]:
+    """Flood fill a region in the image, optionally with a custom fill method.
+
+    Note that the image must be an RGB or RGBA image. Also, this method only considers RGB; alpha is ignored.
+
+    Parameters
+    ----------
+    img : Union[Image.Image, np.ndarray]
+        image or image array to flood fill; MUST be RGB or RGBA
     xy : tuple[int, int]
         (x,y) coordinate to flood fill
-    color : tuple[int, int, int]
-        RGB 3-tuple containing color to fill with
+    fill : Union[ColorTuple, Image.Image, np.ndarray]
+        what to fill in the space; either a RGB 3-tuple containing color to fill, or image with pattern to fill;
+        note that if it's an image, the alpha channel will be ignored
     threshold : int, optional
         tolerance with which similar colors to initial (x,y) point can also be filled, by default 16
+    method: Optional[Callable[[np.ndarray, np.ndarray], np.ndarray]], optional
+        method to fill using, in form `lambda orig, new: ...`;
+        in the lambda function, `orig` and `new` are numpy arrays containing original image data and new color to fill with;
+        if omitted, this will just do a regular floodfill
+    in_place: boolean, optional
+        only takes effect if `img` is type np.ndarray; if True, then does the operation in place, by default False
+
+    Returns
+    -------
+    Union[Image.Image, np.ndarray]
+        the modified PIL image or numpy array
     """
-    if img.mode != "RGBA":
-        img = img.convert("RGBA")
-    img_rgb = img.convert("RGB")
-    width, height = img_rgb.size
+    # Just use the target color to fill if method is undefined
+    if not method:
+        method = lambda orig, new: new
 
-    # Return if xy point can't be filled in
-    if xy[0] < 0 or xy[0] >= width or xy[1] < 0 or xy[1] >= height:
-        print(f"Error: can't flood fill. xy-coordinates of {xy} not contained in image of dimensions {width}x{height}")
-        return
+    if in_place:
+        img_arr = np.asarray(img)
+    else:
+        img_arr = np.array(img)
+    x, y = xy
+    img_rgb = img_arr[:, :, :3].astype(np.int16)
 
-    init_r, init_g, init_b = img_rgb.getpixel(xy)
-    initial_color = (float(init_r), float(init_g), float(init_b))
-    initial_alpha = img.getpixel(xy)[3]
-    fill_pixels = set()
-    explored_pixels = set()
-    explored_pixels.add(xy)
-    next_pixels = [xy]
+    # Make sure pattern is the same size as the image for masking later
+    if isinstance(fill, (Image.Image, np.ndarray)):
+        h_img, w_img = img_arr.shape[:2]
+        fill_arr = np.asarray(tile_image_to_size(np.asarray(fill), (w_img, h_img)))
+        # Only use RGB channels for pattern fill
+        fill_arr = fill_arr[:, :, :3]
 
-    while next_pixels:
-        curr_xy = next_pixels.pop(0)
-        fill_pixels.add(curr_xy)
-        x, y = curr_xy
-        radius = 1
-        nearby_pixels = [
-            ij
-            for i in range(x - radius, x + radius + 1)
-            for j in range(y - radius, y + radius + 1)
-            if (ij := (i, j)) not in explored_pixels and 0 <= i < width and 0 <= j < height
-        ]
-        for ij in nearby_pixels:
-            explored_pixels.add(ij)
-            # Recursively find neighboring pixels & mark to fill those within the threshold too
-            ij_r, ij_g, ij_b = img_rgb.getpixel(ij)
-            ij_color = (float(ij_r), float(ij_g), float(ij_b))
-            if abs(initial_alpha - img.getpixel(ij)[3]) <= threshold and sqrt(get_rgb_delta(initial_color, ij_color)) <= threshold:
-                next_pixels.append(ij)
+    init_color = img_rgb[y, x]
 
-    for x, y in fill_pixels:
-        curr_r, curr_g, curr_b = img_rgb.getpixel((x, y))
-        current_color = (float(curr_r), float(curr_g), float(curr_b))
-        current_alpha = img.getpixel((x, y))[3]
-        new_color = tuple(int(c) for c in multiply_colors(color, current_color))
-        img.putpixel((x, y), new_color + (current_alpha,))
+    # Manhattan distance between colors divided by 3 is approximately distance between colors;
+    # find where distance between initial color and all colors in image is less than threshold
+    dists_in_thresh = np.sum(np.abs(img_rgb - init_color), axis=2) <= (threshold * 3)
+    # Then, get contiguous region starting at initial color using scipy.ndimage.label
+    labels, _ = label(dists_in_thresh)
+    # If fill is just a color, convert it to numpy array; else, get where pattern overlaps image
+    mask = labels == labels[y, x]
+    if isinstance(fill, tuple):
+        tgt_fill = np.asarray(fill)
+    else:
+        tgt_fill = fill_arr[mask]
+    img_rgb[mask] = method(img_rgb[mask], tgt_fill)
+    img_arr[:, :, :3] = img_rgb
+
+    # Convert back to PIL image if PIL image was inputted
+    if isinstance(img, Image.Image):
+        img = Image.fromarray(img_arr)
+    return img
+
+
+def multiply_floodfill(
+    img: Union[Image.Image, np.ndarray],
+    xy: tuple[int, int],
+    fill: Union[ColorTuple, Image.Image, np.ndarray],
+    threshold: int = 16,
+    in_place: bool = False,
+) -> Union[Image.Image, np.ndarray]:
+    """Flood fill a region in the image by using multiply blending using `ImageUtil.floodfill`.
+
+    Parameters
+    ----------
+    img : Union[Image.Image, np.ndarray]
+        image or image array to flood fill
+    xy : tuple[int, int]
+        (x,y) coordinate to flood fill
+    fill : Union[ColorTuple, Image.Image, np.ndarray]
+        what to fill in the space; either a RGB 3-tuple containing color to fill, or image with pattern to fill
+    threshold : int, optional
+        tolerance with which similar colors to initial (x,y) point can also be filled, by default 16
+    in_place: boolean, optional
+        only takes effect if `img` is type np.ndarray; if True, then does the operation in place, by default False
+    """
+    return floodfill(img, xy, fill, threshold, method=lambda orig, new: orig * new // 255, in_place=in_place)

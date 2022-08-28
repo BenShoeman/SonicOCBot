@@ -134,6 +134,7 @@ corpus/*.txt
 data/*.json
 data/*.png
 data/*.txt
+data/*.yml
 !data/colors.*
 !data/dictionary*.txt
 !data/schedule-colors.json

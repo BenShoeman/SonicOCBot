@@ -1,4 +1,5 @@
 from collections import OrderedDict
+import numpy as np
 import os
 import random
 from PIL import Image
@@ -68,7 +69,7 @@ class SonicMakerOC(OC):
     def __initialize_fill(cls):
         cls.SONICMAKER_FILL = FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, "sonicmaker-fill.yml"))
 
-    def generate_image(self, fill_threshold: int = 96) -> None:
+    def generate_image(self, fill_threshold: int = 192) -> None:
         """Implements `generate_image` from `OC` by using Sonic Maker template parts.
 
         Parameters
@@ -110,8 +111,10 @@ class SonicMakerOC(OC):
                 continue
 
             type_name = random.choice(part_types)
-            type_img = Image.open(os.path.join(Directories.IMAGES_DIR, "sonicmaker", f"{part_name}-{type_name}{part_image_extension}")).convert("RGBA")
-            fill_ops = part["fill"][type_name] or {} # Coalesce to empty dict if None
+            type_img_arr = np.asarray(
+                Image.open(os.path.join(Directories.IMAGES_DIR, "sonicmaker", f"{part_name}-{type_name}{part_image_extension}")).convert("RGBA")
+            )
+            fill_ops = part["fill"][type_name] or {}  # Coalesce to empty dict if None
 
             # Now start filling with the list of coords to fill
             for operation in fill_ops:
@@ -145,10 +148,8 @@ class SonicMakerOC(OC):
 
                     # Fill each coordinate with the color we got, with the proper transformation
                     for coord in coords:
-                        coord_x, coord_y = coord
-                        fill_r, fill_g, fill_b = fill_rgb
-                        fill_color = (int(fill_r), int(fill_g), int(fill_b))
-                        ImageUtil.multiply_floodfill(type_img, (coord_x, coord_y), fill_color, threshold=fill_threshold)
+                        ImageUtil.multiply_floodfill(type_img_arr, coord, fill_rgb, threshold=fill_threshold, in_place=True)
 
             # Finally, paste this region in the overall image
+            type_img = Image.fromarray(type_img_arr)
             self._image.paste(type_img, part.get("position", (0, 0)), type_img)

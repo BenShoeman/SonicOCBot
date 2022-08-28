@@ -1,7 +1,7 @@
 import glob
 import os
 import random
-from typing import Literal
+from typing import Literal, Optional
 
 import src.Directories as Directories
 from src.OC import generate_oc
@@ -25,7 +25,13 @@ _post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], float] = {
 }
 
 
-def make_post(post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], float] = _post_probabilities, dummy_post: bool = False) -> None:
+def make_post(
+    post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], float] = _post_probabilities,
+    dummy_post: bool = False,
+    post_type: Optional[Literal["oc", "sonicsez", "fanfic"]] = None,
+    sonicmaker: bool = False,
+    templated: bool = False,
+) -> None:
     """Create a post randomly based on given post probabilities.
 
     Parameters
@@ -34,12 +40,22 @@ def make_post(post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], floa
         dict describing probabilities of each post; default values are picked if not provided
     dummy_post : bool, optional
         whether the post is a dummy post, by default False
+    post_type : Optional[Literal["oc", "sonicsez", "fanfic"]], optional
+        which type of post to make; if omitted, uses `post_probabilities` to determine the type
+    sonicmaker: bool, optional
+        if True, forces an oc post to use a SonicMaker OC; by default False
+    templated: bool, optional
+        if True, forces an oc post to use a template OC; by default False
+        note that the `sonicmaker` argument takes precedence over this
     """
     poster = DummyPoster() if dummy_post else TwitterPoster()
-    post_probs = [(post, pr) for post, pr in post_probabilities.items()]
-    posts = [post for post, pr in post_probs]
-    probs = [pr for post, pr in post_probs]
-    post_typ = random.choices(posts, probs, k=1)[0]
+    if post_type is None:
+        post_probs = [(post, pr) for post, pr in post_probabilities.items()]
+        posts = [post for post, pr in post_probs]
+        probs = [pr for post, pr in post_probs]
+        post_typ = random.choices(posts, probs, k=1)[0]
+    else:
+        post_typ = post_type
 
     post_creator: PostCreator
     if post_typ == "fanfic":
@@ -54,7 +70,12 @@ def make_post(post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], floa
         if len(_ssez_bg_images) > 0:
             post_creator.set_overlay(random.choices(_ssez_bg_images, k=1)[0], alpha=56)
     else:
-        oc = generate_oc()
+        if not (sonicmaker or templated):
+            oc = generate_oc()
+        elif sonicmaker:
+            oc = generate_oc(pr_original=1.0)
+        else:
+            oc = generate_oc(pr_original=0.0)
         post_creator = OCPostCreator(oc=oc)
     # Wrap in a TwitterPostCreator to apply character limits
     post_creator = TwitterPostCreator(post_creator)
@@ -63,12 +84,11 @@ def make_post(post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], floa
     print("Done.")
 
 
-def main(dummy_post: bool = False):
-    """Main app function.
-
-    Parameters
-    ----------
-    dummy_post : bool, optional
-        whether the post is a dummy post, by default False
-    """
-    make_post(dummy_post=dummy_post)
+def main(
+    dummy_post: bool = False,
+    post_type: Optional[Literal["oc", "sonicsez", "fanfic"]] = None,
+    sonicmaker: bool = False,
+    templated: bool = False,
+):
+    """Main app function. Parameters are same as those in `App.make_post`."""
+    make_post(dummy_post=dummy_post, post_type=post_type, sonicmaker=sonicmaker, templated=templated)

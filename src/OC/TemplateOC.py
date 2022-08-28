@@ -1,3 +1,4 @@
+import numpy as np
 import os
 import random
 from PIL import Image, ImageDraw
@@ -71,7 +72,7 @@ class TemplateOC(OC):
     def __initialize_templates(cls):
         cls.TEMPLATES = FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, "template-fill.yml"))
 
-    def generate_image(self, fill_threshold: int = 96) -> None:
+    def generate_image(self, fill_threshold: int = 192) -> None:
         """Implements `generate_image` from `OC` by using full templates.
 
         Parameters
@@ -80,7 +81,7 @@ class TemplateOC(OC):
             threshold of difference in color when flood filling, by default 96
         """
         part_image_extension = ".png"
-        self._image = Image.open(os.path.join(Directories.IMAGES_DIR, "template", self.__template_name + part_image_extension)).convert("RGBA")
+        img_arr = np.asarray(Image.open(os.path.join(Directories.IMAGES_DIR, "template", self.__template_name + part_image_extension)).convert("RGBA"))
 
         region_colors = {}
         # Fill each region in with a random color
@@ -107,10 +108,9 @@ class TemplateOC(OC):
 
                 coords = op_regions[region_name]
                 for coord in coords:
-                    coord_x, coord_y = coord
-                    fill_r, fill_g, fill_b = fill_rgb
-                    fill_color = (int(fill_r), int(fill_g), int(fill_b))
-                    ImageUtil.multiply_floodfill(self._image, (coord_x, coord_y), fill_color, threshold=fill_threshold)
+                    ImageUtil.multiply_floodfill(img_arr, coord, fill_rgb, threshold=fill_threshold, in_place=True)
+
+        self._image = Image.fromarray(img_arr)
 
     def _generate_gender(self):
         self._gender = self.__template["gender"]
