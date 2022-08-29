@@ -7,9 +7,8 @@ from typing import Callable, ClassVar
 
 from .OC import OC
 import src.Directories as Directories
-import src.Util.ColorUtil as ColorUtil
+from src.FillStrategy import ColorFill
 import src.Util.FileUtil as FileUtil
-import src.Util.ImageUtil as ImageUtil
 
 
 class SonicMakerOC(OC):
@@ -89,8 +88,6 @@ class SonicMakerOC(OC):
         image_size = (image_width, image_height)
         self._image = Image.new("RGBA", image_size, (0, 0, 0, 0))
 
-        # region_colors will keep colors consistent for each
-        region_colors = {}
         for part_name in sonicmaker_fill:
             # Since image-size has to be in the top level too, skip it
             if part_name == "image-size":
@@ -118,7 +115,6 @@ class SonicMakerOC(OC):
 
             # Now start filling with the list of coords to fill
             for operation in fill_ops:
-                op_func: Callable[[ColorUtil.ColorTuple], ColorUtil.ColorTuple] = OC._TRANSFORM_OPS.get(operation, lambda color: color)
                 op_regions = fill_ops[operation]
                 for region_name in op_regions:
                     # If there is a pipe, randomly pick one of the region types
@@ -127,28 +123,18 @@ class SonicMakerOC(OC):
                     else:
                         current_region = region_name
 
-                    # Give the current region a color if it doesn't have one
-                    if current_region not in region_colors:
-                        if current_region == "skin":
-                            # Use skin tone gradient image to get a skin tone, and slightly randomize it
-                            new_color_rgb = ColorUtil.randomize_color(ImageUtil.get_random_color_from_image(ColorUtil.SKIN_TONE_GRADIENT))
-                            new_color_name = ColorUtil.get_nearest_color_in_colors_list(new_color_rgb, ColorUtil.SKIN_TONE_COLORS)["name"]
-                        else:
-                            # Get a random color from general colors list and slightly randomize it
-                            new_color = random.choice(ColorUtil.GENERAL_COLORS)
-                            new_color_rgb = ColorUtil.randomize_color(new_color["color"])
-                            new_color_name = new_color["name"]
-
+                    # Give the current region a fill if it doesn't have one
+                    if current_region not in self._fill_regions:
+                        region_fill = ColorFill(current_region, threshold=fill_threshold)
                         # Now set this region to use this color throughout the whole OC
-                        region_colors[current_region] = new_color_rgb
-                        self._color_regions[current_region] = new_color_name
+                        self._fill_regions[current_region] = region_fill
 
-                    fill_rgb = op_func(region_colors[current_region])
+                    fill_strategy = self._fill_regions[current_region]
                     coords = op_regions[region_name]
 
                     # Fill each coordinate with the color we got, with the proper transformation
                     for coord in coords:
-                        ImageUtil.multiply_floodfill(type_img_arr, coord, fill_rgb, threshold=fill_threshold, in_place=True)
+                        fill_strategy.floodfill(type_img_arr, coord, transform_type=operation)
 
             # Finally, paste this region in the overall image
             type_img = Image.fromarray(type_img_arr)

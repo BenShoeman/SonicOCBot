@@ -1,11 +1,11 @@
 import os
 import json
-from typing import Callable
+from typing import Callable, Union
 import yaml
 
 
-def list_load_or_fallback(filepath: str, fallback_factory: Callable = list) -> list:
-    """Load a text file from the path as a list of lines, falling back to a fallback function if an invalid file.
+def list_load_or_fallback(filepath: Union[str, os.PathLike], fallback_factory: Callable = list) -> list:
+    """Load a text file from the path as a list of lines, falling back to a fallback function if it doesn't exist.
 
     Parameters
     ----------
@@ -23,10 +23,11 @@ def list_load_or_fallback(filepath: str, fallback_factory: Callable = list) -> l
         with open(filepath) as f:
             return [line.strip() for line in f.readlines()]
     else:
+        print(f"{f} does not exist, falling back")
         return fallback_factory()
 
 
-def json_load_or_fallback(filepath: str, fallback_factory: Callable = dict) -> dict:
+def json_load_or_fallback(filepath: Union[str, os.PathLike], fallback_factory: Callable = dict) -> dict:
     """Load a JSON file from the path, falling back to a fallback function if an invalid file.
 
     Parameters
@@ -53,7 +54,7 @@ def json_load_or_fallback(filepath: str, fallback_factory: Callable = dict) -> d
         return fallback_factory()
 
 
-def yaml_load_or_fallback(filepath: str, fallback_factory: Callable = dict) -> dict:
+def yaml_load_or_fallback(filepath: Union[str, os.PathLike], fallback_factory: Callable = dict) -> dict:
     """Load a YAML file from the path, falling back to a fallback function if an invalid file.
 
     Parameters
