@@ -7,9 +7,8 @@ import yaml
 
 from .OC import OC
 import src.Directories as Directories
-import src.Util.ColorUtil as ColorUtil
+from src.FillStrategy import ColorFill
 import src.Util.FileUtil as FileUtil
-import src.Util.ImageUtil as ImageUtil
 
 
 class TemplateOC(OC):
@@ -83,32 +82,20 @@ class TemplateOC(OC):
         part_image_extension = ".png"
         img_arr = np.asarray(Image.open(os.path.join(Directories.IMAGES_DIR, "template", self.__template_name + part_image_extension)).convert("RGBA"))
 
-        region_colors = {}
         # Fill each region in with a random color
         fill_ops = self.__template["fill"]
         for operation in fill_ops:
-            op_func = OC._TRANSFORM_OPS.get(operation, lambda color: color)
             op_regions = fill_ops[operation]
             for region_name in op_regions:
-                if region_name not in region_colors:
-                    if region_name == "skin":
-                        # Use skin tone gradient image to get a skin tone, and slightly randomize it
-                        region_color_rgb = ColorUtil.randomize_color(ImageUtil.get_random_color_from_image(ColorUtil.SKIN_TONE_GRADIENT))
-                        region_color_name = ColorUtil.get_nearest_color_in_colors_list(region_color_rgb, ColorUtil.SKIN_TONE_COLORS)["name"]
-                    else:
-                        # Get a random color from general colors list and slightly randomize it
-                        region_color = random.choice(ColorUtil.GENERAL_COLORS)
-                        region_color_rgb = ColorUtil.randomize_color(region_color["color"])
-                        region_color_name = region_color["name"]
-                    region_colors[region_name] = region_color_rgb
-                    # Add text name description
-                    self._color_regions[region_name] = region_color_name
+                if region_name not in self._fill_regions:
+                    region_fill = ColorFill(region_name, threshold=fill_threshold)
+                    # Now set this region to use this color throughout the whole OC
+                    self._fill_regions[region_name] = region_fill
 
-                fill_rgb = op_func(region_colors[region_name])
-
+                fill_strategy = self._fill_regions[region_name]
                 coords = op_regions[region_name]
                 for coord in coords:
-                    ImageUtil.multiply_floodfill(img_arr, coord, fill_rgb, threshold=fill_threshold, in_place=True)
+                    fill_strategy.floodfill(img_arr, coord, transform_type=operation)
 
         self._image = Image.fromarray(img_arr)
 

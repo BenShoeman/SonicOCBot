@@ -107,8 +107,8 @@ class OCPostCreator(PostCreator):
         oc_text += f"{md('- ')}Weight: {oc.weight}\n"
         oc_text += f"{md('- ')}Traits: {', '.join(oc.personalities).title()}\n"
         oc_text += f"{md('- ')}Skills: {', '.join(oc.skills).title()}\n"
-        for k in sorted(oc.color_regions.keys()):
-            oc_text += f"{md('- ')}{k.title()} Color: {oc.color_regions[k].title()}\n"
+        for k, v in sorted(oc.fill_regions.items(), key=lambda kv: kv[0]):
+            oc_text += f"{md('- ')}{k.title()}: {v.title()}\n"
         if use_markdown:
             oc_text += "\n-----\n"
         oc_text += f"\n{oc.description}"

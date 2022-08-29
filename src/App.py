@@ -62,13 +62,13 @@ def make_post(
         title, text = _ffic_generator.get_fanfiction()
         post_creator = TextImagePostCreator(text=text, title=title, tags=("#ocbot", "#fanficbot"))
         if len(_ffic_logo_images) > 0:
-            post_creator.set_banner(random.choices(_ffic_logo_images, k=1)[0])
+            post_creator.set_banner(random.choice(_ffic_logo_images))
     elif post_typ == "sonicsez":
         text = _ssez_generator.get_text()
         post_creator = TextImagePostCreator(text=text)
         post_creator.set_font_size(64)
         if len(_ssez_bg_images) > 0:
-            post_creator.set_overlay(random.choices(_ssez_bg_images, k=1)[0], alpha=56)
+            post_creator.set_overlay(random.choice(_ssez_bg_images), alpha=56)
     else:
         if not (sonicmaker or templated):
             oc = generate_oc()
