@@ -10,7 +10,7 @@
 - `colors.skintones.gradient.png`: Provided in repo. Gradient of various skin tones to pick from.
 - `dictionary.txt`: Provided in repo. Dictionary of words to be used when cleaning corpora.
 - `dictionary.propernouns.txt`: Provided in repo. Dictionary of proper nouns (and other capitalized words) to be used when constructing new sentences.
-- `names.{m,f,x}.txt`: List of names to pull from, for men/women/nonbinary names respectively.
+- `names.{m,f,x}.yml`: List of names to pull from with their probabilities of occurring, for men/women/nonbinary names respectively.
 - `personalities.txt`: List of personality traits.
 - `schedule-colors.yml`: Provided in repo. YAML file defining background and text colors for image posts starting at the given start times. They don't need to be in order, but the order of the times will be taken into account when figuring the color out.
 - `skills.txt`: List of skills.
