@@ -4,7 +4,7 @@ from typing import Optional, Union
 
 from .PostCreator import PostCreator
 from src.Util.HTMLtoImage import md_to_image
-from src.Util.ColorUtil import ColorTuple, rgb_to_hex
+from src.Util.ColorUtil import ColorTuple, to_pil_color_tuple
 
 
 class TextImagePostCreator(PostCreator):
@@ -111,7 +111,7 @@ class TextImagePostCreator(PostCreator):
         banner_height = self.__banner_height if self.__banner_img is not None else 0
         bgcolor = self._get_bgcolor_for_time(current_time)
         textcolor = self._get_textcolor_for_time(current_time)
-        post_img = Image.new("RGB", (img_width, img_height), bgcolor)
+        post_img = Image.new("RGB", (img_width, img_height), to_pil_color_tuple(bgcolor))
 
         # Draw the overlay image if there is one
         if self.__overlay_img is not None:

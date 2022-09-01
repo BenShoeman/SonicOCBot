@@ -1,6 +1,6 @@
 # Data File Structure
 
-- `animals.txt`: List of animal species.
+- `animals.yml`: List of animal species with weights to determine which animals are more likely to be used.
 - `colors.{general,skintones}.txt`: Provided in repo. List of colors with their RGB triplets, in the following format:
   ```
   ...
@@ -11,6 +11,18 @@
 - `dictionary.txt`: Provided in repo. Dictionary of words to be used when cleaning corpora.
 - `dictionary.propernouns.txt`: Provided in repo. Dictionary of proper nouns (and other capitalized words) to be used when constructing new sentences.
 - `names.{m,f,x}.yml`: List of names to pull from with their probabilities of occurring, for men/women/nonbinary names respectively.
+- `patterns.yml`: List of regions to apply a pattern on, given a specific species. Each species contains a list of potential patterns in the `images/pattern` directory to use, along with their probabilities of being used. If none of the patterns are used, a plain color is used instead. (See `sonicmaker-fill.yml` below for what a "region" is.) Follows a format similar to below:
+  ```yml
+  fur:
+    cat:
+      spots: 0.33
+      stripes: 0.33
+    dog:
+      spots: 0.2
+    ...
+  outfit:
+    ...
+  ```
 - `personalities.txt`: List of personality traits.
 - `schedule-colors.yml`: Provided in repo. YAML file defining background and text colors for image posts starting at the given start times. They don't need to be in order, but the order of the times will be taken into account when figuring the color out.
 - `skills.txt`: List of skills.

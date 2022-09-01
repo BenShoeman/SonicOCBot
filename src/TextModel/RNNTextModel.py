@@ -11,6 +11,9 @@ from .TextModel import TextModel
 import src.Directories as Directories
 
 
+_rng = np.random.default_rng()
+
+
 class RNNTextModel(TextModel):
     """Text model that uses a RNN to generate text, based off the models generated from the `models/training.ipynb` notebook."""
 
@@ -81,7 +84,7 @@ class RNNTextModel(TextModel):
             prediction_arr = np.log(prediction_arr) / self.__temperature
             exp_prediction = np.exp(prediction_arr)
             prediction_arr = exp_prediction / np.sum(exp_prediction)
-        probabilities = np.random.multinomial(1, np.asarray(prediction_arr[0, :], dtype=np.float64), 1)
+        probabilities = _rng.multinomial(1, np.asarray(prediction_arr[0, :], dtype=np.float64), 1)
         return np.argmax(probabilities)
 
     def get_next_word(self) -> str:

@@ -7,7 +7,7 @@ import yaml
 
 from .OC import OC
 import src.Directories as Directories
-from src.FillStrategy import ColorFill
+from src.FillStrategy import create_fill_strategy_for_species
 import src.Util.FileUtil as FileUtil
 
 
@@ -88,8 +88,8 @@ class TemplateOC(OC):
             op_regions = fill_ops[operation]
             for region_name in op_regions:
                 if region_name not in self._fill_regions:
-                    region_fill = ColorFill(region_name, threshold=fill_threshold)
-                    # Now set this region to use this color throughout the whole OC
+                    region_fill = create_fill_strategy_for_species(region_name, self.species, threshold=fill_threshold)
+                    # Now set this region to use this color/region throughout the whole OC
                     self._fill_regions[region_name] = region_fill
 
                 fill_strategy = self._fill_regions[region_name]

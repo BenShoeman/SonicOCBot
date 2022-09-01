@@ -4,9 +4,13 @@ import numpy as np
 from PIL import Image
 import random
 from scipy.ndimage import label
-from typing import Callable, Optional, Union
+from typing import Callable, Optional, TypeVar, Union
 
-from .ColorUtil import ColorTuple, get_rgb_delta, multiply_colors
+from .ColorUtil import ColorTuple
+
+
+ImageLike = TypeVar("ImageLike", Image.Image, np.ndarray)
+"""Image-like; i.e., a PIL image or numpy image array."""
 
 
 def get_random_color_from_image(img: Image.Image) -> ColorTuple:
@@ -29,20 +33,20 @@ def get_random_color_from_image(img: Image.Image) -> ColorTuple:
     return img.getpixel((random_x, random_y))
 
 
-def tile_image_to_size(img: Union[Image.Image, np.ndarray], size: tuple[int, int]) -> Union[Image.Image, np.ndarray]:
+def tile_image_to_size(img: ImageLike, size: tuple[int, int]) -> ImageLike:
     """Tile the input image to a given size.
 
     Parameters
     ----------
-    img : Union[Image.Image, np.ndarray]
+    img : ImageLike (Image.Image or np.ndarray)
         image to tile
     size : tuple[int, int]
         size to tile to
 
     Returns
     -------
-    Union[Image.Image, np.ndarray]
-        a new PIL image or numpy array of the tiled image
+    ImageLike
+        a new PIL image or numpy array of the tiled image, same type as input
     """
     img_arr = np.array(img)
     w_tgt, h_tgt = size
@@ -59,20 +63,20 @@ def tile_image_to_size(img: Union[Image.Image, np.ndarray], size: tuple[int, int
 
 
 def floodfill(
-    img: Union[Image.Image, np.ndarray],
+    img: ImageLike,
     xy: tuple[int, int],
     fill: Union[ColorTuple, Image.Image, np.ndarray],
     threshold: int = 16,
     method: Optional[Callable[[np.ndarray, np.ndarray], np.ndarray]] = None,
     in_place: bool = False,
-) -> Union[Image.Image, np.ndarray]:
+) -> ImageLike:
     """Flood fill a region in the image, optionally with a custom fill method.
 
     Note that the image must be an RGB or RGBA image. Also, this method only considers RGB; alpha is ignored.
 
     Parameters
     ----------
-    img : Union[Image.Image, np.ndarray]
+    img : ImageLike
         image or image array to flood fill; MUST be RGB or RGBA
     xy : tuple[int, int]
         (x,y) coordinate to flood fill
@@ -90,8 +94,8 @@ def floodfill(
 
     Returns
     -------
-    Union[Image.Image, np.ndarray]
-        the modified PIL image or numpy array
+    ImageLike
+        the modified PIL image or numpy array, same type as input
     """
     # Just use the target color to fill if method is undefined
     if not method:
@@ -134,17 +138,17 @@ def floodfill(
 
 
 def multiply_floodfill(
-    img: Union[Image.Image, np.ndarray],
+    img: ImageLike,
     xy: tuple[int, int],
     fill: Union[ColorTuple, Image.Image, np.ndarray],
     threshold: int = 16,
     in_place: bool = False,
-) -> Union[Image.Image, np.ndarray]:
+) -> ImageLike:
     """Flood fill a region in the image by using multiply blending using `ImageUtil.floodfill`.
 
     Parameters
     ----------
-    img : Union[Image.Image, np.ndarray]
+    img : ImageLike
         image or image array to flood fill
     xy : tuple[int, int]
         (x,y) coordinate to flood fill
@@ -154,5 +158,10 @@ def multiply_floodfill(
         tolerance with which similar colors to initial (x,y) point can also be filled, by default 16
     in_place: boolean, optional
         only takes effect if `img` is type np.ndarray; if True, then does the operation in place, by default False
+
+    Returns
+    -------
+    ImageLike
+        the modified PIL image or numpy array, same type as input
     """
     return floodfill(img, xy, fill, threshold, method=lambda orig, new: orig * new // 255, in_place=in_place)

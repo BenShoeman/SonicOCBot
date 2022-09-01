@@ -11,21 +11,24 @@ This module has 4 constants defined that contain colors to use. They are:
   Image containing many different skin tones to pick from.
 """
 
-import random
+import numpy as np
 import re
+from skimage import color
 import os
 from PIL import Image
-from typing import Any, TypedDict, Union
+from typing import Any, TypedDict, TypeVar, Union
 
 import src.Directories as Directories
 
 
-def _clamp(n: Union[int, float], min_val: Union[int, float], max_val: Union[int, float]) -> Union[int, float]:
-    return min_val if n < min_val else (max_val if n > max_val else n)
+_rng = np.random.default_rng()
 
 
-ColorTuple = tuple[Union[int, float], Union[int, float], Union[int, float]]
+_Number = Union[int, float, np.number]
+ColorTuple = tuple[_Number, _Number, _Number]
 """Type that describes a triplet of color values, for RGB, HSL, XYZ, and CIE-Lab color spaces."""
+ColorOrImage = TypeVar("ColorOrImage", ColorTuple, np.ndarray)
+"""Type that is either a ColorTuple or image array."""
 
 
 class ColorDict(TypedDict):
@@ -35,7 +38,23 @@ class ColorDict(TypedDict):
     color: ColorTuple
 
 
-def hex_to_rgb(hex_val: str) -> ColorTuple:
+def to_pil_color_tuple(color_tup: ColorTuple) -> tuple[int, int, int]:
+    """Convert ColorTuple into a guaranteed all-int tuple for Pillow to be happy in type checking.
+
+    Parameters
+    ----------
+    color_tup : ColorTuple
+        color tuple to convert
+
+    Returns
+    -------
+    tuple[int, int, int]
+        all-int tuple
+    """
+    return (int(color_tup[0]), int(color_tup[1]), int(color_tup[2]))
+
+
+def hex2rgb(hex_val: str) -> ColorTuple:
     """Convert a color in hex values to an RGB color tuple.
 
     Parameters
@@ -55,7 +74,7 @@ def hex_to_rgb(hex_val: str) -> ColorTuple:
     return (r, g, b)
 
 
-def rgb_to_hex(rgb: ColorTuple) -> str:
+def rgb2hex(rgb: ColorTuple) -> str:
     """Convert an RGB color tuple to hex values.
 
     Parameters
@@ -68,339 +87,91 @@ def rgb_to_hex(rgb: ColorTuple) -> str:
     str
         hex color in format #RRGGBB
     """
-    return "#" + "".join(hex(int(_clamp(color, 0, 255))).replace("0x", "").zfill(2) for color in rgb)
+    return "#" + "".join(hex(int(np.clip(color, 0, 255))).replace("0x", "").zfill(2) for color in rgb)
 
 
-def rgb_to_hsl(rgb: ColorTuple) -> ColorTuple:
-    """Convert an RGB color tuple into an HSL color tuple.
-
-    Parameters
-    ----------
-    rgb : ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255]
-
-    Returns
-    -------
-    ColorTuple
-        3-tuple of colors in HSL, where hue is in [0, 360) and saturation/lightness are in [0, 100]
-    """
-
-    # Get RGB values and put them in range 0..1
-    r = rgb[0] / 255.0
-    g = rgb[1] / 255.0
-    b = rgb[2] / 255.0
-    cmax = max(r, g, b)
-    cmin = min(r, g, b)
-    delta = cmax - cmin
-
-    l = (cmax + cmin) / 2
-    if delta == 0:
-        return (0, 0, round(l * 100, 2))
-
-    s = delta / (1 - abs(2 * l - 1))
-
-    if cmax == r:
-        h = 60 * (((g - b) / delta) % 6)
-    elif cmax == g:
-        h = 60 * (((b - r) / delta) + 2)
-    else:
-        h = 60 * (((r - g) / delta) + 4)
-
-    # Return HSL values in the range [0,360) for hue, [0,100] for saturation/lightness
-    h_rounded = round(h, 2)
-    s_normed = round(s * 100, 2)
-    l_normed = round(l * 100, 2)
-    return (h_rounded, s_normed, l_normed)
-
-
-def hsl_to_rgb(hsl: ColorTuple) -> ColorTuple:
-    """Convert an HSL color tuple into an RGB color tuple.
+def hsv2hsl(hsv: np.ndarray) -> np.ndarray:
+    """Convert HSV image to HSL image.
 
     Parameters
     ----------
-    hsl : ColorTuple
-        3-tuple of colors in HSL, where hue is in [0, 360) and saturation/lightness are in [0, 100]
+    hsv : np.ndarray
+        HSV color or image, all values in interval [0,1]
 
     Returns
     -------
-    ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255]
+    np.ndarray
+        HSL color or image, all values in interval [0,1]
     """
-
-    # Get saturation and lightness in range [0,1]
-    h = float(hsl[0])
-    s = hsl[1] / 100.0
-    l = hsl[2] / 100.0
-
-    c = (1 - abs(2 * l - 1)) * s
-    hh = float(h) / 60
-    x = c * (1 - abs(hh % 2 - 1))
-    m = l - c / 2
-
-    r = 0.0
-    g = 0.0
-    b = 0.0
-    if hh >= 5:
-        r = c
-        b = x
-    elif hh >= 4:
-        r = x
-        b = c
-    elif hh >= 3:
-        g = x
-        b = c
-    elif hh >= 2:
-        g = c
-        b = x
-    elif hh >= 1:
-        r = x
-        g = c
+    h = hsv[..., 0]
+    s = hsv[..., 1]
+    v = hsv[..., 2]
+    l = v * (1 - s / 2)
+    s_new = np.zeros(h.shape)
+    l_in_0_1_open = np.logical_and(l != 0, l != 1)
+    s_new[l_in_0_1_open] = (v[l_in_0_1_open] - l[l_in_0_1_open]) / np.minimum(l[l_in_0_1_open], 1 - l[l_in_0_1_open])
+    if hsv.ndim == 1:
+        return np.hstack((h, s_new, l))
     else:
-        r = c
-        g = x
-
-    # Return RGB values in the range [0,255]
-    r_standard = round((r + m) * 255)
-    g_standard = round((g + m) * 255)
-    b_standard = round((b + m) * 255)
-    return (r_standard, g_standard, b_standard)
+        return np.dstack((h, s_new, l))
 
 
-def rgb_to_xyz(rgb: ColorTuple) -> ColorTuple:
-    """Convert an RGB color tuple to an XYZ color tuple.
+def hsl2hsv(hsl: np.ndarray) -> np.ndarray:
+    """Convert HSL image to HSV image.
 
     Parameters
     ----------
-    rgb : ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255]
+    hsl : np.ndarray
+        HSL color or image, all values in interval [0,1]
 
     Returns
     -------
-    ColorTuple
-        3-tuple of colors in XYZ, with the following ranges coming from an sRGB color:
-        - X in [0, 95.047]
-        - Y in [0, 100.000]
-        - Z in [0, 108.883]
+    np.ndarray
+        HSV color or image, all values in interval [0,1]
     """
-
-    standard_r, standard_g, standard_b = rgb
-
-    r = standard_r / 255
-    g = standard_g / 255
-    b = standard_b / 255
-
-    if r > 0.04045:
-        r = ((r + 0.055) / 1.055) ** 2.4
+    h = hsl[..., 0]
+    s = hsl[..., 1]
+    l = hsl[..., 2]
+    v = l + s * np.minimum(l, 1 - l)
+    s_new = np.zeros(h.shape)
+    v_gt_0 = v != 0
+    s_new[v_gt_0] = 2 * (1 - l[v_gt_0] / v[v_gt_0])
+    if hsl.ndim == 1:
+        return np.hstack((h, s_new, v))
     else:
-        r = r / 12.92
-    if g > 0.04045:
-        g = ((g + 0.055) / 1.055) ** 2.4
-    else:
-        g = g / 12.92
-    if b > 0.04045:
-        b = ((b + 0.055) / 1.055) ** 2.4
-    else:
-        b = b / 12.92
-
-    r = r * 100
-    g = g * 100
-    b = b * 100
-
-    x = r * 0.4124 + g * 0.3576 + b * 0.1805
-    y = r * 0.2126 + g * 0.7152 + b * 0.0722
-    z = r * 0.0193 + g * 0.1192 + b * 0.9505
-    return (x, y, z)
+        return np.dstack((h, s_new, v))
 
 
-def xyz_to_lab(xyz: ColorTuple) -> ColorTuple:
-    """Convert an XYZ color tuple into a CIE-Lab color tuple.
+def rgb2hsl(rgb: np.ndarray) -> np.ndarray:
+    """Convenience function to convert RGB image to HSL.
 
     Parameters
     ----------
-    xyz : ColorTuple
-        3-tuple of colors in XYZ, with the following ranges coming from an sRGB color:
-        - X in [0, 95.047]
-        - Y in [0, 100.000]
-        - Z in [0, 108.883]
+    rgb : np.ndarray
+        RGB color or image, all values in interval [0,255] with uint8 dtype
 
     Returns
     -------
-    ColorTuple
-        3-tuple of colors in CIE-Lab, normally with the following ranges coming from an sRGB color:
-        - L in [0, 100]
-        - a in [-128, 127]
-        - b in [-128, 127]
+    np.ndarray
+        HSL color or image, all values in interval [0,1]
     """
-
-    x_orig, y_orig, z_orig = xyz
-
-    x = x_orig / 95.047
-    y = y_orig / 100
-    z = z_orig / 108.883
-
-    if x > 0.008856:
-        x = x ** (1 / 3)
-    else:
-        x = (7.787 * x) + (16 / 116)
-    if y > 0.008856:
-        y = y ** (1 / 3)
-    else:
-        y = (7.787 * y) + (16 / 116)
-    if z > 0.008856:
-        z = z ** (1 / 3)
-    else:
-        z = (7.787 * z) + (16 / 116)
-
-    L = (116 * y) - 16
-    a = 500 * (x - y)
-    b = 200 * (y - z)
-    return (L, a, b)
+    return hsv2hsl(color.rgb2hsv(rgb))
 
 
-def lab_to_xyz(lab: ColorTuple) -> ColorTuple:
-    """Convert a CIE-Lab color tuple into an XYZ color tuple.
+def hsl2rgb(hsl: np.ndarray) -> np.ndarray:
+    """Convenience function to convert HSL image to RGB.
 
     Parameters
     ----------
-    lab : ColorTuple
-        3-tuple of colors in CIE-Lab, normally with the following ranges coming from an sRGB color:
-        - L in [0, 100]
-        - a in [-128, 127]
-        - b in [-128, 127]
+    hsl : np.ndarray
+        HSL color or image, all values in interval [0,1]
 
     Returns
     -------
-    ColorTuple
-        3-tuple of colors in XYZ, with the following ranges coming from an sRGB color:
-        - X in [0, 95.047]
-        - Y in [0, 100.000]
-        - Z in [0, 108.883]
+    np.ndarray
+        RGB color or image, all values in interval [0,255] with uint8 dtype
     """
-
-    L, a, b = lab
-
-    y = (L + 16) / 116
-    x = a / 500 + y
-    z = y - b / 200
-
-    if y**3 > 0.008856:
-        y = y**3
-    else:
-        y = (y - 16 / 116) / 7.787
-    if x**3 > 0.008856:
-        x = x**3
-    else:
-        x = (x - 16 / 116) / 7.787
-    if z**3 > 0.008856:
-        z = z**3
-    else:
-        z = (z - 16 / 116) / 7.787
-
-    x = x * 95.047
-    y = y * 100.0
-    z = z * 108.883
-    return (x, y, z)
-
-
-def xyz_to_rgb(xyz: ColorTuple) -> ColorTuple:
-    """Convert an XYZ color tuple into an RGB color tuple.
-
-    Parameters
-    ----------
-    xyz : ColorTuple
-        3-tuple of colors in XYZ, with the following ranges coming from an sRGB color:
-        - X in [0, 95.047]
-        - Y in [0, 100.000]
-        - Z in [0, 108.883]
-
-    Returns
-    -------
-    ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255]
-    """
-
-    x_orig, y_orig, z_orig = xyz
-
-    x = x_orig / 100
-    y = y_orig / 100
-    z = z_orig / 100
-
-    r = x * 3.2406 + y * -1.5372 + z * -0.4986
-    g = x * -0.9689 + y * 1.8758 + z * 0.0415
-    b = x * 0.0557 + y * -0.2040 + z * 1.0570
-
-    if r > 0.0031308:
-        r = 1.055 * (r ** (1 / 2.4)) - 0.055
-    else:
-        r = 12.92 * r
-    if g > 0.0031308:
-        g = 1.055 * (g ** (1 / 2.4)) - 0.055
-    else:
-        g = 12.92 * g
-    if b > 0.0031308:
-        b = 1.055 * (b ** (1 / 2.4)) - 0.055
-    else:
-        b = 12.92 * b
-
-    standard_r = round(r * 255)
-    standard_g = round(g * 255)
-    standard_b = round(b * 255)
-    return (standard_r, standard_g, standard_b)
-
-
-def rgb_to_lab(rgb: ColorTuple) -> ColorTuple:
-    """Convenience function to convert an RGB color tuple into a CIE-Lab color tuple, using XYZ as an intermediate step.
-
-    Parameters
-    ----------
-    rgb : ColorTuple
-        3-tuple of colors in RGB
-
-    Returns
-    -------
-    ColorTuple
-        3-tuple of colors in CIE-Lab
-    """
-    return xyz_to_lab(rgb_to_xyz(rgb))
-
-
-def lab_to_rgb(lab: ColorTuple) -> ColorTuple:
-    """Convenience function to convert a CIE-Lab color tuple into an RGB color tuple, using XYZ as an intermediate step.
-
-    Parameters
-    ----------
-    rgb : ColorTuple
-        3-tuple of colors in CIE-Lab
-
-    Returns
-    -------
-    ColorTuple
-        3-tuple of colors in RGB
-    """
-    return xyz_to_rgb(lab_to_xyz(lab))
-
-
-def get_rgb_delta(rgb1: ColorTuple, rgb2: ColorTuple) -> float:
-    """Get distance between RGB colors in CIE-Lab color space, for comparing which colors are close to each other.
-
-    Parameters
-    ----------
-    rgb1 : ColorTuple
-        first RGB 3-tuple to compare
-    rgb2 : ColorTuple
-        second RGB 3-tuple to compare
-
-    Returns
-    -------
-    float
-        delta between the two RGB 3-tuples
-    """
-    L1, a1, b1 = rgb_to_lab(rgb1)
-    L2, a2, b2 = rgb_to_lab(rgb2)
-    delta_L = L2 - L1
-    delta_a = a2 - a1
-    delta_b = b2 - b1
-    return delta_L * delta_L + delta_a * delta_a + delta_b * delta_b
+    return (color.hsv2rgb(hsl2hsv(hsl)) * 255).astype(np.uint8)
 
 
 def get_nearest_color_in_colors_list(rgb: ColorTuple, colors_list: list[ColorDict]) -> ColorDict:
@@ -418,6 +189,13 @@ def get_nearest_color_in_colors_list(rgb: ColorTuple, colors_list: list[ColorDic
     ColorDict
         `ColorDict` of the closest color
     """
+    # Get delta E between input color and all colors in colors list, then pick the minimum one
+    def get_rgb_delta(color_tup1: ColorTuple, color_tup2: ColorTuple) -> _Number:
+        return color.deltaE_cie76(
+            color.rgb2lab(np.asarray(color_tup1, dtype=np.uint8)),
+            color.rgb2lab(np.asarray(color_tup2, dtype=np.uint8)),
+        )
+
     return min(colors_list, key=lambda color_dict: get_rgb_delta(color_dict["color"], rgb))
 
 
@@ -434,138 +212,161 @@ def randomize_color(rgb: ColorTuple) -> ColorTuple:
     ColorTuple
         3-tuple of colors in RGB, in interval [0, 255] slightly randomized from input tuple `rgb`
     """
-    h, s, l = rgb_to_hsl(rgb)
+    h, s, l = rgb2hsl(np.asarray(rgb, dtype=np.uint8))
     # Randomize lightness more the closer it is to 50%.
-    rand_light_factor = 1 - ((l - 50) / 50) ** 2
-    new_hsl = (h + random.random() * 16 - 8, _clamp(s + random.gauss(0, 2.5), 0, 100), _clamp(l + random.gauss(0, 2.5) * rand_light_factor, 0, 100))
-    return hsl_to_rgb(new_hsl)
+    rand_light_factor = 1 - ((l - 0.5) / 0.5) ** 2
+    new_hsl = np.asarray(
+        (
+            h + _rng.uniform(-0.025, 0.025),
+            np.clip(s + _rng.normal(0, 0.025), 0.0, 1.0),
+            np.clip(l + _rng.normal(0, 0.025) * rand_light_factor, 0.0, 1.0),
+        ),
+        dtype=np.float64,
+    )
+    new_rgb = hsl2rgb(new_hsl)
+    return (new_rgb[0], new_rgb[1], new_rgb[2])
 
 
-def brighten_color(rgb: ColorTuple, amount: float = 10) -> ColorTuple:
-    """Brightens the color.
+def brighten(rgb: ColorOrImage, amount: float = 0.1) -> ColorOrImage:
+    """Brightens the color or image.
 
     Parameters
     ----------
-    rgb : ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255]
+    rgb : ColorOrImage
+        3-tuple of colors or an image in RGB, values in interval [0, 255]
     amount : float, optional
         amount to increase lightness by, by default 10
 
     Returns
     -------
-    ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255] brightened from the input tuple `rgb`
+    ColorOrImage
+        3-tuple of colors or an image in RGB, values in interval [0, 255] brightened from the input tuple `rgb`
     """
-    h, s, l = rgb_to_hsl(rgb)
-    new_hsl = (h, s, _clamp(l + amount, 0, 100))
-    return hsl_to_rgb(new_hsl)
+    hsl = rgb2hsl(np.asarray(rgb, dtype=np.uint8))
+    h = hsl[..., 0]
+    s = hsl[..., 1]
+    l = hsl[..., 2]
+    hsl_transform = (h, s, np.clip(l + amount, 0.0, 1.0))
+    if isinstance(rgb, tuple):
+        new_hsl = np.asarray(hsl_transform, dtype=np.float64)
+    else:
+        new_hsl = np.asarray(np.dstack(hsl_transform), dtype=np.float64)
+    new_rgb = hsl2rgb(new_hsl)
+    if isinstance(rgb, tuple):
+        return (new_rgb[0], new_rgb[1], new_rgb[2])
+    else:
+        return new_rgb
 
 
-def darken_color(rgb: ColorTuple, amount: float = 10) -> ColorTuple:
-    """Darkens the color.
+def darken(rgb: ColorOrImage, amount: float = 0.1) -> ColorOrImage:
+    """Darkens the color or image.
 
     Parameters
     ----------
-    rgb : ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255]
+    rgb : ColorOrImage
+        3-tuple of colors or an image in RGB, values in interval [0, 255]
     amount : float, optional
         amount to decrease lightness by, by default 10
 
     Returns
     -------
-    ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255] darkened from input tuple `rgb`
+    ColorOrImage
+        3-tuple of colors or an image in RGB, values in interval [0, 255] darkened from input tuple `rgb`
     """
-    return brighten_color(rgb, amount=-amount)
+    return brighten(rgb, amount=-amount)
 
 
-def complementary_color(rgb: ColorTuple) -> ColorTuple:
-    """Returns the complementary color of the input color.
+def complementary(rgb: ColorOrImage) -> ColorOrImage:
+    """Returns the complementary color of the input color, or image where all colors are complementary.
 
     Parameters
     ----------
-    rgb : ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255]
+    rgb : ColorOrImage
+        3-tuple of colors or an image in RGB, values in interval [0, 255]
 
     Returns
     -------
-    ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255] complementary to the input tuple `rgb`
+    ColorOrImage
+        3-tuple of colors or an image in RGB, values in interval [0, 255] complementary to the input tuple `rgb`
     """
-    h, s, l = rgb_to_hsl(rgb)
-    new_hsl = ((h + 180) % 360, s, l)
-    return hsl_to_rgb(new_hsl)
+    hsl = rgb2hsl(np.asarray(rgb, dtype=np.uint8))
+    h = hsl[..., 0]
+    s = hsl[..., 1]
+    l = hsl[..., 2]
+    hsl_transform = ((h + 0.5) % 1.0, s, l)
+    if isinstance(rgb, tuple):
+        new_hsl = np.asarray(hsl_transform, dtype=np.float64)
+    else:
+        new_hsl = np.asarray(np.dstack(hsl_transform), dtype=np.float64)
+    new_rgb = hsl2rgb(new_hsl)
+    if isinstance(rgb, tuple):
+        return (new_rgb[0], new_rgb[1], new_rgb[2])
+    else:
+        return new_rgb
 
 
-def analogous_color(rgb: ColorTuple, clockwise: bool = False) -> ColorTuple:
-    """Returns the analogous color of the input color in the counter-clockwise direction by default.
+def analogous(rgb: ColorOrImage, clockwise: bool = False) -> ColorOrImage:
+    """Returns the analogous color of the input color (or image where all colors are analogous) in the counter-clockwise direction by default.
 
     Parameters
     ----------
-    rgb : ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255]
+    rgb : ColorOrImage
+        3-tuple of colors or an image in RGB, values in interval [0, 255]
     clockwise : bool, optional
         whether the analogous color is calculated in clockwise direction or not, by default False
 
     Returns
     -------
-    ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255] analogous to the input tuple `rgb`
+    ColorOrImage
+        3-tuple of colors or an image in RGB, values in interval [0, 255] analogous to the input tuple `rgb`
     """
-    h, s, l = rgb_to_hsl(rgb)
+    hsl = rgb2hsl(np.asarray(rgb, dtype=np.uint8))
+    h = hsl[..., 0]
+    s = hsl[..., 1]
+    l = hsl[..., 2]
     angle_sign = -1 if clockwise else 1
-    new_hsl = ((h + 30 * angle_sign) % 360, s, l)
-    return hsl_to_rgb(new_hsl)
+    hsl_transform = ((h + 1.0 / 12.0 * angle_sign) % 1.0, s, l)
+    if isinstance(rgb, tuple):
+        new_hsl = np.asarray(hsl_transform, dtype=np.float64)
+    else:
+        new_hsl = np.asarray(np.dstack(hsl_transform), dtype=np.float64)
+    new_rgb = hsl2rgb(new_hsl)
+    if isinstance(rgb, tuple):
+        return (new_rgb[0], new_rgb[1], new_rgb[2])
+    else:
+        return new_rgb
 
 
-def analogous_ccw_color(rgb: ColorTuple) -> ColorTuple:
-    """Returns the analogous color of the input color in the counter-clockwise direction.
-
-    Parameters
-    ----------
-    rgb : ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255]
-
-    Returns
-    -------
-    ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255] analogous to the input tuple `rgb` in the counter-clockwise direction
-    """
-    return analogous_color(rgb, clockwise=False)
-
-
-def analogous_cw_color(rgb: ColorTuple) -> ColorTuple:
-    """Returns the analogous color of the input color in the clockwise direction.
+def analogous_ccw(rgb: ColorOrImage) -> ColorOrImage:
+    """Returns the analogous color of the input color (or image where all colors are analogous) in the counter-clockwise direction.
 
     Parameters
     ----------
-    rgb : ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255]
+    rgb : ColorOrImage
+        3-tuple of colors or an image in RGB, values in interval [0, 255]
 
     Returns
     -------
-    ColorTuple
-        3-tuple of colors in RGB, in interval [0, 255] analogous to the input tuple `rgb` in the clockwise direction
+    ColorOrImage
+        3-tuple of colors or an image in RGB, values in interval [0, 255] analogous to the input tuple `rgb` in the counter-clockwise direction
     """
-    return analogous_color(rgb, clockwise=True)
+    return analogous(rgb, clockwise=False)
 
 
-def multiply_colors(rgb1: ColorTuple, rgb2: ColorTuple) -> tuple:
-    """Multiply blend the two colors.
+def analogous_cw(rgb: ColorOrImage) -> ColorOrImage:
+    """Returns the analogous color of the input color (or image where all colors are analogous) in the clockwise direction.
 
     Parameters
     ----------
-    rgb1 : ColorTuple
-        first color to blend
-    rgb2 : ColorTuple
-        second color to blend
+    rgb : ColorOrImage
+        3-tuple of colors or an image in RGB, values in interval [0, 255]
 
     Returns
     -------
-    ColorTuple
-        blended color
+    ColorOrImage
+        3-tuple of colors or an image in RGB, values in interval [0, 255] analogous to the input tuple `rgb` in the clockwise direction
     """
-    return tuple(round(color1 * color2 / 255) for color1, color2 in zip(rgb1, rgb2))
+    return analogous(rgb, clockwise=True)
 
 
 def get_colors_list(filename: Union[str, os.PathLike]) -> list[ColorDict]:
@@ -601,7 +402,7 @@ def get_colors_list(filename: Union[str, os.PathLike]) -> list[ColorDict]:
             colorlist: list[list[Any]] = [line.strip().split(":") for line in f.readlines()]
             # Convert the first half of each line into color triplets
             for i in range(len(colorlist)):
-                colorlist[i][0] = tuple(_clamp(int(value.strip()), 0, 255) for value in colorlist[i][0].split(","))
+                colorlist[i][0] = tuple(np.clip(int(value.strip()), 0, 255) for value in colorlist[i][0].split(","))
             # Finally, create the list of ColorDicts
             colors = [ColorDict(name=color_name, color=color_tuple) for color_tuple, color_name in colorlist]
     except FileNotFoundError:

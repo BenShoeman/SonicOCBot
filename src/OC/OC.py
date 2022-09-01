@@ -35,7 +35,7 @@ class OC(ABC):
 
     _NAMES = {gender: FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, f"names.{gender}.yml")) for gender in ("m", "f", "x")}
     """Contains lists of names and probabilities of those names occurring for various genders."""
-    _SPECIES = FileUtil.list_load_or_fallback(os.path.join(Directories.DATA_DIR, "animals.txt"))
+    _SPECIES = FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, "animals.yml"))
     """List of species."""
     _PERSONALITIES = FileUtil.list_load_or_fallback(os.path.join(Directories.DATA_DIR, "personalities.txt"))
     """List of personality types."""
@@ -186,7 +186,9 @@ class OC(ABC):
         self._gender = random.choices(("m", "f", "x"), weights=(48.9, 50.1, 1.0), k=1)[0]
 
     def _generate_species(self) -> None:
-        self._species = random.choice(OC._SPECIES)
+        species = list(OC._SPECIES.keys())
+        weights = list(OC._SPECIES.values())
+        self._species = random.choices(species, weights=weights, k=1)[0]
 
     def _generate_age(self) -> None:
         self._age = max(int(round(random.gauss(21, 6))), 13)
