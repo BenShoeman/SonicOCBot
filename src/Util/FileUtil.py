@@ -23,7 +23,7 @@ def list_load_or_fallback(filepath: Union[str, os.PathLike], fallback_factory: C
         with open(filepath) as f:
             return [line.strip() for line in f.readlines()]
     else:
-        print(f"{f} does not exist, falling back")
+        print(f"{filepath} does not exist, falling back")
         return fallback_factory()
 
 
@@ -50,7 +50,7 @@ def json_load_or_fallback(filepath: Union[str, os.PathLike], fallback_factory: C
             print(f"JSON decode error reading {f}, falling back")
             return fallback_factory()
     else:
-        print(f"{f} does not exist, falling back")
+        print(f"{filepath} does not exist, falling back")
         return fallback_factory()
 
 
@@ -77,5 +77,5 @@ def yaml_load_or_fallback(filepath: Union[str, os.PathLike], fallback_factory: C
             print(f"YAML parser error reading {f}, falling back")
             return fallback_factory()
     else:
-        print(f"{f} does not exist, falling back")
+        print(f"{filepath} does not exist, falling back")
         return fallback_factory()
