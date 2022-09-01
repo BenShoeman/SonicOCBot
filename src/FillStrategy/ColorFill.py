@@ -1,21 +1,24 @@
 import numpy as np
-from typing import Callable, Optional
+from typing import Callable, ClassVar, Optional
 
 from .FillStrategy import FillStrategy
 import src.Util.ColorUtil as ColorUtil
 import src.Util.ImageUtil as ImageUtil
 
 
+_rng = np.random.default_rng()
+
+
 class ColorFill(FillStrategy):
     """FillStrategy that fills on a single color."""
 
-    _TRANSFORM_OPS: dict[str, Callable[[ColorUtil.ColorTuple], ColorUtil.ColorTuple]] = {
+    _TRANSFORM_OPS: ClassVar[dict[str, Callable[[ColorUtil.ColorTuple], ColorUtil.ColorTuple]]] = {
         "noop": lambda color: color,
-        "darken": ColorUtil.darken_color,
-        "brighten": ColorUtil.brighten_color,
-        "complementary": ColorUtil.complementary_color,
-        "analogous-ccw": ColorUtil.analogous_ccw_color,
-        "analogous-cw": ColorUtil.analogous_cw_color,
+        "darken": ColorUtil.darken,
+        "brighten": ColorUtil.brighten,
+        "complementary": ColorUtil.complementary,
+        "analogous-ccw": ColorUtil.analogous_ccw,
+        "analogous-cw": ColorUtil.analogous_cw,
     }
     """Dict mapping transformation operations to `ColorUtil` functions."""
 
@@ -50,7 +53,7 @@ class ColorFill(FillStrategy):
                 self._fill = ColorUtil.randomize_color(ImageUtil.get_random_color_from_image(ColorUtil.SKIN_TONE_GRADIENT))
                 self._color_name = ColorUtil.get_nearest_color_in_colors_list(self._fill, color_list)["name"]
             else:
-                new_color = np.random.choice(ColorUtil.GENERAL_COLORS)
+                new_color = _rng.choice(ColorUtil.GENERAL_COLORS)
                 self._fill = ColorUtil.randomize_color(new_color["color"])
                 self._color_name = new_color["name"]
         self._threshold = threshold

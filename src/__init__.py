@@ -7,6 +7,7 @@ The submodules are as follows:
 - **src.Directories**: Constants for getting directory paths relative to the project root.
 - **src.FanfictionGenerator**: Class to generate fanfictions using a text model. (*At some point, all generators should be under a single base class.*)
 - **src.SonicSezGenerator**: Class to generate Sonic Sez using a text model. (*At some point, all generators should be under a single base class.*)
+- **src.FillStrategy**: Classes that represent fill strategies, which are used to determine how to floodfill OCs.
 - **src.OC**: Classes that represent OCs. This also contains a function to generate an OC. (*At some point, all generators should be under a single base class.*)
 - **src.PostCreator**: Classes used to make posts for various social media platforms.
 - **src.Poster**: Classes that post onto various social media platforms.

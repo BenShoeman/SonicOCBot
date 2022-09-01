@@ -7,7 +7,7 @@ from typing import Callable, ClassVar
 
 from .OC import OC
 import src.Directories as Directories
-from src.FillStrategy import ColorFill
+from src.FillStrategy import create_fill_strategy_for_species
 import src.Util.FileUtil as FileUtil
 
 
@@ -125,8 +125,8 @@ class SonicMakerOC(OC):
 
                     # Give the current region a fill if it doesn't have one
                     if current_region not in self._fill_regions:
-                        region_fill = ColorFill(current_region, threshold=fill_threshold)
-                        # Now set this region to use this color throughout the whole OC
+                        region_fill = create_fill_strategy_for_species(current_region, self.species, threshold=fill_threshold)
+                        # Now set this region to use this color/pattern throughout the whole OC
                         self._fill_regions[current_region] = region_fill
 
                     fill_strategy = self._fill_regions[current_region]
