@@ -4,7 +4,7 @@ from typing import Optional
 
 from .PostCreator import PostCreator
 from src.OC import OC
-from src.Util.ColorUtil import rgb_to_hex
+from src.Util.ColorUtil import to_pil_color_tuple
 from src.Util.HTMLtoImage import md_to_image
 
 
@@ -41,7 +41,7 @@ class OCPostCreator(PostCreator):
         textcolor = self._get_textcolor_for_time(current_time)
         post_img_width, post_img_height = (1200, 680)
         post_img_margin = 20
-        post_img = Image.new("RGB", (post_img_width, post_img_height), bgcolor)
+        post_img = Image.new("RGB", (post_img_width, post_img_height), to_pil_color_tuple(bgcolor))
 
         # Position the OC on the image
         oc_img = self.__oc.image

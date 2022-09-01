@@ -142,6 +142,7 @@ fonts/*.ttf
 images/**/*.png
 images/*svg/
 images/fanficlogo/
+images/pattern/
 images/sonicmaker/
 images/sonicsez/
 images/template/
