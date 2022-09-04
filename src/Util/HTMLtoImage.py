@@ -1,9 +1,6 @@
 """Utilities to convert HTML and Markdown documents to images."""
 
-from datetime import datetime
-import glob
 import markdown
-import os
 from pdf2image import convert_from_path
 from PIL import Image
 import tempfile

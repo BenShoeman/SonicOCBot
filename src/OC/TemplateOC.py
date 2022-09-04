@@ -1,9 +1,8 @@
 import numpy as np
 import os
 import random
-from PIL import Image, ImageDraw
-from typing import Callable, ClassVar, Optional
-import yaml
+from PIL import Image
+from typing import ClassVar, Optional
 
 from .OC import OC
 import src.Directories as Directories
@@ -68,7 +67,7 @@ class TemplateOC(OC):
         super().__init__(auto_populate=auto_populate)
 
     @classmethod
-    def __initialize_templates(cls):
+    def __initialize_templates(cls) -> None:
         cls.TEMPLATES = FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, "template-fill.yml"))
 
     def generate_image(self, fill_threshold: int = 192) -> None:
@@ -99,8 +98,8 @@ class TemplateOC(OC):
 
         self._image = Image.fromarray(img_arr)
 
-    def _generate_gender(self):
+    def _generate_gender(self) -> None:
         self._gender = self.__template["gender"]
 
-    def _generate_species(self):
+    def _generate_species(self) -> None:
         self._species = self.__template["species"]

@@ -1,7 +1,3 @@
-import os
-import random
-
-import src.Directories as Directories
 from src.TextModel import TextModel
 
 

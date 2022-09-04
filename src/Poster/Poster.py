@@ -6,7 +6,7 @@ from src.PostCreator import PostCreator
 class Poster(ABC):
     """Interface for posters. Must implement `make_post`."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """`Poster` constructor with no inputs."""
 
     @abstractmethod

@@ -18,8 +18,7 @@ This module has 7 constants to use. They are:
 """
 
 import os
-import sys
-from typing import Final
+from typing import Any, Final
 
 _PROJECT_DIR: Final[str] = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 _DATA_DIR: Final[str] = os.path.join(_PROJECT_DIR, "data")
@@ -30,7 +29,7 @@ _SONICMAKER_DIR: Final[str] = os.path.join(_PROJECT_DIR, "sonicmaker")
 _TEMPLATES_DIR: Final[str] = os.path.join(_PROJECT_DIR, "templates")
 
 
-def __getattr__(name):
+def __getattr__(name: str) -> Any:
     attrs = {
         "PROJECT_DIR": _PROJECT_DIR,
         "DATA_DIR": _DATA_DIR,

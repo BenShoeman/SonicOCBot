@@ -1,11 +1,8 @@
 from abc import ABC, abstractmethod
-import os
 import random
-import re
-from typing import Callable, Optional, Union
+from typing import Optional, Union
 
 from .SentenceRestorer import SentenceRestorer
-import src.Directories as Directories
 
 
 class TextModel(ABC):

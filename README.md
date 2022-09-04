@@ -1,6 +1,6 @@
 # Sonic OC Bot
 
-A bot that randomly generates Sonic OCs, fanfictions, and Sonic Sez segments, which can be found [@SonicOCBot](https://twitter.com/SonicOCBot) on Twitter!
+A bot that randomly generates Sonic OCs, fanfictions, and Sonic Says segments.
 
 ## Setup
 
