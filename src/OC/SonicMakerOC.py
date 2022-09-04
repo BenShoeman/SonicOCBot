@@ -1,9 +1,8 @@
-from collections import OrderedDict
 import numpy as np
 import os
 import random
 from PIL import Image
-from typing import Callable, ClassVar
+from typing import ClassVar
 
 from .OC import OC
 import src.Directories as Directories
@@ -12,7 +11,7 @@ import src.Util.FileUtil as FileUtil
 
 
 class SonicMakerOC(OC):
-    SONICMAKER_FILL: ClassVar[OrderedDict]
+    SONICMAKER_FILL: ClassVar[dict]
     """Data that contains information on how to create and fill the regions of the OC.
 
     `data/sonicmaker-fill.yml` is a YAML file in the following format:
@@ -65,7 +64,7 @@ class SonicMakerOC(OC):
     """
 
     @classmethod
-    def __initialize_fill(cls):
+    def __initialize_fill(cls) -> None:
         cls.SONICMAKER_FILL = FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, "sonicmaker-fill.yml"))
 
     def generate_image(self, fill_threshold: int = 192) -> None:

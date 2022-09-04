@@ -1,10 +1,9 @@
-import json
 import nltk
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 import os
 import random
 import re
-from typing import Callable, Optional, Union
+from typing import Any, Optional, Union
 
 import src.Directories as Directories
 import src.Util.FileUtil as FileUtil
@@ -55,7 +54,13 @@ class SentenceRestorer:
         "stdev_words_per_sentence": 4.5,
     }
 
-    def __init__(self, sent_seqs_file: Optional[str] = None, punc_probs_file: Optional[str] = None, proper_nouns_file: Optional[str] = None, **kwargs):
+    def __init__(
+        self,
+        sent_seqs_file: Optional[str] = None,
+        punc_probs_file: Optional[str] = None,
+        proper_nouns_file: Optional[str] = None,
+        **kwargs: Any,
+    ):
         """Create a `SentenceRestorer`.
 
         Parameters

@@ -1,11 +1,8 @@
-from datetime import datetime
 import os
-from PIL import Image
 import tempfile
 import tweepy
 
 from .Poster import Poster
-import src.Directories as Directories
 from src.PostCreator import PostCreator
 
 
@@ -18,7 +15,7 @@ class TwitterPoster(Poster):
     - `TWITTER_ACCESS_TOKEN_SECRET`
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Create the Twitter poster using the environment variables described above."""
         auth = tweepy.OAuth1UserHandler(
             consumer_key=os.environ.get("TWITTER_CONSUMER_KEY", ""),
@@ -36,9 +33,11 @@ class TwitterPoster(Poster):
         post_creator : PostCreator
             post creator to make the post
         """
+        # Set post creator to not prefer long text
+        post_creator.prefer_long_text = False
         # Get the image and text from the post creator
         img = post_creator.get_image()
-        post_txt = post_creator.get_text()
+        post_txt = post_creator.get_short_text()
         alt_txt = post_creator.get_alt_text()
         if img is None:
             self.__api.update_status(status=post_txt)

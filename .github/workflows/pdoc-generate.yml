@@ -53,6 +53,7 @@ jobs:
           use-only-tar-bz2: true
       - run: |
           conda install pdoc
+          pip install -r $GITHUB_WORKSPACE/requirements/ghactions/pip.txt
           pdoc --docformat numpy -o docs/ src
 
       - run: tar --directory docs/ -hcf artifact.tar .

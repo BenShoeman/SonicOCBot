@@ -12,7 +12,6 @@ This module has 4 constants defined that contain colors to use. They are:
 """
 
 import numpy as np
-import re
 from skimage import color
 import os
 from PIL import Image
@@ -432,7 +431,7 @@ else:
     _SKIN_TONE_GRADIENT = Image.new("RGB", (1, 1), (128, 128, 128))
 
 
-def __getattr__(name):
+def __getattr__(name: str) -> Any:
     attrs = {
         "BASIC_COLORS": _BASIC_COLORS,
         "GENERAL_COLORS": _GENERAL_COLORS,

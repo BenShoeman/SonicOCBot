@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import os
 from PIL import Image
 import random
-from typing import Callable, Optional, Union
+from typing import Optional
 
 import src.Util.FileUtil as FileUtil
 import src.Directories as Directories
@@ -58,7 +58,7 @@ class OC(ABC):
         if auto_populate:
             self.populate_info()
 
-    def populate_info(self):
+    def populate_info(self) -> None:
         """Populate all the information about this OC."""
         self._generate_gender()
         self._generate_species()

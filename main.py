@@ -5,8 +5,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d",
         "--dummy",
-        action="store_true",
-        help="don't make a real post, instead print description and show image",
+        type=str,
+        choices=["short", "long"],
+        help="don't make a real post, instead print description and show image (choosing short or long text post)",
     )
     parser.add_argument(
         "-t",

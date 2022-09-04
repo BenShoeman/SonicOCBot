@@ -1,17 +1,17 @@
 from datetime import datetime
 from PIL import Image, ImageDraw
-from typing import Optional, Union
+from typing import Any, Optional, Union
 
 from .PostCreator import PostCreator
 from src.Util.HTMLtoImage import md_to_image
 from src.Util.ColorUtil import ColorTuple, to_pil_color_tuple
 
 
-class TextImagePostCreator(PostCreator):
+class TextPostCreator(PostCreator):
     """`PostCreator` that creates a post having an image with text on it."""
 
-    def __init__(self, text: str, title: Optional[str] = None, tags: Optional[Union[list[str], tuple[str, ...]]] = None, **kwargs):
-        """Create a `TextImagePostCreator`.
+    def __init__(self, text: str, title: Optional[str] = None, tags: Optional[Union[list[str], tuple[str, ...]]] = None, **kwargs: Any):
+        """Create a `TextPostCreator`.
 
         Parameters
         ----------
@@ -100,58 +100,63 @@ class TextImagePostCreator(PostCreator):
     def get_image(self) -> Optional[Image.Image]:
         """Implements `get_image` in `PostCreator` by creating an image, using the title and text of the post.
 
+        If `prefer_long_text` is True, then no image is returned.
+
         Returns
         -------
         Optional[Image.Image]
-            image of the post, or None if no image
+            image of the post, or None if long text is preferred
         """
-        current_time = datetime.now().time()
-        img_width, img_height = (1200, 680)
-        img_hmargin, img_vmargin = (50, 20)
-        banner_height = self.__banner_height if self.__banner_img is not None else 0
-        bgcolor = self._get_bgcolor_for_time(current_time)
-        textcolor = self._get_textcolor_for_time(current_time)
-        post_img = Image.new("RGB", (img_width, img_height), to_pil_color_tuple(bgcolor))
+        if self.prefer_long_text:
+            return None
+        else:
+            current_time = datetime.now().time()
+            img_width, img_height = (1200, 680)
+            img_hmargin, img_vmargin = (50, 20)
+            banner_height = self.__banner_height if self.__banner_img is not None else 0
+            bgcolor = self._get_bgcolor_for_time(current_time)
+            textcolor = self._get_textcolor_for_time(current_time)
+            post_img = Image.new("RGB", (img_width, img_height), to_pil_color_tuple(bgcolor))
 
-        # Draw the overlay image if there is one
-        if self.__overlay_img is not None:
-            orig_overlay_width, orig_overlay_height = self.__overlay_img.size
-            resize_ratio = (img_height - banner_height) / orig_overlay_height
-            overlay_img: Image.Image = self.__overlay_img.convert("RGBA").resize((int(orig_overlay_width * resize_ratio), img_height - banner_height))
-            overlay_width, overlay_height = overlay_img.size
-            # Apply alpha to image by modifying alpha channel
-            alpha_chnl: Image.Image = overlay_img.getchannel("A").convert("RGBA")
-            alpha_dim = Image.new("RGBA", (overlay_width, overlay_height), (0, 0, 0, 255 - self.__overlay_alpha))
-            alpha_chnl.alpha_composite(alpha_dim)
-            post_img.paste(overlay_img, (0, banner_height), alpha_chnl.convert("L"))
+            # Draw the overlay image if there is one
+            if self.__overlay_img is not None:
+                orig_overlay_width, orig_overlay_height = self.__overlay_img.size
+                resize_ratio = (img_height - banner_height) / orig_overlay_height
+                overlay_img: Image.Image = self.__overlay_img.convert("RGBA").resize((int(orig_overlay_width * resize_ratio), img_height - banner_height))
+                overlay_width, overlay_height = overlay_img.size
+                # Apply alpha to image by modifying alpha channel
+                alpha_chnl: Image.Image = overlay_img.getchannel("A").convert("RGBA")
+                alpha_dim = Image.new("RGBA", (overlay_width, overlay_height), (0, 0, 0, 255 - self.__overlay_alpha))
+                alpha_chnl.alpha_composite(alpha_dim)
+                post_img.paste(overlay_img, (0, banner_height), alpha_chnl.convert("L"))
 
-        # Draw the banner at the top if there is a logo
-        if self.__banner_img is not None and self.__banner_bgcolor is not None:
-            img_draw = ImageDraw.Draw(post_img)
-            img_draw.rectangle((0, 0, img_width, banner_height), fill=self.__banner_bgcolor)
-            del img_draw
-            logo_width, logo_height = self.__banner_img.size
-            new_logo_height = banner_height - 2 * img_vmargin
-            resize_ratio = new_logo_height / logo_height
-            new_logo_width = int(logo_width * resize_ratio)
-            logo_resized = self.__banner_img.resize((new_logo_width, new_logo_height))
-            post_img.paste(logo_resized, (img_width // 2 - new_logo_width // 2, img_vmargin), logo_resized)
+            # Draw the banner at the top if there is a logo
+            if self.__banner_img is not None and self.__banner_bgcolor is not None:
+                img_draw = ImageDraw.Draw(post_img)
+                img_draw.rectangle((0, 0, img_width, banner_height), fill=self.__banner_bgcolor)
+                del img_draw
+                logo_width, logo_height = self.__banner_img.size
+                new_logo_height = banner_height - 2 * img_vmargin
+                resize_ratio = new_logo_height / logo_height
+                new_logo_width = int(logo_width * resize_ratio)
+                logo_resized = self.__banner_img.resize((new_logo_width, new_logo_height))
+                post_img.paste(logo_resized, (img_width // 2 - new_logo_width // 2, img_vmargin), logo_resized)
 
-        post_text = (f"# {self.__title}\n\n" if self.__title is not None else "") + self.__text.replace("\n", "\n\n")
+            post_text = (f"# {self.__title}\n\n" if self.__title is not None else "") + self.__text.replace("\n", "\n\n")
 
-        self.generate_css(textcolor)
-        text_img = md_to_image(post_text, css=self._md_css, width=img_width - 2 * img_hmargin)
-        # Crop transparency in image
-        bbox = text_img.getbbox()
-        text_img = text_img.crop(bbox)
+            self.generate_css(textcolor)
+            text_img = md_to_image(post_text, css=self._md_css, width=img_width - 2 * img_hmargin)
+            # Crop transparency in image
+            bbox = text_img.getbbox()
+            text_img = text_img.crop(bbox)
 
-        # Squish text_img to fit height if it exceeds height
-        text_img_width, text_img_height = text_img.size
-        if text_img_height > img_height - 2 * img_vmargin - banner_height:
-            text_img_height = img_height - 2 * img_vmargin - banner_height
-            text_img = text_img.resize((text_img_width, text_img_height))
-        post_img.paste(text_img, (img_hmargin, img_height // 2 - text_img_height // 2 + banner_height // 2), text_img)
-        return post_img
+            # Squish text_img to fit height if it exceeds height
+            text_img_width, text_img_height = text_img.size
+            if text_img_height > img_height - 2 * img_vmargin - banner_height:
+                text_img_height = img_height - 2 * img_vmargin - banner_height
+                text_img = text_img.resize((text_img_width, text_img_height))
+            post_img.paste(text_img, (img_hmargin, img_height // 2 - text_img_height // 2 + banner_height // 2), text_img)
+            return post_img
 
     def get_alt_text(self) -> str:
         """Implements `get_alt_text` in `PostCreator` by using the text in the post image.
@@ -165,16 +170,46 @@ class TextImagePostCreator(PostCreator):
         double_newline = "\n\n"
         return f"{(self.__title + double_newline) if self.__title else ''}{self.__text.replace(single_newline, double_newline)}"
 
-    def get_text(self) -> str:
-        """Implements `get_text` in `PostCreator` by using the title, text, and tags of the post.
+    def get_title(self) -> Optional[str]:
+        """Implements `get_title` in `PostCreator` by returning the title of the post.
+
+        Returns
+        -------
+        Optional[str]
+            title of the post
+        """
+        return self.__title
+
+    def get_short_text(self) -> str:
+        """Implements `get_short_text` in `PostCreator` by using the title or text, and tags of the post.
 
         Returns
         -------
         str
-            text of the post
+            short text of the post
         """
-        tags_suffix = "" if self.__tags is None else " " + " ".join(self.__tags)
+        tags_suffix = " " + " ".join(f"#{tag}" for tag in self.__tags) if self.__tags else ""
         # Use title if there is one, otherwise the text
         content = self.__title or self.__text
         content += tags_suffix
         return content
+
+    def get_long_text(self) -> str:
+        """Implements `get_long_text` in `PostCreator` by returning the text of the post.
+
+        Returns
+        -------
+        str
+            long text of the post
+        """
+        return self.__text.replace("\n", "\n\n")
+
+    def get_tags(self) -> Optional[tuple[str, ...]]:
+        """Implements `get_tags` in `PostCreator` by returning the tuple of tags.
+
+        Returns
+        -------
+        Optional[tuple[str, ...]]
+            tags of the post
+        """
+        return tuple(self.__tags) if self.__tags else None

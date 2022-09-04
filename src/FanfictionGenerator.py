@@ -1,8 +1,6 @@
-import os
 import random
-from typing import Union
+from typing import Any
 
-import src.Directories as Directories
 from src.TextModel import TextModel
 
 
@@ -22,7 +20,7 @@ class FanfictionGenerator:
         "stdev_title_words": 2,
     }
 
-    def __init__(self, body_text_model_name: str, titles_model_name: str, model_class: type[TextModel], **kwargs):
+    def __init__(self, body_text_model_name: str, titles_model_name: str, model_class: type[TextModel], **kwargs: Any):
         """Create a `FanfictionGenerator`.
 
         Parameters

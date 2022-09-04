@@ -4,7 +4,7 @@ import glob
 import os
 from PIL import Image
 import random
-from typing import Literal, Optional, Union
+from typing import Any, Literal, Optional, Union
 import yaml
 
 import src.Directories as Directories
@@ -61,18 +61,19 @@ def _get_color_schedule(schedule_path: str) -> dict:
 class PostCreator(ABC):
     """Abstract class for post creators."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Any):
         """Post creator default constructor, setting optional kwargs parameters. This should be called in subclass constructors.
 
         Other Parameters
         ----------------
         **kwargs : dict
-            Other keyword arguments to define how the images are created. If omitted, they will get randomly populated.
-            Below are the available options:
-            - regular_font_file
-            - italic_font_file
+            Other keyword arguments to define how the images are created. If omitted, they will get populated as such:
+            - prefer_long_text: True
+            - regular_font_file: randomly
+            - italic_font_file: randomly
         """
         self.__schedule_colors = _get_color_schedule(os.path.join(Directories.DATA_DIR, "schedule-colors.yml"))
+        self._prefer_long_text = kwargs.get("prefer_long_text", True)
         # If no font file provided, pick a random one from fonts directory
         self.regular_font_file = kwargs.get("regular_font_file")
         self.italic_font_file = kwargs.get("italic_font_file")
@@ -83,6 +84,28 @@ class PostCreator(ABC):
             self.italic_font_file = self.italic_font_file or font_choices[font_name]["italic"]
         self._md_css: Union[str, dict] = ""
         self.__font_size = 32
+
+    @property
+    def prefer_long_text(self) -> bool:
+        """Whether the post should focus on long text, or an image. (e.g., prefer an image for sites with small character limits)
+
+        Returns
+        -------
+        bool
+            whether the post prefers long text
+        """
+        return self._prefer_long_text
+
+    @prefer_long_text.setter
+    def prefer_long_text(self, new: bool) -> None:
+        """Set whether the post should focus on long text or an image.
+
+        Parameters
+        ----------
+        new : bool
+            new value for preferring long text
+        """
+        self._prefer_long_text = new
 
     def generate_css(self, textcolor: ColorTuple) -> None:
         """Generate the CSS for images using specified font files and sizes, required whenever changing them.
@@ -219,11 +242,41 @@ class PostCreator(ABC):
         """
 
     @abstractmethod
-    def get_text(self) -> str:
-        """Returns the text for the post.
+    def get_title(self) -> Optional[str]:
+        """Returns the title for the post, if applicable.
+
+        Returns
+        -------
+        Optional[str]
+            title of the post, or None if there is none
+        """
+
+    @abstractmethod
+    def get_short_text(self) -> str:
+        """Returns the short text for the post.
 
         Returns
         -------
         str
-            text of the post
+            short text of the post
+        """
+
+    @abstractmethod
+    def get_long_text(self) -> str:
+        """Returns the long text for the post.
+
+        Returns
+        -------
+        str
+            long text of the post
+        """
+
+    @abstractmethod
+    def get_tags(self) -> Optional[tuple[str, ...]]:
+        """Returns all tags for the post image, if there are any.
+
+        Returns
+        -------
+        Optional[tuple[str, ...]]
+            tuple of tags for the post, or None if there are none
         """
