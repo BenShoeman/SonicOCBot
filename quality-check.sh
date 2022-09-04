@@ -10,7 +10,7 @@ echo
 
 # Unimport unused import checking
 echo "--- Unimport unused import checking ---"
-unimport --ignore-init src main.py
+python -m unimport --ignore-init src main.py
 unimport_exit_code=$?
 echo
 
