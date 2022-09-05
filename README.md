@@ -43,4 +43,4 @@ $ jupyter lab
 
 ## Other Documentation
 
-Documentation for the code itself, including classes, lives [here](https://benshoeman.github.io/SonicOCBot/) and is automatically generated on push to master. It's generated using [pdoc](https://pdoc.dev/), which uses docstrings in the functions to create documentation. (This repo is documented using numpydoc format.)
+[Documentation for the code itself lives here](https://benshoeman.github.io/SonicOCBot/) and is automatically generated on push to `master`. It's generated using [pdoc](https://pdoc.dev/), which uses docstrings in the functions to create documentation. (This repo is documented using numpydoc format.)
