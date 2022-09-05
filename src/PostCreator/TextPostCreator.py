@@ -188,7 +188,7 @@ class TextPostCreator(PostCreator):
         str
             short text of the post
         """
-        tags_suffix = " " + " ".join(f"#{tag}" for tag in self.__tags) if self.__tags else ""
+        tags_suffix = " " + " ".join(f"#{tag.replace(' ', '')}" for tag in self.__tags) if self.__tags else ""
         # Use title if there is one, otherwise the text
         content = self.__title or self.__text
         content += tags_suffix

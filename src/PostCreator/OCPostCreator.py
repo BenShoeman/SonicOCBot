@@ -124,7 +124,7 @@ class OCPostCreator(PostCreator):
             short text of the post
         """
         oc = self.__oc
-        return f"{oc.name} the {oc.species.title()} {' '.join(f'#{tag}' for tag in self.__tags) if self.__tags else ''}"
+        return f"{oc.name} the {oc.species.title()} {' '.join('#' + tag.replace(' ', '') for tag in self.__tags) if self.__tags else ''}"
 
     def get_long_text(self) -> str:
         """Implements `get_long_text` in `PostCreator` by using the description of the `OC`.

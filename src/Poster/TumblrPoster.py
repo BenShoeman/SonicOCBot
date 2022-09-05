@@ -41,12 +41,12 @@ class TumblrPoster(Poster):
         body_txt = post_creator.get_long_text()
         # Add extra tags for Tumblr posts based on the post type
         post_tags = post_creator.get_tags()
-        extra_tags: tuple[str, ...] = ("sonic", "sonicthehedgehog")
+        extra_tags: tuple[str, ...] = ("sonic", "sonic the hedgehog")
         if isinstance(post_creator, OCPostCreator):
-            extra_tags += ("oc", "sonicoc", "fakeoc")
+            extra_tags += ("oc", "sonic oc", "fake oc")
         if isinstance(post_creator, TextPostCreator):
             if post_tags and "fanficbot" in post_tags:
-                extra_tags += ("fanfic", "sonicfanfic", "fakefanfic")
+                extra_tags += ("fanfic", "sonic fanfic", "fake fanfic")
         tags = extra_tags + (post_tags if post_tags else tuple())
         if img is None:
             self.__client.create_text(

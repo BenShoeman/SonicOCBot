@@ -60,12 +60,12 @@ def make_post(
     post_creator: PostCreator
     if post_typ == "fanfic":
         title, text = _ffic_generator.get_fanfiction()
-        post_creator = TextPostCreator(text=text, title=title, tags=("fanficbot",))
+        post_creator = TextPostCreator(text=text, title=title, tags=("fanfic bot",))
         if len(_ffic_logo_images) > 0:
             post_creator.set_banner(random.choice(_ffic_logo_images))
     elif post_typ == "sonicsez":
         text = _ssez_generator.get_text()
-        post_creator = TextPostCreator(text=text, title="Sonic Says...", tags=("sonicsays", "sonicsez"))
+        post_creator = TextPostCreator(text=text, title="Sonic Says...", tags=("sonic says", "sonic sez"))
         post_creator.set_font_size(64)
         if len(_ssez_bg_images) > 0:
             post_creator.set_overlay(random.choice(_ssez_bg_images), alpha=56)
