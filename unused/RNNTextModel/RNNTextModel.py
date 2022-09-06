@@ -3,8 +3,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 import onnxruntime as ort
 import os
-import random
-from typing import Optional
+from typing import Any, Optional, Union
 
 from .SentenceRestorer import SentenceRestorer
 from .TextModel import TextModel
@@ -24,6 +23,7 @@ class RNNTextModel(TextModel):
         predict_temperature: float = 0.45,
         sequence_length: int = 20,
         seed: Optional[list] = None,
+        **kwargs: Any,
     ):
         """Create a `RNNTextModel`.
 
@@ -48,7 +48,10 @@ class RNNTextModel(TextModel):
             self.__idx_word = {int(key): val for key, val in json.load(f).items()}
             self.__max_word_idx = max(key for key in self.__idx_word.keys())
         self.__initialize_pattern_seed(seed)
-        super().__init__(model_name, sentence_restorer)
+        if sentence_restorer is not None:
+            self._sentence_restorer = sentence_restorer
+        else:
+            self._sentence_restorer = SentenceRestorer()
 
     def __initialize_pattern_seed(self, seed: Optional[list] = None) -> None:
         """Initialize the seed of the RNN.
@@ -61,7 +64,7 @@ class RNNTextModel(TextModel):
         if seed is not None:
             self.__pattern = seed
         else:
-            self.__pattern = [random.randint(1, self.__max_word_idx) for _ in range(self.__sequence_length - 1)]
+            self.__pattern = [_rng.integers(1, self.__max_word_idx) for _ in range(self.__sequence_length - 1)]
             # Run the pattern through the whole sequence to forget the random sequence
             for _ in range(self.__sequence_length):
                 self.get_next_word()
@@ -105,3 +108,22 @@ class RNNTextModel(TextModel):
         self.__pattern = self.__pattern[1:]
 
         return self.__idx_word.get(int(idx), "")
+
+    def get_text_block(self, mean_words: Union[int, float] = 20, stdev_words: Union[int, float] = 30) -> str:
+        """Get a random block of text from the model.
+
+        Parameters
+        ----------
+        mean_words : Union[int, float], optional
+            mean number of words in the paragraph, by default 20
+        stdev_words : Union[int, float], optional
+            standard deviation of number of words in the paragraph, by default 30
+
+        Returns
+        -------
+        str
+            random block of text from the model
+        """
+        n_words = max(1, abs(round(_rng.normal(mean_words, stdev_words))))
+        generated_text = " ".join(self.get_next_word() for _ in range(n_words))
+        return self._sentence_restorer.restore_sentences(generated_text)

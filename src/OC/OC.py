@@ -7,24 +7,24 @@ from typing import Optional
 import src.Util.FileUtil as FileUtil
 import src.Directories as Directories
 from src.FillStrategy import FillStrategy
-from src.TextModel import TextModel, RNNTextModel
+from src.TextModel import TextModel, MarkovTextModel
 
 
-def _load_rnn_model(model_name: str) -> Optional[TextModel]:
-    """Load the RNN model from the model name.
+def _load_text_model(model_name: str) -> Optional[TextModel]:
+    """Load the text model from the model name.
 
     Parameters
     ----------
     model_name : str
-        model name, see `RNNTextModel` for more details
+        model name, see `MarkovTextModel` for more details
 
     Returns
     -------
     Optional[TextModel]
-        RNN model if applicable, else None
+        text model if applicable, else None
     """
     try:
-        model = RNNTextModel(model_name)
+        model = MarkovTextModel(model_name)
     except:
         model = None
     return model
@@ -42,7 +42,7 @@ class OC(ABC):
     _SKILLS = FileUtil.list_load_or_fallback(os.path.join(Directories.DATA_DIR, "skills.txt"))
     """List of possible skills."""
 
-    _DESC_MODELS = {gender: _load_rnn_model(f"ocdescriptions.{gender}") for gender in ("m", "f", "x")}
+    _DESC_MODELS = {gender: _load_text_model(f"ocdescriptions.{gender}") for gender in ("m", "f", "x")}
 
     def __init__(self, auto_populate: bool = True):
         """Create an `OC`.

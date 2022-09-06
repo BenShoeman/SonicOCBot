@@ -45,7 +45,7 @@ class TumblrPoster(Poster):
         if isinstance(post_creator, OCPostCreator):
             extra_tags += ("oc", "sonic oc", "fake oc")
         if isinstance(post_creator, TextPostCreator):
-            if post_tags and "fanficbot" in post_tags:
+            if post_tags and "fanfic bot" in post_tags:
                 extra_tags += ("fanfic", "sonic fanfic", "fake fanfic")
         tags = extra_tags + (post_tags if post_tags else tuple())
         if img is None:

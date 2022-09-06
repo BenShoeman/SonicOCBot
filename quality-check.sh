@@ -4,19 +4,19 @@ cd $(dirname "${BASH_SOURCE[0]}")
 
 # MyPy type checking
 echo "--- MyPy type checking ---"
-mypy --ignore-missing-imports --disallow-untyped-defs --disallow-incomplete-defs -p src -p main
+mypy --ignore-missing-imports --disallow-untyped-defs --disallow-incomplete-defs -p src -p main -p train
 mypy_exit_code=$?
 echo
 
 # Unimport unused import checking
 echo "--- Unimport unused import checking ---"
-python -m unimport --ignore-init src main.py
+python -m unimport --ignore-init src main.py train.py
 unimport_exit_code=$?
 echo
 
 # Black format checking
 echo "--- Black format checking ---"
-black --check --line-length 160 src main.py
+black --check --line-length 160 src main.py train.py
 black_exit_code=$?
 echo
 

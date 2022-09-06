@@ -146,11 +146,8 @@ images/pattern/
 images/sonicmaker/
 images/sonicsez/
 images/template/
-keys/
-keys.json
-models/*.h5
-models/*.json
-models/*.onnx
-!models/punctuation.probabilities.json
+models/*.db
 scraper-files/
 scraper-texts/
+unused/*.json
+unused/*.onnx

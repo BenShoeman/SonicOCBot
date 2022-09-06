@@ -1,25 +1,23 @@
 from abc import ABC, abstractmethod
-import random
-from typing import Optional, Union
-
-from .SentenceRestorer import SentenceRestorer
+from typing import Any, Union
 
 
 class TextModel(ABC):
     """Abstract class for pre-trained text generation models."""
 
-    def __init__(self, model_name: str, sentence_restorer: Optional[SentenceRestorer] = None):
-        """Create a `TextModel`. Should be called in subclasses to add the `SentenceRestorer`.
+    def __init__(self, model_name: str, **kwargs: Any):
+        """Create a `TextModel`.
 
         Parameters
         ----------
-        sentence_restorer : Optional[SentenceRestorer]
-            sentence restorer to use; if None, creates default one to use
+        model_name : str
+            name of the model (usage depends on the model type)
+
+        Other Parameters
+        ----------------
+        **kwargs : dict
+            Other keyword arguments to define how the text model is created; per object specific
         """
-        if sentence_restorer is not None:
-            self._sentence_restorer = sentence_restorer
-        else:
-            self._sentence_restorer = SentenceRestorer()
 
     @abstractmethod
     def get_next_word(self) -> str:
@@ -31,22 +29,19 @@ class TextModel(ABC):
             next word of the text model
         """
 
-    def get_text_block(self, mean_words: Union[int, float] = 20, stdev_words: Union[int, float] = 30) -> str:
+    @abstractmethod
+    def get_text_block(self, mean_words: Union[int, float] = 0, stdev_words: Union[int, float] = 0) -> str:
         """Get a random block of text from the model.
 
         Parameters
         ----------
         mean_words : Union[int, float], optional
-            average number of words in the paragraph, by default 100
-            (this is not strictly the mean as calculation ensures non-zero positive values)
+            mean number of words in the paragraph, default on a per object basis
         stdev_words : Union[int, float], optional
-            standard deviation of number of words in the paragraph, by default 100
+            standard deviation of number of words in the paragraph, default set on a per object basis
 
         Returns
         -------
         str
-            random block of text from the model
+            block of text from the model
         """
-        n_words = max(1, abs(round(random.gauss(mean_words, stdev_words))))
-        generated_text = " ".join(self.get_next_word() for _ in range(n_words))
-        return self._sentence_restorer.restore_sentences(generated_text)

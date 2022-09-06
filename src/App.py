@@ -9,11 +9,11 @@ from src.PostCreator import PostCreator, OCPostCreator, TextPostCreator, Twitter
 from src.FanfictionGenerator import TwitterFanfictionGenerator
 from src.SonicSezGenerator import SonicSezGenerator
 from src.Poster import Poster, DummyPoster, TwitterPoster, TumblrPoster
-from src.TextModel import RNNTextModel
+from src.TextModel import MarkovTextModel
 
 
-_ffic_generator = TwitterFanfictionGenerator(body_text_model_name="fanfics.bodies", titles_model_name="fanfics.titles", model_class=RNNTextModel)
-_ssez_generator = SonicSezGenerator(body_text_model_name="sonicsez", model_class=RNNTextModel)
+_ffic_generator = TwitterFanfictionGenerator(body_text_model_name="fanfics.bodies", titles_model_name="fanfics.titles", model_class=MarkovTextModel)
+_ssez_generator = SonicSezGenerator(body_text_model_name="sonicsez", model_class=MarkovTextModel)
 
 _ffic_logo_images = glob.glob(os.path.join(Directories.IMAGES_DIR, "fanficlogo", "*.png"))
 _ssez_bg_images = glob.glob(os.path.join(Directories.IMAGES_DIR, "sonicsez", "*.png"))
