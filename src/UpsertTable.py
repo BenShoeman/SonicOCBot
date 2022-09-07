@@ -89,7 +89,7 @@ class UpsertTable:
 
         for microdf in batch_df(df, batch_size=UPSERT_CHUNK_SIZE):
             # Do all as a single transaction
-            with engine.connect() as conn:
+            with engine.begin() as conn:
                 # Wipe the table between chunks
                 conn.execute(delete(temp_table))
 

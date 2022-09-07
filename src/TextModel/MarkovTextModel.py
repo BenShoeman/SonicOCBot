@@ -1,6 +1,9 @@
+import atexit
+import gzip
 import numpy as np
 import os
 from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 from typing import Optional, Union
 
 from .TextModel import TextModel
@@ -20,15 +23,33 @@ class MarkovTextModel(TextModel):
         Parameters
         ----------
         model_name : str
-            name of the model, which requires the file `models/{model_name}.db`
+            name of the model, which requires the file `models/{model_name}.db.gz`
         punc_required : bool, optional
             whether punctuation is required in this model, by default True
         """
-        self.__markov_table = MarkovTriads()
-        self.__engine = create_engine(f"sqlite:///{os.path.join(Directories.MODELS_DIR, f'{model_name}.db')}")
         self.__first_word: Optional[str] = None
         self.__second_word: Optional[str] = None
         self.__punc_required: bool = punc_required
+        self.__markov_table = MarkovTriads()
+        self.__db_path = os.path.join(Directories.MODELS_DIR, f"{model_name}.db.gz")
+        # Don't decompress database right away, only load when necessary
+        self.__tmp_path: Optional[str] = None
+        self.__engine: Optional[Engine] = None
+        # Ensure ungzipped database is deleted on exit
+        atexit.register(self.__clean_up)
+
+    def __load_db(self) -> None:
+        """Decompress and load the database."""
+        print(f"DECOMPRESSING {self.__db_path}")
+        self.__tmp_path = f"{self.__db_path}_tmp.db"
+        with gzip.open(self.__db_path, "rb") as f_src, open(self.__tmp_path, "wb") as f_dst:
+            f_dst.writelines(f_src)
+        self.__engine = create_engine(f"sqlite:///{self.__tmp_path}")
+
+    def __clean_up(self) -> None:
+        """Delete the ungzipped database file once done."""
+        if self.__tmp_path:
+            os.remove(self.__tmp_path)
 
     def get_next_word(self) -> str:
         """Use the Markov model to get the next word.
@@ -38,17 +59,22 @@ class MarkovTextModel(TextModel):
         str
             next word from the model
         """
-        if self.__second_word:
-            if self.__first_word:
-                third_word = self.__markov_table.get_next_token(self.__engine, self.__first_word, self.__second_word)
-            else:
-                third_word = self.__markov_table.get_next_token(self.__engine, self.__second_word)
+        # Load database if not loaded first
+        if not self.__engine:
+            self.__load_db()
+            return self.get_next_word()
         else:
-            third_word = self.__markov_table.get_first_token(self.__engine)
-        # Update the Markov model state
-        self.__first_word = self.__second_word
-        self.__second_word = third_word
-        return third_word
+            if self.__second_word:
+                if self.__first_word:
+                    third_word = self.__markov_table.get_next_token(self.__engine, self.__first_word, self.__second_word)
+                else:
+                    third_word = self.__markov_table.get_next_token(self.__engine, self.__second_word)
+            else:
+                third_word = self.__markov_table.get_first_token(self.__engine)
+            # Update the Markov model state
+            self.__first_word = self.__second_word
+            self.__second_word = third_word
+            return third_word
 
     def get_text_block(
         self,

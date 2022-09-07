@@ -147,7 +147,8 @@ images/sonicmaker/
 images/sonicsez/
 images/template/
 models/*.db
+models/*.db.gz
 scraper-files/
 scraper-texts/
-unused/*.json
-unused/*.onnx
+unused/models/*.json
+unused/models/*.onnx

@@ -1,5 +1,6 @@
 import argparse
 from dataclasses import dataclass, field
+import gzip
 import nltk
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 import numpy as np
@@ -220,7 +221,12 @@ def train(argv: list[str]) -> None:
     )
     args = parser.parse_args(argv)
 
-    engine = create_engine(f"sqlite:///{os.path.join(Directories.MODELS_DIR, f'{args.db_name}.db')}", echo=True)
+    db_path = os.path.join(Directories.MODELS_DIR, f"{args.db_name}.db")
+    # Decompress gzip-compressed db first if the db file doesn't exist
+    if not os.path.exists(db_path) and os.path.exists(f"{db_path}.gz"):
+        with gzip.open(f"{db_path}.gz", "rb") as f_src, open(db_path, "wb") as f_dst:
+            f_dst.writelines(f_src)
+    engine = create_engine(f"sqlite:///{db_path}", echo=True)
     markov_model = MarkovTriads()
     markov_model.create_table(engine)
     for fn in args.text_files:
@@ -229,3 +235,8 @@ def train(argv: list[str]) -> None:
     markov_model.remove_uncommon_tokens(engine, uncommon_threshold=args.remove_uncommon)
     # Remove deleted data
     engine.execute("vacuum")
+    engine.dispose()
+    # gzip-compress the db now
+    with open(db_path, "rb") as f_src, gzip.open(f"{db_path}.gz", "wb") as f_dst:
+        f_dst.writelines(f_src)
+    os.remove(db_path)
