@@ -70,7 +70,7 @@ class UpsertTable:
             - Input dataframe doesn't have all the PK columns of this table
             - Input dataframe has no value columns to upsert with
         """
-        UPSERT_CHUNK_SIZE = 10000
+        UPSERT_CHUNK_SIZE = 50000
         table_col_names = [col.name for col in self.columns]
         table_pk_names = [col.name for col in self.columns if col.primary_key]
         table_upd_names = [name for name in df.columns if name not in table_pk_names]
