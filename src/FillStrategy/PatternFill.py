@@ -28,7 +28,7 @@ class PatternFill(FillStrategy):
     }
     """Dict mapping transformation operations to `ColorUtil` functions."""
 
-    PATTERN_PROBABILITIES: ClassVar[dict] = FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, "patterns.yml"))
+    _PATTERN_PROBABILITIES: ClassVar[dict] = FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, "patterns.yml"))
     """Contains probabilities for each species to have a certain pattern."""
 
     def __init__(
@@ -89,6 +89,17 @@ class PatternFill(FillStrategy):
 
         self._threshold = threshold
         self._multiply_fill = multiply_fill
+
+    @classmethod
+    def get_pattern_probabilities(cls) -> dict:
+        """Return the dict of patterns and their probabilities of occurring on various species.
+
+        Returns
+        -------
+        dict
+            pattern probabilities dict
+        """
+        return cls._PATTERN_PROBABILITIES
 
     def _set_pattern_fill(self, bg_fill: ColorUtil.ColorTuple, fg_fill: ColorUtil.ColorTuple, pattern_img: Optional[Image.Image]) -> None:
         """Create the pattern fill image using background/foreground fill colors and the pattern image.

@@ -33,7 +33,7 @@ def create_fill_strategy_for_species(region_type: str, species_type: str, thresh
     FillStrategy
         randomly generated fill strategy for this species and region
     """
-    all_probs = PatternFill.PATTERN_PROBABILITIES
+    all_probs = PatternFill.get_pattern_probabilities()
     region_fills = all_probs.get(region_type)
     if region_fills:
         species_fills = region_fills.get(species_type)
