@@ -40,7 +40,6 @@ class MarkovTextModel(TextModel):
 
     def __load_db(self) -> None:
         """Decompress and load the database."""
-        print(f"DECOMPRESSING {self.__db_path}")
         self.__tmp_path = f"{self.__db_path}_tmp.db"
         with gzip.open(self.__db_path, "rb") as f_src, open(self.__tmp_path, "wb") as f_dst:
             f_dst.writelines(f_src)
