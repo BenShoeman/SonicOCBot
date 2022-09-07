@@ -44,7 +44,7 @@ class FanfictionGenerator:
             - stdev_title_words
         """
         self.__body_text_model: TextModel = model_class(body_text_model_name)
-        self.__titles_model: TextModel = model_class(titles_model_name)
+        self.__titles_model: TextModel = model_class(titles_model_name, punc_required=False)
         self.__mean_paragraphs = kwargs.get("mean_paragraphs", FanfictionGenerator.__DEFAULT_KWARGS["mean_paragraphs"])
         self.__stdev_paragraphs = kwargs.get("stdev_paragraphs", FanfictionGenerator.__DEFAULT_KWARGS["stdev_paragraphs"])
         self.__mean_body_words = kwargs.get("mean_body_words", FanfictionGenerator.__DEFAULT_KWARGS["mean_body_words"])

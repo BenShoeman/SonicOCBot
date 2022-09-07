@@ -11,7 +11,7 @@ from src.Util.HTMLtoImage import md_to_image
 class OCPostCreator(PostCreator):
     """`PostCreator` that creates a post involving an OC."""
 
-    def __init__(self, oc: OC, tags: Optional[Union[list[str], tuple[str, ...]]] = ("ocbot",), **kwargs: Any):
+    def __init__(self, oc: OC, tags: Optional[Union[list[str], tuple[str, ...]]] = ("oc bot",), **kwargs: Any):
         """Create a `OCPostCreator`.
 
         Parameters
