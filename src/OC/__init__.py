@@ -15,7 +15,7 @@ from .SonicMakerOC import SonicMakerOC
 from .TemplateOC import TemplateOC
 
 
-def generate_oc(pr_original: float = 0.9) -> OC:
+def generate_oc(pr_original: float = 0.925) -> OC:
     """Generate a new OC and return it.
 
     Parameters

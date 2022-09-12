@@ -128,6 +128,7 @@ dmypy.json
 
 # macOS crap
 *.DS_Store
+._*
 
 # Specific to Sonic OC Bot
 corpus/*.txt

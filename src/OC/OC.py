@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import os
 from PIL import Image
 import random
 from typing import Optional
@@ -33,13 +32,15 @@ def _load_text_model(model_name: str) -> Optional[TextModel]:
 class OC(ABC):
     """Represents an original character with all the information about it."""
 
-    _NAMES = {gender: FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, f"names.{gender}.yml")) for gender in ("m", "f", "x")}
+    _NAMES = {gender: FileUtil.yaml_load(Directories.DATA_DIR / f"names.{gender}.yml") for gender in ("m", "f", "x")}
     """Contains lists of names and probabilities of those names occurring for various genders."""
-    _SPECIES = FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, "animals.yml"))
+    _SPECIES = FileUtil.yaml_load(Directories.DATA_DIR / "animals.yml")
     """List of species."""
-    _PERSONALITIES = FileUtil.list_load_or_fallback(os.path.join(Directories.DATA_DIR, "personalities.txt"))
+    _SPECIES_PARTS = FileUtil.yaml_load(Directories.DATA_DIR / "animal-types.yml")
+    """List of parts to use for each species type."""
+    _PERSONALITIES = FileUtil.list_load(Directories.DATA_DIR / "personalities.txt")
     """List of personality types."""
-    _SKILLS = FileUtil.list_load_or_fallback(os.path.join(Directories.DATA_DIR, "skills.txt"))
+    _SKILLS = FileUtil.list_load(Directories.DATA_DIR / "skills.txt")
     """List of possible skills."""
 
     _DESC_MODELS = {gender: _load_text_model(f"ocdescriptions.{gender}") for gender in ("m", "f", "x")}
@@ -187,7 +188,7 @@ class OC(ABC):
 
     def _generate_species(self) -> None:
         species = list(OC._SPECIES.keys())
-        weights = list(OC._SPECIES.values())
+        weights = list(OC._SPECIES[k].get("weight", 1) for k in OC._SPECIES)
         self._species = random.choices(species, weights=weights, k=1)[0]
 
     def _generate_age(self) -> None:

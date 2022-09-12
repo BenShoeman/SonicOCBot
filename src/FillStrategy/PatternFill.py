@@ -1,5 +1,4 @@
 import numpy as np
-import os
 import glob
 from pathlib import Path
 from PIL import Image, ImageChops
@@ -28,7 +27,7 @@ class PatternFill(FillStrategy):
     }
     """Dict mapping transformation operations to `ColorUtil` functions."""
 
-    _PATTERN_PROBABILITIES: ClassVar[dict] = FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, "patterns.yml"))
+    _PATTERN_PROBABILITIES: ClassVar[dict] = FileUtil.yaml_load(Directories.DATA_DIR / "patterns.yml")
     """Contains probabilities for each species to have a certain pattern."""
 
     def __init__(
@@ -39,6 +38,7 @@ class PatternFill(FillStrategy):
         pattern_type: Optional[str] = None,
         threshold: int = 192,
         multiply_fill: bool = True,
+        use_skin_tones: bool = True,
     ):
         """Create a `PatternFill` strategy, optionally with a specific pattern.
 
@@ -56,6 +56,8 @@ class PatternFill(FillStrategy):
             floodfill threshold when comparing colors to the floodfill origin, by default 192
         multiply_fill : bool, optional
             if True, does a multiply blend on the fill instead of a regular floodfill, by default True
+        use_skin_tones : bool, optional
+            if True, pulls color from a skin tone gradient instead of general colors list, by default True
         """
         super().__init__(region_type)
 
@@ -65,7 +67,7 @@ class PatternFill(FillStrategy):
             self._color_name = ColorUtil.get_nearest_color_in_colors_list(bg_fill, color_list)["name"]
         else:
             # Randomly pick a color from the color list depending on region type
-            if self._region_type == "skin":
+            if use_skin_tones and self._region_type == "skin":
                 bg_fill = ColorUtil.randomize_color(ImageUtil.get_random_color_from_image(ColorUtil.SKIN_TONE_GRADIENT))
                 self._bg_color_name = ColorUtil.get_nearest_color_in_colors_list(bg_fill, color_list)["name"]
             else:
@@ -81,10 +83,10 @@ class PatternFill(FillStrategy):
             fg_fill = ColorUtil.randomize_color(new_color["color"])
             self._fg_color_name = new_color["name"]
         if not pattern_type:
-            pattern_imgs = [Path(file).stem for file in glob.iglob(os.path.join(Directories.IMAGES_DIR, "pattern", "*.png"))]
+            pattern_imgs = [Path(file).stem for file in glob.iglob(Directories.IMAGES_DIR / "pattern" / "*.png")]
             pattern_type = _rng.choice(pattern_imgs) if len(pattern_imgs) > 0 else None
         self._pattern_type = pattern_type
-        pattern_img = Image.open(os.path.join(Directories.IMAGES_DIR, "pattern", f"{pattern_type}.png")).convert("RGBA") if pattern_type is not None else None
+        pattern_img = Image.open(Directories.IMAGES_DIR / "pattern" / f"{pattern_type}.png").convert("RGBA") if pattern_type is not None else None
         self._set_pattern_fill(bg_fill, fg_fill, pattern_img)
 
         self._threshold = threshold

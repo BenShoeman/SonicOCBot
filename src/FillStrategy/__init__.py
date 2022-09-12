@@ -18,7 +18,12 @@ from .PatternFill import PatternFill
 _rng = np.random.default_rng()
 
 
-def create_fill_strategy_for_species(region_type: str, species_type: str, threshold: int = 192) -> FillStrategy:
+def create_fill_strategy_for_species(
+    region_type: str,
+    species_type: str,
+    threshold: int = 192,
+    use_skin_tones: bool = True,
+) -> FillStrategy:
     """Create a `FillStrategy` object for a given species and region, taking into account pattern probabilities.
 
     Parameters
@@ -27,6 +32,10 @@ def create_fill_strategy_for_species(region_type: str, species_type: str, thresh
         type of region to fill (e.g., "fur" or "skin")
     species_type : str
         type of species (e.g., "tiger")
+    threshold : int, optional
+        floodfill threshold when comparing colors to the floodfill origin, by default 192
+    use_skin_tones : bool, optional
+        if True, pulls color from a skin tone gradient instead of general colors list, by default True
 
     Returns
     -------
@@ -47,6 +56,6 @@ def create_fill_strategy_for_species(region_type: str, species_type: str, thresh
                 probs.append(1 - sum_probs)
             pattern_type = _rng.choice(choices, p=probs)
             if pattern_type:
-                return PatternFill(region_type, pattern_type=pattern_type, threshold=threshold)
+                return PatternFill(region_type, pattern_type=pattern_type, threshold=threshold, use_skin_tones=use_skin_tones)
     # If we couldn't get a PatternFill above, generate a ColorFill and return that
-    return ColorFill(region_type, threshold=threshold)
+    return ColorFill(region_type, threshold=threshold, use_skin_tones=use_skin_tones)

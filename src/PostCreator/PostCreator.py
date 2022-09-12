@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import time
 import glob
 import os
+from pathlib import Path
 from PIL import Image
 import random
 from typing import Any, Literal, Optional, Union
@@ -11,11 +12,12 @@ import src.Directories as Directories
 from src.Util.ColorUtil import ColorTuple, hex2rgb, rgb2hex
 
 
-def _get_font_choices(fonts_dir: str) -> dict:
-    if os.path.exists(fonts_dir):
+def _get_font_choices(fonts_dir: os.PathLike) -> dict:
+    fonts_path = Path(fonts_dir)
+    if fonts_path.exists():
         font_names = set(
             font_file.removesuffix(".ttf").removesuffix("-Regular")
-            for font_file in glob.glob(os.path.join(fonts_dir, "*.ttf"))
+            for font_file in glob.glob(str(fonts_path / "*.ttf"))
             if font_file.endswith(".ttf") and not font_file.endswith("-Italic.ttf")
         )
         return {
@@ -72,7 +74,7 @@ class PostCreator(ABC):
             - regular_font_file: randomly
             - italic_font_file: randomly
         """
-        self.__schedule_colors = _get_color_schedule(os.path.join(Directories.DATA_DIR, "schedule-colors.yml"))
+        self.__schedule_colors = _get_color_schedule(Directories.DATA_DIR / "schedule-colors.yml")
         self._prefer_long_text = kwargs.get("prefer_long_text", True)
         # If no font file provided, pick a random one from fonts directory
         self.regular_font_file = kwargs.get("regular_font_file")

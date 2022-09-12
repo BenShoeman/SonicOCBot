@@ -1,5 +1,4 @@
 import glob
-import os
 import random
 from typing import Literal, Optional
 
@@ -15,8 +14,8 @@ from src.TextModel import MarkovTextModel
 _ffic_generator = TwitterFanfictionGenerator(body_text_model_name="fanfics.bodies", titles_model_name="fanfics.titles", model_class=MarkovTextModel)
 _ssez_generator = SonicSezGenerator(body_text_model_name="sonicsez", model_class=MarkovTextModel)
 
-_ffic_logo_images = glob.glob(os.path.join(Directories.IMAGES_DIR, "fanficlogo", "*.png"))
-_ssez_bg_images = glob.glob(os.path.join(Directories.IMAGES_DIR, "sonicsez", "*.png"))
+_ffic_logo_images = glob.glob(str(Directories.IMAGES_DIR / "fanficlogo" / "*.png"))
+_ssez_bg_images = glob.glob(str(Directories.IMAGES_DIR / "sonicsez" / "*.png"))
 
 _post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], float] = {
     "oc": 0.85,

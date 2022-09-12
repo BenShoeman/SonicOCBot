@@ -117,11 +117,12 @@ def floodfill(
 
     init_color = img_rgb[y, x]
 
-    # Manhattan distance between colors divided by 3 is approximately distance between colors;
-    # find where distance between initial color and all colors in image is less than threshold
-    dists_in_thresh = np.sum(np.abs(img_rgb - init_color), axis=2) <= (threshold * 3)
+    # Find where difference between initial color and all colors in image is less than threshold for all channels
+    diffs = np.abs(img_rgb - init_color)
+    match_regions = np.logical_and(np.logical_and(diffs[:, :, 0] <= threshold, diffs[:, :, 1] <= threshold), diffs[:, :, 2] <= threshold)
+    # match_regions = np.sum(np.abs(img_rgb - init_color), axis=2) <= (threshold * 3)
     # Then, get contiguous region starting at initial color using scipy.ndimage.label
-    labels, _ = label(dists_in_thresh)
+    labels, _ = label(match_regions)
     # If fill is just a color, convert it to numpy array; else, get where pattern overlaps image
     mask = labels == labels[y, x]
     if isinstance(fill, tuple):
