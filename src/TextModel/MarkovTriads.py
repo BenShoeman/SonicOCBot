@@ -221,7 +221,7 @@ def train(argv: list[str]) -> None:
     )
     args = parser.parse_args(argv)
 
-    db_path = os.path.join(Directories.MODELS_DIR, f"{args.db_name}.db")
+    db_path = Directories.MODELS_DIR / f"{args.db_name}.db"
     # Decompress gzip-compressed db first if the db file doesn't exist
     if not os.path.exists(db_path) and os.path.exists(f"{db_path}.gz"):
         with gzip.open(f"{db_path}.gz", "rb") as f_src, open(db_path, "wb") as f_dst:

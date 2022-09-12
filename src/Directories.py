@@ -18,15 +18,16 @@ This module has 7 constants to use. They are:
 """
 
 import os
+from pathlib import Path
 from typing import Any, Final
 
-_PROJECT_DIR: Final[str] = os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-_DATA_DIR: Final[str] = os.path.join(_PROJECT_DIR, "data")
-_IMAGES_DIR: Final[str] = os.path.join(_PROJECT_DIR, "images")
-_MODELS_DIR: Final[str] = os.path.join(_PROJECT_DIR, "models")
-_FONTS_DIR: Final[str] = os.path.join(_PROJECT_DIR, "fonts")
-_SONICMAKER_DIR: Final[str] = os.path.join(_PROJECT_DIR, "sonicmaker")
-_TEMPLATES_DIR: Final[str] = os.path.join(_PROJECT_DIR, "templates")
+_PROJECT_DIR: Final[Path] = Path(os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)))
+_DATA_DIR: Final[Path] = _PROJECT_DIR / "data"
+_IMAGES_DIR: Final[Path] = _PROJECT_DIR / "images"
+_MODELS_DIR: Final[Path] = _PROJECT_DIR / "models"
+_FONTS_DIR: Final[Path] = _PROJECT_DIR / "fonts"
+_SONICMAKER_DIR: Final[Path] = _PROJECT_DIR / "sonicmaker"
+_TEMPLATES_DIR: Final[Path] = _PROJECT_DIR / "templates"
 
 
 def __getattr__(name: str) -> Any:

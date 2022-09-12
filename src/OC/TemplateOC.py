@@ -1,5 +1,4 @@
 import numpy as np
-import os
 import random
 from PIL import Image
 from typing import ClassVar, Optional
@@ -68,7 +67,7 @@ class TemplateOC(OC):
 
     @classmethod
     def __initialize_templates(cls) -> None:
-        cls.TEMPLATES = FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, "template-fill.yml"))
+        cls.TEMPLATES = FileUtil.yaml_load(Directories.DATA_DIR / "template-fill.yml")
 
     def generate_image(self, fill_threshold: int = 192) -> None:
         """Implements `generate_image` from `OC` by using full templates.
@@ -79,20 +78,17 @@ class TemplateOC(OC):
             threshold of difference in color when flood filling, by default 96
         """
         part_image_extension = ".png"
-        img_arr = np.asarray(Image.open(os.path.join(Directories.IMAGES_DIR, "template", self.__template_name + part_image_extension)).convert("RGBA"))
+        img_arr = np.asarray(Image.open(Directories.IMAGES_DIR / "template" / f"{self.__template_name}{part_image_extension}").convert("RGBA"))
 
         # Fill each region in with a random color
-        fill_ops = self.__template["fill"]
-        for operation in fill_ops:
-            op_regions = fill_ops[operation]
-            for region_name in op_regions:
+        for operation, op_regions in self.__template.get("fill", {}).items():
+            for region_name, coords in op_regions.items():
+                # Give the current region type a fill strategy if it doesn't have one
                 if region_name not in self._fill_regions:
-                    region_fill = create_fill_strategy_for_species(region_name, self.species, threshold=fill_threshold)
-                    # Now set this region to use this color/region throughout the whole OC
-                    self._fill_regions[region_name] = region_fill
+                    self._fill_regions[region_name] = create_fill_strategy_for_species(region_name, self.species, threshold=fill_threshold)
 
+                # Fill each coordinate with the color we got, with the proper transformation
                 fill_strategy = self._fill_regions[region_name]
-                coords = op_regions[region_name]
                 for coord in coords:
                     fill_strategy.floodfill(img_arr, coord, transform_type=operation)
 

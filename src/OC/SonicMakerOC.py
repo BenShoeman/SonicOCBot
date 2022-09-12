@@ -1,6 +1,4 @@
 import numpy as np
-import os
-import random
 from PIL import Image
 from typing import ClassVar
 
@@ -8,6 +6,9 @@ from .OC import OC
 import src.Directories as Directories
 from src.FillStrategy import create_fill_strategy_for_species
 import src.Util.FileUtil as FileUtil
+
+
+_rng = np.random.default_rng()
 
 
 class SonicMakerOC(OC):
@@ -65,7 +66,7 @@ class SonicMakerOC(OC):
 
     @classmethod
     def __initialize_fill(cls) -> None:
-        cls.SONICMAKER_FILL = FileUtil.yaml_load_or_fallback(os.path.join(Directories.DATA_DIR, "sonicmaker-fill.yml"))
+        cls.SONICMAKER_FILL = FileUtil.yaml_load(Directories.DATA_DIR / "sonicmaker-fill.yml")
 
     def generate_image(self, fill_threshold: int = 192) -> None:
         """Implements `generate_image` from `OC` by using Sonic Maker template parts.
@@ -81,60 +82,68 @@ class SonicMakerOC(OC):
         except AttributeError:
             SonicMakerOC.__initialize_fill()
 
+        species_type: dict = OC._SPECIES[self.species].get("type")
+        type_parts: dict = OC._SPECIES_PARTS.get(species_type, {})
+        use_skin_tones = type_parts.get("use-skin-tones", True)
+        rename_map = type_parts.get("rename", {})
+        allow_parts: dict = type_parts.get("allow", {})
+        deny_parts: dict = type_parts.get("deny", {})
+        omit_list = type_parts.get("omit", [])
+
         sonicmaker_fill = SonicMakerOC.SONICMAKER_FILL
         part_image_extension = ".png"
         image_width, image_height = sonicmaker_fill.get("image-size", [500, 500])
-        image_size = (image_width, image_height)
-        self._image = Image.new("RGBA", image_size, (0, 0, 0, 0))
+        self._image = Image.new("RGBA", (image_width, image_height), (0, 0, 0, 0))
 
-        for part_name in sonicmaker_fill:
-            # Since image-size has to be in the top level too, skip it
-            if part_name == "image-size":
+        for part_name, part in sonicmaker_fill.get("fills", {}).items():
+            # Always skip parts in the omit list
+            if part_name in omit_list:
                 continue
 
-            part = sonicmaker_fill[part_name]
+            # Remove or include parts based on the allow/deny lists
+            allow_list = allow_parts.get(part_name, list(part.get("fill", {}).keys()))
+            deny_list = deny_parts.get(part_name, [])
+            part_types = [typ for typ in part.get("fill", {}).keys() if typ in allow_list and typ not in deny_list]
 
-            omit_part = random.choice((True, False)) if part.get("optional", False) else False
+            # If required, do not allow the part to be omitted unless explicitly in the omit list
+            if part.get("required", False) and "none" in part_types:
+                part_types.remove("none")
 
-            # If optional part randomly omitted, skip it
-            if omit_part:
+            try:
+                type_name = _rng.choice(part_types)
+            except ValueError:
+                # Means the list is empty, so skip this part
                 continue
+            else:
+                # If we chose to omit this part, skip it
+                if type_name == "none":
+                    continue
 
-            part_types = list(part.get("fill", {}).keys())
-
-            # If no types defined for this part, skip it
-            if len(part_types) == 0:
-                continue
-
-            type_name = random.choice(part_types)
-            type_img_arr = np.asarray(
-                Image.open(os.path.join(Directories.IMAGES_DIR, "sonicmaker", f"{part_name}-{type_name}{part_image_extension}")).convert("RGBA")
-            )
+            type_img_arr = np.asarray(Image.open(Directories.IMAGES_DIR / "sonicmaker" / f"{part_name}-{type_name}{part_image_extension}").convert("RGBA"))
             fill_ops = part["fill"][type_name] or {}  # Coalesce to empty dict if None
 
             # Now start filling with the list of coords to fill
-            for operation in fill_ops:
-                op_regions = fill_ops[operation]
-                for region_name in op_regions:
-                    # If there is a pipe, randomly pick one of the region types
-                    if "|" in region_name:
-                        current_region = random.choice(region_name.split("|"))
-                    else:
-                        current_region = region_name
+            for operation, op_regions in fill_ops.items():
+                for region_name, coords in op_regions.items():
+                    # Randomly pick one of the region types if there is a pipe
+                    current_region = _rng.choice(region_name.split("|")) if "|" in region_name else region_name
 
-                    # Give the current region a fill if it doesn't have one
+                    # If animal types config says to rename, then do so; otherwise go with this name
+                    current_region = rename_map.get(current_region, current_region)
+
+                    # Give the current region type a fill strategy if it doesn't have one
                     if current_region not in self._fill_regions:
-                        region_fill = create_fill_strategy_for_species(current_region, self.species, threshold=fill_threshold)
-                        # Now set this region to use this color/pattern throughout the whole OC
-                        self._fill_regions[current_region] = region_fill
-
-                    fill_strategy = self._fill_regions[current_region]
-                    coords = op_regions[region_name]
+                        self._fill_regions[current_region] = create_fill_strategy_for_species(
+                            current_region, self.species, threshold=fill_threshold, use_skin_tones=use_skin_tones
+                        )
 
                     # Fill each coordinate with the color we got, with the proper transformation
+                    fill_strategy = self._fill_regions[current_region]
                     for coord in coords:
                         fill_strategy.floodfill(type_img_arr, coord, transform_type=operation)
 
-            # Finally, paste this region in the overall image
-            type_img = Image.fromarray(type_img_arr)
-            self._image.paste(type_img, part.get("position", (0, 0)), type_img)
+            # Finally, paste this region in the overall image using alpha composite (for more accurate alpha blending)
+            type_img = Image.new("RGBA", self._image.size, color=(0, 0, 0, 0))
+            temp_img = Image.fromarray(type_img_arr)
+            type_img.paste(temp_img, part.get("position", (0, 0)), temp_img)
+            self._image = Image.alpha_composite(self._image, type_img)

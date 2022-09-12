@@ -257,7 +257,7 @@ def brighten(rgb: ColorOrImage, amount: float = 0.1) -> ColorOrImage:
         return new_rgb
 
 
-def darken(rgb: ColorOrImage, amount: float = 0.1) -> ColorOrImage:
+def darken(rgb: ColorOrImage, amount: float = 0.05) -> ColorOrImage:
     """Darkens the color or image.
 
     Parameters
@@ -422,9 +422,9 @@ _BASIC_COLORS = [
     ColorDict(name="black", color=(0, 0, 0)),
     ColorDict(name="white", color=(255, 255, 255)),
 ]
-_GENERAL_COLORS = get_colors_list(os.path.join(Directories.DATA_DIR, "colors.general.txt"))
-_SKIN_TONE_COLORS = get_colors_list(os.path.join(Directories.DATA_DIR, "colors.skintones.txt"))
-if os.path.exists((_skin_tone_gradient_file := os.path.join(Directories.DATA_DIR, "colors.skintones.gradient.png"))):
+_GENERAL_COLORS = get_colors_list(Directories.DATA_DIR / "colors.general.txt")
+_SKIN_TONE_COLORS = get_colors_list(Directories.DATA_DIR / "colors.skintones.txt")
+if os.path.exists((_skin_tone_gradient_file := Directories.DATA_DIR / "colors.skintones.gradient.png")):
     _SKIN_TONE_GRADIENT = Image.open(_skin_tone_gradient_file)
 else:
     print("Error: skin tones gradient not found. Loading a dummy image")

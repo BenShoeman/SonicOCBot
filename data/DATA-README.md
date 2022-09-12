@@ -1,6 +1,47 @@
 # Data File Structure
 
-- `animals.yml`: List of animal species with weights to determine which animals are more likely to be used.
+- `animals.yml`: List of animal species with their species category and weights to determine which animals are more likely to be used. An example below:
+  ```yml
+  cat:
+    weight: 2
+    type: feline
+  dog:
+    weight: 1
+    type: canine
+  ```
+  This would indicate that cats are twice more likely to show up than dogs, and puts cats in the feline group and dogs in the canine group. See `animal-types.yml` for details on this.
+- `animal-types.yml`: YAML file defining which body parts are allowed, denied, or omitted for each animal type, as well as whether to rename certain regions or use skin tones for skin regions. It follows a format like below:
+  ```yml
+  elephant:
+    use-skin-tones: false
+    rename:
+      fur: skin
+    allow:
+      ear:
+        - elephant
+      nose:
+        - trunk
+      tail:
+        - short
+        - standard
+    deny:
+      back:
+        - shell
+        - wings
+    omit:
+      - snout
+  cat:
+    ...
+  ...
+  ```
+  Note that animal types not defined here will just use completely random parts as defined in `sonicmaker-fill.yml`. If the file is not provided, all OCs created will have completely random parts.
+
+  Explanation for each part:
+  - `use-skin-tones`: Whether to use skin tones for skin regions, or any random color; *can be omitted, which will make this fall back to True and use skin tones for skin regions.*
+  - `rename`: Use this to rename regions defined in `sonicmaker-fill.yml` that should be renamed for this type of animal; for instance, rename "fur" regions to "scale" for reptiles. *Can be omitted.*
+  - `allow`: An allow-list of which parts to allow for each body type; any parts not present in the list will not be allowed. In the above example, elephants will only be allowed elephant ears and trunks. Any parts not defined here will have all parts allowed.
+  - `deny`: A deny-list of which parts are not allowed for each body type; any parts present in the list will be excluded. In the above example, elephants will not be allowed to have a shell or wings. Any parts not defined here will not have any parts denied, unless present in the allow-list.
+  - `omit`: A list of which parts to omit entirely for this animal type. Overrides the `required` attribute in `sonicmaker-fill.yml` too.
 - `colors.{general,skintones}.txt`: Provided in repo. List of colors with their RGB triplets, in the following format:
   ```
   ...
@@ -23,6 +64,7 @@
   outfit:
     ...
   ```
+  If the file is not provided, only flat colors will be used for fills.
 - `personalities.txt`: List of personality traits.
 - `schedule-colors.yml`: Provided in repo. YAML file defining background and text colors for image posts starting at the given start times. They don't need to be in order, but the order of the times will be taken into account when figuring the color out.
 - `skills.txt`: List of skills.

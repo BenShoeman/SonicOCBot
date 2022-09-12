@@ -31,7 +31,7 @@ class MarkovTextModel(TextModel):
         self.__second_word: Optional[str] = None
         self.__punc_required: bool = punc_required
         self.__markov_table = MarkovTriads()
-        self.__db_path = os.path.join(Directories.MODELS_DIR, f"{model_name}.db.gz")
+        self.__db_path = Directories.MODELS_DIR / f"{model_name}.db.gz"
         # Don't decompress database right away, only load when necessary
         self.__tmp_path: Optional[str] = None
         self.__engine: Optional[Engine] = None

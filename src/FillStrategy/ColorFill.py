@@ -28,6 +28,7 @@ class ColorFill(FillStrategy):
         color: Optional[ColorUtil.ColorTuple] = None,
         threshold: int = 192,
         multiply_fill: bool = True,
+        use_skin_tones: bool = True,
     ):
         """Create a `ColorFill` strategy, optionally with a specific color.
 
@@ -41,6 +42,8 @@ class ColorFill(FillStrategy):
             floodfill threshold when comparing colors to the floodfill origin, by default 192
         multiply_fill : bool, optional
             if True, does a multiply blend on the fill instead of a regular floodfill, by default True
+        use_skin_tones : bool, optional
+            if True, pulls color from a skin tone gradient instead of general colors list, by default True
         """
         super().__init__(region_type)
         color_list = ColorUtil.SKIN_TONE_COLORS if self._region_type == "skin" else ColorUtil.GENERAL_COLORS
@@ -49,7 +52,7 @@ class ColorFill(FillStrategy):
             self._color_name = ColorUtil.get_nearest_color_in_colors_list(self._fill, color_list)["name"]
         else:
             # Randomly pick a color from the color list depending on region type
-            if self._region_type == "skin":
+            if use_skin_tones and self._region_type == "skin":
                 self._fill = ColorUtil.randomize_color(ImageUtil.get_random_color_from_image(ColorUtil.SKIN_TONE_GRADIENT))
                 self._color_name = ColorUtil.get_nearest_color_in_colors_list(self._fill, color_list)["name"]
             else:

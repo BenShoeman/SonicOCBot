@@ -4,7 +4,7 @@ from typing import Callable, Union
 import yaml
 
 
-def list_load_or_fallback(filepath: Union[str, os.PathLike], fallback_factory: Callable = list) -> list:
+def list_load(filepath: Union[str, os.PathLike], fallback_factory: Callable = list) -> list:
     """Load a text file from the path as a list of lines, falling back to a fallback function if it doesn't exist.
 
     Parameters
@@ -27,7 +27,7 @@ def list_load_or_fallback(filepath: Union[str, os.PathLike], fallback_factory: C
         return fallback_factory()
 
 
-def json_load_or_fallback(filepath: Union[str, os.PathLike], fallback_factory: Callable = dict) -> dict:
+def json_load(filepath: Union[str, os.PathLike], fallback_factory: Callable = dict) -> dict:
     """Load a JSON file from the path, falling back to a fallback function if an invalid file.
 
     Parameters
@@ -54,7 +54,7 @@ def json_load_or_fallback(filepath: Union[str, os.PathLike], fallback_factory: C
         return fallback_factory()
 
 
-def yaml_load_or_fallback(filepath: Union[str, os.PathLike], fallback_factory: Callable = dict) -> dict:
+def yaml_load(filepath: Union[str, os.PathLike], fallback_factory: Callable = dict) -> dict:
     """Load a YAML file from the path, falling back to a fallback function if an invalid file.
 
     Parameters
