@@ -2,7 +2,9 @@ name: Make post
 
 on:
   schedule:
-  - cron: "30 * * * *"
+  - cron: "0 */3 * * *"
+  - cron: "30 1/3 * * *"
+  # Run every 90 minutes
 
   workflow_dispatch:
 
@@ -19,9 +21,6 @@ env:
 jobs:
   make-post:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash -l {0}
 
     steps:
       - name: Set timezone to US Central
@@ -39,24 +38,24 @@ jobs:
           git clone git@github.com:BenShoeman/SonicOCBot-private-assets.git $GITHUB_WORKSPACE/../PrivateAssets
           rsync -a $GITHUB_WORKSPACE/../PrivateAssets/ $GITHUB_WORKSPACE/
 
-      - name: Set up Conda cache
-        uses: actions/cache@v2
-        env:
-          CACHE_NUMBER: 0
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v3
         with:
-          path: ~/conda_pkgs_dir
-          key:
-            ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('requirements/ghactions/conda.txt') }}
+          python-version: 3.9
 
-      - name: Set up Miniconda
-        uses: conda-incubator/setup-miniconda@v2
+      - name: Set up pip cache
+        uses: actions/cache@v2
+        id: venv-cache
         with:
-          activate-environment: sonicocbot
-          environment-file: requirements/ghactions/conda.txt
-          channels: conda-forge
-          allow-softlinks: true
-          channel-priority: strict
-          use-only-tar-bz2: true
-      - run: |
-          pip install -r $GITHUB_WORKSPACE/requirements/ghactions/pip.txt
-          python $GITHUB_WORKSPACE/main.py
+          path: ./.venv/
+          key: ${{ runner.os }}-venv-${{ hashFiles('requirements/gha.txt') }}
+
+      - name: Set up venv
+        if: steps.venv-cache.outputs.cache-hit != 'true'
+        run: python -m venv ./.venv && source ./.venv/bin/activate && pip install -r $GITHUB_WORKSPACE/requirements/gha.txt
+
+      - name: Set up Chrome browser
+        uses: browser-actions/setup-chrome@latest
+
+      - name: Make post
+        run: source ./.venv/bin/activate && CHROME_BIN=$(which chrome) python $GITHUB_WORKSPACE/main.py

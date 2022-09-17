@@ -90,7 +90,7 @@ def make_post(
             poster.make_post(curr_post_creator)
             print("Done.")
         except Exception as e:
-            print(f"Exception encountered in posting from {poster_typ.__name__}: {e}")
+            print(f"{type(e).__name__} encountered in posting from {poster_typ.__name__}: {e}")
 
 
 def main(

@@ -139,16 +139,13 @@ class TextPostCreator(PostCreator):
                 new_logo_height = banner_height - 2 * img_vmargin
                 resize_ratio = new_logo_height / logo_height
                 new_logo_width = int(logo_width * resize_ratio)
-                logo_resized = self.__banner_img.resize((new_logo_width, new_logo_height))
+                logo_resized = self.__banner_img.convert("RGBA").resize((new_logo_width, new_logo_height))
                 post_img.paste(logo_resized, (img_width // 2 - new_logo_width // 2, img_vmargin), logo_resized)
 
             post_text = (f"# {self.__title}\n\n" if self.__title is not None else "") + self.__text.replace("\n", "\n\n")
 
             self.generate_css(textcolor)
             text_img = md_to_image(post_text, css=self._md_css, width=img_width - 2 * img_hmargin)
-            # Crop transparency in image
-            bbox = text_img.getbbox()
-            text_img = text_img.crop(bbox)
 
             # Squish text_img to fit height if it exceeds height
             text_img_width, text_img_height = text_img.size

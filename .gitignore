@@ -131,7 +131,7 @@ dmypy.json
 ._*
 
 # Specific to Sonic OC Bot
-corpus/*.txt
+corpus/
 data/*.json
 data/*.png
 data/*.txt
@@ -139,14 +139,14 @@ data/*.yml
 !data/colors.*
 !data/dictionary*.txt
 !data/schedule-colors.json
-fonts/*.ttf
+fonts/**/*.ttf
 images/**/*.png
-images/*svg/
 images/fanficlogo/
 images/pattern/
 images/sonicmaker/
 images/sonicsez/
-images/template/
+images/octemplate/
+images/posttemplate/
 models/*.db
 models/*.db.gz
 scraper-files/

@@ -119,7 +119,7 @@ class SonicMakerOC(OC):
                 if type_name == "none":
                     continue
 
-            type_img_arr = np.asarray(Image.open(Directories.IMAGES_DIR / "sonicmaker" / f"{part_name}-{type_name}{part_image_extension}").convert("RGBA"))
+            type_img_arr = np.array(Image.open(Directories.SONICMAKER_DIR / f"{part_name}-{type_name}{part_image_extension}").convert("RGBA"))
             fill_ops = part["fill"][type_name] or {}  # Coalesce to empty dict if None
 
             # Now start filling with the list of coords to fill

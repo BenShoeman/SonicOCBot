@@ -52,6 +52,30 @@
 - `dictionary.txt`: Provided in repo. Dictionary of words to be used when cleaning corpora.
 - `dictionary.propernouns.txt`: Provided in repo. Dictionary of proper nouns (and other capitalized words) to be used when constructing new sentences.
 - `names.{m,f,x}.yml`: List of names to pull from with their probabilities of occurring, for men/women/nonbinary names respectively.
+- `octemplate-fill.yml`: YAML file defining where to flood fill the templates. Below is the format for this file:
+  ```yml
+  template-1:
+    species: <species-name>
+    gender: <gender letter or string>
+    fill:
+      fill-operation:
+        region-name-1: [ [<fill x-coord 1>, <fill y-coord 1>], [<fill x-coord 2>, <fill y-coord 2>], ... ]
+        region-name-2: [ ... ]
+        ...
+      another-fill-op:
+        ...
+      ...
+  template-2:
+    ...
+  ...
+  ```
+  Explanation for each part:
+  - `template-1`: One of the templates. Images for this should be placed in `/images/octemplate/template-1.png`.
+    - `species`: Species of the template, e.g. "hedgehog" or "echidna".
+    - `gender`: Gender of the template, either "m", "f", or "x" for man, woman, or nonbinary respectively.
+      Can also use a string to indicate a few possible options, e.g. "mf" means man or woman are possible options.
+    - `fill` contains the actual information on where to fill this template.
+      - `fill-operation` is what operation you want to do to the color when filling. This is identical to the fill operations for Sonic Maker OCs (see `sonicmaker-fill.yml` below for more details).
 - `patterns.yml`: List of regions to apply a pattern on, given a specific species. Each species contains a list of potential patterns in the `images/pattern` directory to use, along with their probabilities of being used. If none of the patterns are used, a plain color is used instead. (See `sonicmaker-fill.yml` below for what a "region" is.) Follows a format similar to below:
   ```yml
   fur:
@@ -112,27 +136,3 @@
           Regions stay consistently colored all throughout the OC regardless of the part it is on, and will use a skin tone if set to "skin".
           You can also make it randomly decide between a region name using a pipe character, e.g. "fur|skin".
           The value for this is a list of x,y coordinates indicating the points to flood fill the template at (like flood filling in MS Paint).
-- `template-fill.yml`: YAML file defining where to flood fill the templates. Below is the format for this file:
-  ```yml
-  template-1:
-    species: <species-name>
-    gender: <gender letter or string>
-    fill:
-      fill-operation:
-        region-name-1: [ [<fill x-coord 1>, <fill y-coord 1>], [<fill x-coord 2>, <fill y-coord 2>], ... ]
-        region-name-2: [ ... ]
-        ...
-      another-fill-op:
-        ...
-      ...
-  template-2:
-    ...
-  ...
-  ```
-  Explanation for each part:
-  - `template-1`: One of the templates. Images for this should be placed in `/images/template/template-1.png`.
-    - `species`: Species of the template, e.g. "hedgehog" or "echidna".
-    - `gender`: Gender of the template, either "m", "f", or "x" for man, woman, or nonbinary respectively.
-      Can also use a string to indicate a few possible options, e.g. "mf" means man or woman are possible options.
-    - `fill` contains the actual information on where to fill this template.
-      - `fill-operation` is what operation you want to do to the color when filling. This is identical to the fill operations for Sonic Maker OCs.
