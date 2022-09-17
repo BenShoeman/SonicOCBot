@@ -52,9 +52,6 @@ class OCPostCreator(PostCreator):
             post_img_width, post_img_height = (680, 680)
             post_img = Image.new("RGB", (post_img_width, post_img_height), to_pil_color_tuple(bgcolor))
             text_img = md_to_image(f"# {self.__oc.name} the {self.__oc.species.title()}", css=self._md_css, width=post_img_width - 2 * post_img_margin)
-            # Crop transparency in image
-            bbox = text_img.getbbox()
-            text_img = text_img.crop(bbox)
 
             # Put text image at the bottom
             text_img_width, text_img_height = text_img.size
@@ -81,9 +78,6 @@ class OCPostCreator(PostCreator):
             post_img.paste(oc_img_resized, (0, post_img_margin), oc_img_resized)
 
             text_img = md_to_image(self.__get_oc_text(), css=self._md_css, width=post_img_width - new_oc_width - 3 * post_img_margin)
-            # Crop transparency in image
-            bbox = text_img.getbbox()
-            text_img = text_img.crop(bbox)
 
             # Squish text_img to fit height if it exceeds height and place on right side of the image
             text_img_width, text_img_height = text_img.size

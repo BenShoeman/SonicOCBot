@@ -13,7 +13,7 @@ class TemplateOC(OC):
     TEMPLATES: ClassVar[dict]
     """Data that contains information on how to create and fill the regions of the OC.
 
-    `data/template-fill.yml` is a YAML file in the following format:
+    `data/octemplate-fill.yml` is a YAML file in the following format:
 
     ```
     template-1:
@@ -34,7 +34,7 @@ class TemplateOC(OC):
 
     Explanation for each part:
 
-    - `template-1`: One of the templates. Images for this should be placed in `/images/template/template-1.png`.
+    - `template-1`: One of the templates. Images for this should be placed in `/images/octemplate/template-1.png`.
         - `species`: Species of the template, e.g. "hedgehog" or "echidna".
         - `gender`: Gender of the template, either "m", "f", or "x" for man, woman, or nonbinary respectively.
           Can also use a string to indicate a few possible options, e.g. "mf" means man or woman are possible options.
@@ -67,7 +67,7 @@ class TemplateOC(OC):
 
     @classmethod
     def __initialize_templates(cls) -> None:
-        cls.TEMPLATES = FileUtil.yaml_load(Directories.DATA_DIR / "template-fill.yml")
+        cls.TEMPLATES = FileUtil.yaml_load(Directories.DATA_DIR / "octemplate-fill.yml")
 
     def generate_image(self, fill_threshold: int = 192) -> None:
         """Implements `generate_image` from `OC` by using full templates.
@@ -78,7 +78,7 @@ class TemplateOC(OC):
             threshold of difference in color when flood filling, by default 96
         """
         part_image_extension = ".png"
-        img_arr = np.asarray(Image.open(Directories.IMAGES_DIR / "template" / f"{self.__template_name}{part_image_extension}").convert("RGBA"))
+        img_arr = np.array(Image.open(Directories.OC_TEMPLATES_DIR / f"{self.__template_name}{part_image_extension}").convert("RGBA"))
 
         # Fill each region in with a random color
         for operation, op_regions in self.__template.get("fill", {}).items():

@@ -137,6 +137,9 @@ class PostCreator(ABC):
             "h1": {
                 "font-size": "1.5em",
             },
+            "p": {
+                "text-align": "justify",
+            },
             "hr": {
                 "border": f"1px solid {rgb2hex(textcolor)}",
                 "opacity": "0.375",

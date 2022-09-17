@@ -1,8 +1,9 @@
-name: CI
+name: Quality checks
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: 
+      - master
 
 jobs:
   quality-checks:
@@ -17,9 +18,16 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install dependencies
-        run: |
-          pip install mypy black types-Markdown types-Pillow types-PyYAML unimport
+      - name: Set up pip cache
+        uses: actions/cache@v2
+        id: venv-cache
+        with:
+          path: ./.venv/
+          key: ${{ runner.os }}-venv-${{ hashFiles('requirements/gha.txt') }}
+
+      - name: Set up venv
+        if: steps.venv-cache.outputs.cache-hit != 'true'
+        run: python -m venv ./.venv && source ./.venv/bin/activate && pip install -r $GITHUB_WORKSPACE/requirements/gha.txt
 
       - name: Run quality checks
-        run: bash $GITHUB_WORKSPACE/quality-check.sh
+        run: source ./.venv/bin/activate && bash $GITHUB_WORKSPACE/quality-check.sh
