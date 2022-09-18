@@ -39,19 +39,19 @@ def fill_jinja_template(template_file: os.PathLike, **kwargs: Any) -> str:
 
 
 def html_to_image(
-    html: str,
+    html_str: str,
     css: Union[str, CSSDict] = "",
     width: int = 1000,
     height: Optional[int] = None,
     crop_transparency: bool = True,
 ) -> Image.Image:
-    """Convert HTML to an image using `weasyprint` and `pdf2image`.
+    """Convert HTML to an image using `html2image`.
 
     If `html2image` is not detecting the Chrome/Chromium path, pass it in using the `CHROME_BIN` environment variable.
 
     Parameters
     ----------
-    html : str
+    html_str : str
         HTML string to convert
     css : Union[str, CSSDict], optional
         CSS string to use for styling, or dict containing selectors as keys and attribute subdicts, by default ""
@@ -78,7 +78,7 @@ def html_to_image(
             browser_executable=os.getenv("CHROME_BIN"),
             custom_flags=["--default-background-color=0", "--hide-scrollbars"],
         )
-        h2i.screenshot(html_str=html, css_str=css_str, save_as=f_path.name, size=(width, height))
+        h2i.screenshot(html_str=html_str, css_str=css_str, save_as=f_path.name, size=(width, height))
         text_img = Image.open(f_path).convert("RGBA")
     # Resize image to match expected width if it doesn't match, for hidpi issues
     text_img_width, text_img_height = text_img.size
@@ -90,25 +90,26 @@ def html_to_image(
     return text_img
 
 
-def md_to_image(md: str, css: Union[str, CSSDict] = "", width: int = 1000) -> Image.Image:
+def md_to_image(md_str: str, **kwargs) -> Image.Image:
     """Convert Markdown to an image using `html_to_image`.
 
     Parameters
     ----------
-    md : str
+    md_str : str
         MD string to convert
-    css : Union[str, CSSDict], optional
-        CSS string to use for styling, or dict containing selectors as keys and attribute subdicts, by default ""
-    width : int, optional
-        width of the exported image, by default 1000
+
+    Other Parameters
+    ----------------
+    **kwargs : dict
+        The non-HTML arguments in `html_to_image`: css, width, height, crop_transparency
 
     Returns
     -------
     Image.Image
         MD and CSS converted to an image
     """
-    html = f"<html><body>{markdown.markdown(md)}</body></html>"
-    return html_to_image(html, css, width)
+    html_str = f"<html><body>{markdown.markdown(md_str)}</body></html>"
+    return html_to_image(html_str=html_str, **kwargs)
 
 
 def dict_to_css(css_dict: CSSDict) -> str:
