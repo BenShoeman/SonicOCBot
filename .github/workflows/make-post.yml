@@ -47,15 +47,20 @@ jobs:
         uses: actions/cache@v2
         id: venv-cache
         with:
-          path: ./.venv/
+          path: .venv/
           key: ${{ runner.os }}-venv-${{ hashFiles('requirements/gha.txt') }}
 
       - name: Set up venv
         if: steps.venv-cache.outputs.cache-hit != 'true'
-        run: python -m venv ./.venv && source ./.venv/bin/activate && pip install -r $GITHUB_WORKSPACE/requirements/gha.txt
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r $GITHUB_WORKSPACE/requirements/gha.txt
 
       - name: Set up Chrome browser
         uses: browser-actions/setup-chrome@latest
 
       - name: Make post
-        run: source ./.venv/bin/activate && CHROME_BIN=$(which chrome) python $GITHUB_WORKSPACE/main.py
+        run: |
+          source .venv/bin/activate
+          CHROME_BIN=$(which chrome) python $GITHUB_WORKSPACE/main.py

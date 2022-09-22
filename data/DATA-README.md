@@ -49,8 +49,6 @@
   ...
   ```
 - `colors.skintones.gradient.png`: Provided in repo. Gradient of various skin tones to pick from.
-- `dictionary.txt`: Provided in repo. Dictionary of words to be used when cleaning corpora.
-- `dictionary.propernouns.txt`: Provided in repo. Dictionary of proper nouns (and other capitalized words) to be used when constructing new sentences.
 - `names.{m,f,x}.yml`: List of names to pull from with their probabilities of occurring, for men/women/nonbinary names respectively.
 - `octemplate-fill.yml`: YAML file defining where to flood fill the templates. Below is the format for this file:
   ```yml
