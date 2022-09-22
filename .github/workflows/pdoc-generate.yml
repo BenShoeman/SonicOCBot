@@ -35,24 +35,22 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Set up pip cache
-        uses: actions/cache@v2
-        id: venv-cache
+      - name: Set up venv cache
+        uses: syphar/restore-virtualenv@v1
+        id: cache-venv
         with:
-          path: .venv/
-          key: ${{ runner.os }}-venv-${{ hashFiles('requirements/gha.txt') }}
+          requirement_files: requirements/gha.txt
 
-      - name: Set up venv
-        if: steps.venv-cache.outputs.cache-hit != 'true'
-        run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          pip install -r $GITHUB_WORKSPACE/requirements/gha.txt
+      - name: Set up pip cache
+        uses: syphar/restore-pip-download-cache@v1
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+
+      - name: Install requirements in venv
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: pip install -r $GITHUB_WORKSPACE/requirements/gha.txt
 
       - name: Generate docs
-        run: |
-          source .venv/bin/activate
-          pdoc --docformat numpy -o docs/ src
+        run: pdoc --docformat numpy -o docs/ src
 
       - run: tar --directory docs/ -hcf artifact.tar .
       - uses: actions/upload-artifact@v3
