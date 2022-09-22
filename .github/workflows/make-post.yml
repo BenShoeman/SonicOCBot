@@ -2,9 +2,7 @@ name: Make post
 
 on:
   schedule:
-  - cron: "0 */3 * * *"
-  - cron: "30 1/3 * * *"
-  # Run every 90 minutes
+  - cron: "30 * * * *"
 
   workflow_dispatch:
 
