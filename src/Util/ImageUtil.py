@@ -1,5 +1,7 @@
 """Utilities for reading and manipulating images."""
 
+from base64 import b64encode
+from io import BytesIO
 import numpy as np
 from PIL import Image
 import random
@@ -166,3 +168,23 @@ def multiply_floodfill(
         the modified PIL image or numpy array, same type as input
     """
     return floodfill(img, xy, fill, threshold, method=lambda orig, new: orig * new // 255, in_place=in_place)
+
+
+def image_to_data_url(img: Image.Image) -> str:
+    """Create a data URL from the inputted image.
+
+    Parameters
+    ----------
+    img : Image.Image
+        PIL image to convert to a data URL (as a PNG)
+
+    Returns
+    -------
+    str
+        data URL of the image
+    """
+    with BytesIO() as f:
+        img.save(f, format="PNG")
+        f.seek(0)
+        b64_contents = b64encode(f.read()).decode("utf-8")
+    return f"data:image/png;base64,{b64_contents}"

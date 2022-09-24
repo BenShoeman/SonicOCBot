@@ -13,7 +13,7 @@ CSSDict = dict[str, Union[dict[str, str], list[dict[str, str]]]]
 """Dictionary type containing CSS attributes and values."""
 
 
-def fill_jinja_template(template_file: os.PathLike, **kwargs: Any) -> str:
+def fill_jinja_template(template_file: Union[str, Path], **kwargs: Any) -> str:
     """Return a filled Jinja template using the keyword arguments; easy wrapper around Jinja template rendering.
 
     This does support template inheritance but only when the inherited template is in the same directory as the template file.

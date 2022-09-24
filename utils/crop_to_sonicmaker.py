@@ -24,7 +24,7 @@ out_dir.mkdir(exist_ok=True)
 sonicocbot_path = Path(args.sonicocbotpath)
 sonicmaker_fill = yaml.safe_load(read_file(sonicocbot_path / "data" / "sonicmaker-fill.yml"))
 part_x, part_y = sonicmaker_fill["fills"][args.parttype]["position"]
-part_img = Image.open(glob.glob(str(sonicocbot_path / "images" / "sonicmaker" / f"{args.parttype}*.png"))[0])
+part_img = Image.open(next((sonicocbot_path / "images" / "sonicmaker").glob(f"{args.parttype}*.png")))
 part_width, part_height = part_img.size
 
 for g in args.files:

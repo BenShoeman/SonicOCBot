@@ -14,6 +14,7 @@ This module has 4 constants defined that contain colors to use. They are:
 import numpy as np
 from skimage import color
 import os
+from pathlib import Path
 from PIL import Image
 from typing import Any, TypedDict, TypeVar, Union
 
@@ -368,7 +369,7 @@ def analogous_cw(rgb: ColorOrImage) -> ColorOrImage:
     return analogous(rgb, clockwise=True)
 
 
-def get_colors_list(filename: Union[str, os.PathLike]) -> list[ColorDict]:
+def get_colors_list(filename: Union[str, Path]) -> list[ColorDict]:
     """Reads a text file containing RGB triplets and their corresponding names into a list.
 
     The input list will be in the following format:

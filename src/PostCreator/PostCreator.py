@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 from datetime import time
-import glob
-import os
 from pathlib import Path
 from PIL import Image
 import random
@@ -12,28 +10,27 @@ import src.Directories as Directories
 from src.Util.ColorUtil import ColorTuple, hex2rgb, rgb2hex
 
 
-def _get_font_choices(fonts_dir: os.PathLike) -> dict:
+def _get_font_choices(fonts_dir: Union[str, Path]) -> dict:
     fonts_path = Path(fonts_dir)
     if fonts_path.exists():
-        font_names = set(
-            font_file.removesuffix(".ttf").removesuffix("-Regular")
-            for font_file in glob.glob(str(fonts_path / "*.ttf"))
-            if font_file.endswith(".ttf") and not font_file.endswith("-Italic.ttf")
-        )
+        # Group all fonts with their italic counterparts in the fonts directory
         return {
-            font_name: {
-                "regular": (regular_font_path := f"{font_name}.ttf" if os.path.exists(f"{font_name}.ttf") else f"{font_name}-Regular.ttf"),
-                "italic": f"{font_name}-Italic.ttf" if os.path.exists(f"{font_name}-Italic.ttf") else regular_font_path,
+            font_file.stem.removesuffix("-Regular"): {
+                "regular": font_file,
+                "italic": font_italic_file
+                if (font_italic_file := (fonts_path / f"{font_file.stem.removesuffix('-Regular')}-Italic.ttf")).exists()
+                else font_file,
             }
-            for font_name in font_names
+            for font_file in fonts_path.glob("*.ttf")
+            if not font_file.stem.endswith("-Italic")
         }
     else:
         print(f"Error: could not load fonts as directory {fonts_dir} doesn't exist.")
         return {}
 
 
-def _get_color_schedule(schedule_path: str) -> dict:
-    if os.path.exists(schedule_path):
+def _get_color_schedule(schedule_path: Union[str, Path]) -> dict:
+    if Path(schedule_path).exists():
         with open(schedule_path) as f:
             schedule_dict = yaml.safe_load(f)
         converted_schedule = {}
