@@ -90,7 +90,7 @@ def html_to_image(
     return text_img
 
 
-def md_to_image(md_str: str, **kwargs) -> Image.Image:
+def md_to_image(md_str: str, **kwargs: Any) -> Image.Image:
     """Convert Markdown to an image using `html_to_image`.
 
     Parameters
