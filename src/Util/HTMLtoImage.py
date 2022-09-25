@@ -9,6 +9,8 @@ from PIL import Image
 import tempfile
 from typing import Any, Optional, Union
 
+import src.Directories as Directories
+
 CSSDict = dict[str, Union[dict[str, str], list[dict[str, str]]]]
 """Dictionary type containing CSS attributes and values."""
 
@@ -34,7 +36,7 @@ def fill_jinja_template(template_file: Union[str, Path], **kwargs: Any) -> str:
         Jinja template filled out with the kwargs
     """
     template_path = Path(template_file)
-    env = Environment(loader=FileSystemLoader(template_path.parent))
+    env = Environment(loader=FileSystemLoader((Directories.TEMPLATES_DIR, template_path.parent)))
     return env.get_template(template_path.name).render(**kwargs)
 
 

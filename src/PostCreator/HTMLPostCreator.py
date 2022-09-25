@@ -1,4 +1,5 @@
 import markdown
+from pathlib import Path
 from PIL import Image
 import random
 from typing import Any, Optional, Union
@@ -14,12 +15,12 @@ class HTMLPostCreator(PostCreator):
 
     def __init__(
         self,
+        template_path: Union[str, Path],
         content: str,
         title: Optional[str] = None,
         subtitle: Optional[str] = None,
         image: Optional[Image.Image] = None,
         tags: Optional[Union[list[str], tuple[str, ...]]] = None,
-        template_name: Optional[str] = None,
         width: int = 1200,
         height: int = 680,
         use_markdown: bool = True,
@@ -29,6 +30,8 @@ class HTMLPostCreator(PostCreator):
 
         Parameters
         ----------
+        template_path : Union[str, Path]
+            path of the HTML Jinja template to use; if a directory is provided, picks a random `.j2` file from the directory
         content : str
             body text for the image
         title : Optional[str]
@@ -39,8 +42,6 @@ class HTMLPostCreator(PostCreator):
             image to insert within the image, by default None
         tags : Optional[Union[list[str], tuple[str, ...]]]
             list of tags to be used in the text of the post, by default None
-        template_name : Optional[str]
-            name of the HTML Jinja template from `images/posttemplate/*.j2` to use, by default None; if None, picks one at random
         width : int, optional
             width of the outputted image, by default 1200
         height : int, optional
@@ -53,10 +54,11 @@ class HTMLPostCreator(PostCreator):
         **kwargs : dict
             Same as in `PostCreator`.
         """
-        if template_name:
-            self.__template_file = Directories.IMAGES_DIR / "posttemplate" / f"{template_name}.j2"
+        path = Path(template_path)
+        if path.is_dir():
+            self.__template_file = random.choice(list(path.glob("*.j2")))
         else:
-            self.__template_file = random.choice(list((Directories.IMAGES_DIR / "posttemplate").glob("*.j2")))
+            self.__template_file = path
         self.__content = content
         self.__title = title
         self.__subtitle = subtitle
@@ -69,6 +71,13 @@ class HTMLPostCreator(PostCreator):
 
     def get_image(self) -> Optional[Image.Image]:
         """Implements `get_image` in `PostCreator` by creating an image, using the post inputs and HTML Jinja template.
+
+        The fields that will be filled out in the template are the following:
+        - `title`
+        - `subtitle`
+        - `content`
+        - `image` (this is the input image converted to a PNG data URL)
+        - `project_dir` (taken from `Directories.PROJECT_DIR`)
 
         Returns
         -------
