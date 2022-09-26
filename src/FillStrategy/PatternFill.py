@@ -1,6 +1,4 @@
 import numpy as np
-import glob
-from pathlib import Path
 from PIL import Image, ImageChops
 from typing import Callable, ClassVar, Optional
 
@@ -83,7 +81,7 @@ class PatternFill(FillStrategy):
             fg_fill = ColorUtil.randomize_color(new_color["color"])
             self._fg_color_name = new_color["name"]
         if not pattern_type:
-            pattern_imgs = [Path(file).stem for file in glob.iglob(Directories.IMAGES_DIR / "pattern" / "*.png")]
+            pattern_imgs = [path.stem for path in (Directories.IMAGES_DIR / "pattern").glob("*.png")]
             pattern_type = _rng.choice(pattern_imgs) if len(pattern_imgs) > 0 else None
         self._pattern_type = pattern_type
         pattern_img = Image.open(Directories.IMAGES_DIR / "pattern" / f"{pattern_type}.png").convert("RGBA") if pattern_type is not None else None

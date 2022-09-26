@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 from PIL import Image, ImageDraw
 from typing import Any, Optional, Union
 
@@ -10,13 +11,13 @@ from src.Util.ColorUtil import ColorTuple, to_pil_color_tuple
 class TextPostCreator(PostCreator):
     """`PostCreator` that creates a post having an image with text on it."""
 
-    def __init__(self, text: str, title: Optional[str] = None, tags: Optional[Union[list[str], tuple[str, ...]]] = None, **kwargs: Any):
+    def __init__(self, content: str, title: Optional[str] = None, tags: Optional[Union[list[str], tuple[str, ...]]] = None, **kwargs: Any):
         """Create a `TextPostCreator`.
 
         Parameters
         ----------
         text : str
-            text to make image of
+            body text to make image of
         title : Optional[str], optional
             title of the text in the image, by default None
         tags : Optional[Union[list[str], tuple[str, ...]]], optional
@@ -27,7 +28,7 @@ class TextPostCreator(PostCreator):
         **kwargs : dict
             Same as in `PostCreator`.
         """
-        self.__text = text
+        self.__content = content
         self.__title = title
         self.__tags = tags
         self.__banner_img: Optional[Image.Image] = None
@@ -37,19 +38,19 @@ class TextPostCreator(PostCreator):
         self.__overlay_alpha = 0
         super().__init__(**kwargs)
 
-    def set_banner(self, img: Optional[Union[str, Image.Image]] = None, bgcolor: Optional[ColorTuple] = None, height: int = 80) -> None:
+    def set_banner(self, img: Optional[Union[str, Path, Image.Image]] = None, bgcolor: Optional[ColorTuple] = None, height: int = 80) -> None:
         """Set the top banner logo (e.g., to imitate a specific site).
 
         Parameters
         ----------
-        img : Optional[Image.Image], optional
+        img : Optional[str | Path | Image.Image], optional
             logo to put in the upper left corner of the banner, or None to remove banner
         bgcolor : Optional[ColorTuple], optional
             color to make the banner; if None, uses the average color of the image corners; by default None
         height : int, optional
             height of the banner, by default 100
         """
-        if isinstance(img, str):
+        if isinstance(img, (str, Path)):
             self.__banner_img = Image.open(img)
         else:
             self.__banner_img = img
@@ -78,17 +79,17 @@ class TextPostCreator(PostCreator):
             self.__banner_bgcolor = None
             self.__banner_height = 0
 
-    def set_overlay(self, img: Optional[Union[str, Image.Image]] = None, alpha: int = 255) -> None:
+    def set_overlay(self, img: Optional[Union[str, Path, Image.Image]] = None, alpha: int = 255) -> None:
         """Set the background overlay image.
 
         Parameters
         ----------
-        img : Optional[Image.Image], optional
+        img : Optional[str | Path | Image.Image], optional
             image to overlay in the background, or None to remove it
         alpha : int, optional
             alpha to paste the image at in interval [0, 255], by default 255
         """
-        if isinstance(img, str):
+        if isinstance(img, (str, Path)):
             self.__overlay_img = Image.open(img)
         else:
             self.__overlay_img = img
@@ -142,7 +143,7 @@ class TextPostCreator(PostCreator):
                 logo_resized = self.__banner_img.convert("RGBA").resize((new_logo_width, new_logo_height))
                 post_img.paste(logo_resized, (img_width // 2 - new_logo_width // 2, img_vmargin), logo_resized)
 
-            post_text = (f"# {self.__title}\n\n" if self.__title is not None else "") + self.__text.replace("\n", "\n\n")
+            post_text = (f"# {self.__title}\n\n" if self.__title is not None else "") + self.__content.replace("\n", "\n\n")
 
             self.generate_css(textcolor)
             text_img = md_to_image(post_text, css=self._md_css, width=img_width - 2 * img_hmargin)
@@ -155,7 +156,7 @@ class TextPostCreator(PostCreator):
             post_img.paste(text_img, (img_hmargin, img_height // 2 - text_img_height // 2 + banner_height // 2), text_img)
             return post_img
 
-    def get_alt_text(self) -> str:
+    def get_alt_text(self) -> Optional[str]:
         """Implements `get_alt_text` in `PostCreator` by using the text in the post image.
 
         Returns
@@ -165,7 +166,7 @@ class TextPostCreator(PostCreator):
         """
         single_newline = "\n"
         double_newline = "\n\n"
-        return f"{(self.__title + double_newline) if self.__title else ''}{self.__text.replace(single_newline, double_newline)}"
+        return f"{(self.__title + double_newline) if self.__title else ''}{self.__content.replace(single_newline, double_newline)}"
 
     def get_title(self) -> Optional[str]:
         """Implements `get_title` in `PostCreator` by returning the title of the post.
@@ -187,7 +188,7 @@ class TextPostCreator(PostCreator):
         """
         tags_suffix = " " + " ".join(f"#{tag.replace(' ', '')}" for tag in self.__tags) if self.__tags else ""
         # Use title if there is one, otherwise the text
-        content = self.__title or self.__text
+        content = self.__title or self.__content
         content += tags_suffix
         return content
 
@@ -199,7 +200,7 @@ class TextPostCreator(PostCreator):
         str
             long text of the post
         """
-        return self.__text.replace("\n", "\n\n")
+        return self.__content.replace("\n", "\n\n")
 
     def get_tags(self) -> Optional[tuple[str, ...]]:
         """Implements `get_tags` in `PostCreator` by returning the tuple of tags.

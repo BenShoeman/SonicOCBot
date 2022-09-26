@@ -63,7 +63,7 @@ class FanfictionGenerator:
             body text of the fanfiction
         """
         title = self.__titles_model.get_text_block(mean_words=self.__mean_title_words, stdev_words=self.__stdev_title_words)
-        body_text = "\n".join(
+        body_text = "\n\n".join(
             self.__body_text_model.get_text_block(mean_words=self.__mean_body_words, stdev_words=self.__stdev_body_words)
             for _ in range(_gauss_int(mean=self.__mean_paragraphs, stdev=self.__stdev_paragraphs, min_val=1))
         )

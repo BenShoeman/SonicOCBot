@@ -17,14 +17,17 @@ pip install -r requirements/{os}.txt
 
 This repo uses `mypy`, `black`, and `unimport` to check typing, formatting, and unused imports respectively. All are installed during the above requirements installation and you can run all the checks using [`quality-check.sh`](/quality-check.sh).
 
+As this repo uses the `html2image` module, this repo requires a Chromium browser to generate the images. The module should detect the browser if it's Chrome or Chromium, but if not, set the `CHROME_BIN` environment variable to the path of the executable and that will be used.
+
 ### Required Data
 
 This repo requires a good amount of data to run. Please see each of the following guides to see what files are required:
 
-- [Files in /data](data/DATA-README.md)
-- [Files in /fonts](fonts/FONTS-README.md)
-- [Files in /images](images/IMAGES-README.md)
-- [Files in /models](models/MODELS-README.md)
+- [Files in /data](/data/DATA-README.md)
+- [Files in /fonts](/fonts/FONTS-README.md)
+- [Files in /images](/images/IMAGES-README.md)
+- [Files in /models](/models/MODELS-README.md)
+- [Files in /templates](/templates/TEMPLATES-README.md)
 
 Note that the `models` directory requires trained models to be put into it. These are generated from text files using [`train.py`](/train.py).
 

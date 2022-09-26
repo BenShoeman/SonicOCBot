@@ -146,10 +146,10 @@ images/pattern/
 images/sonicmaker/
 images/sonicsez/
 images/octemplate/
-images/posttemplate/
 models/*.db
 models/*.db.gz
-scraper-files/
-scraper-texts/
+templates/**/*.html
+templates/**/*.j2
+templates/**/*.png
 unused/models/*.json
 unused/models/*.onnx

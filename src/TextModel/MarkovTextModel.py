@@ -4,7 +4,7 @@ import numpy as np
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
-from typing import Optional, Union
+from typing import ClassVar, Optional, Union
 
 from .TextModel import TextModel
 from .MarkovTriads import MarkovTriads
@@ -16,6 +16,9 @@ _rng = np.random.default_rng()
 
 class MarkovTextModel(TextModel):
     """Text model that uses a Markov model to generate text, based off the models generated from `train.py`."""
+
+    MAX_TOKENS_PER_BLOCK: ClassVar[int] = 10000
+    """Max tokens per text block in case of a loop in the Markov model."""
 
     def __init__(self, model_name: str, punc_required: bool = True):
         """Create a `MarkovTextModel`.
@@ -100,6 +103,6 @@ class MarkovTextModel(TextModel):
         n_words = max(1, abs(round(_rng.normal(mean_words, stdev_words))))
         tokens = [self.get_next_word() for _ in range(n_words)]
         # Finish until the end of a sentence, if punctuation is required
-        while self.__punc_required and tokens[-1] not in (".", "!", "?"):
+        while self.__punc_required and tokens[-1] not in (".", "!", "?") and len(tokens) < self.__class__.MAX_TOKENS_PER_BLOCK:
             tokens.append(self.get_next_word())
         return self.__markov_table.detokenize(tokens)
