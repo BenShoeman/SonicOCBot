@@ -74,6 +74,13 @@
       Can also use a string to indicate a few possible options, e.g. "mf" means man or woman are possible options.
     - `fill` contains the actual information on where to fill this template.
       - `fill-operation` is what operation you want to do to the color when filling. This is identical to the fill operations for Sonic Maker OCs (see `sonicmaker-fill.yml` below for more details).
+- `palettes.yml`: List of palettes to use in posts, including a primary/secondary/tertiary color. Like so:
+  ```yml
+  palette-name:
+    primary: '#ff0000'
+    secondary: '#00ff00'
+    tertiary: '#0000ff'
+  ```
 - `patterns.yml`: List of regions to apply a pattern on, given a specific species. Each species contains a list of potential patterns in the `images/pattern` directory to use, along with their probabilities of being used. If none of the patterns are used, a plain color is used instead. (See `sonicmaker-fill.yml` below for what a "region" is.) Follows a format similar to below:
   ```yml
   fur:

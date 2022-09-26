@@ -23,10 +23,11 @@ As this repo uses the `html2image` module, this repo requires a Chromium browser
 
 This repo requires a good amount of data to run. Please see each of the following guides to see what files are required:
 
-- [Files in /data](data/DATA-README.md)
-- [Files in /fonts](fonts/FONTS-README.md)
-- [Files in /images](images/IMAGES-README.md)
-- [Files in /models](models/MODELS-README.md)
+- [Files in /data](/data/DATA-README.md)
+- [Files in /fonts](/fonts/FONTS-README.md)
+- [Files in /images](/images/IMAGES-README.md)
+- [Files in /models](/models/MODELS-README.md)
+- [Files in /templates](/templates/TEMPLATES-README.md)
 
 Note that the `models` directory requires trained models to be put into it. These are generated from text files using [`train.py`](/train.py).
 

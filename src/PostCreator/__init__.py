@@ -10,6 +10,8 @@ The submodules are as follows:
 """
 
 from .PostCreator import PostCreator
+from .HTMLPostCreator import HTMLPostCreator
+from .OCHTMLPostCreator import OCHTMLPostCreator
 from .OCPostCreator import OCPostCreator
 from .TextPostCreator import TextPostCreator
 from .TwitterPostCreator import TwitterPostCreator

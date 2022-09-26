@@ -156,7 +156,7 @@ class TextPostCreator(PostCreator):
             post_img.paste(text_img, (img_hmargin, img_height // 2 - text_img_height // 2 + banner_height // 2), text_img)
             return post_img
 
-    def get_alt_text(self) -> str:
+    def get_alt_text(self) -> Optional[str]:
         """Implements `get_alt_text` in `PostCreator` by using the text in the post image.
 
         Returns

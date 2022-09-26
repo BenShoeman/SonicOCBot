@@ -369,6 +369,23 @@ def analogous_cw(rgb: ColorOrImage) -> ColorOrImage:
     return analogous(rgb, clockwise=True)
 
 
+def contrasting_text_color(rgb: ColorTuple) -> ColorTuple:
+    """Get the color white or black, depending on whether it contrasts well with the input color.
+
+    Parameters
+    ----------
+    rgb : ColorTuple
+        3-tuple of colors to get contrasting color for
+
+    Returns
+    -------
+    ColorTuple
+        3-tuple of colors representing white or black
+    """
+    h, s, l = rgb2hsl(np.asarray(rgb, dtype=np.uint8))
+    return (0, 0, 0) if l >= 0.5 else (255, 255, 255)
+
+
 def get_colors_list(filename: Union[str, Path]) -> list[ColorDict]:
     """Reads a text file containing RGB triplets and their corresponding names into a list.
 
