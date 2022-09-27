@@ -3,7 +3,7 @@ import pytumblr
 import tempfile
 
 from .Poster import Poster
-from src.PostCreator import PostCreator, OCPostCreator, TextPostCreator
+from src.PostCreator import PostCreator
 
 
 class TumblrPoster(Poster):
@@ -42,11 +42,10 @@ class TumblrPoster(Poster):
         # Add extra tags for Tumblr posts based on the post type
         post_tags = post_creator.get_tags()
         extra_tags: tuple[str, ...] = ("sonic", "sonic the hedgehog")
-        if isinstance(post_creator, OCPostCreator):
+        if post_tags and "oc bot" in post_tags:
             extra_tags += ("oc", "sonic oc", "fake oc")
-        if isinstance(post_creator, TextPostCreator):
-            if post_tags and "fanfic bot" in post_tags:
-                extra_tags += ("fanfic", "sonic fanfic", "fake fanfic")
+        elif post_tags and "fanfic bot" in post_tags:
+            extra_tags += ("fanfic", "sonic fanfic", "fake fanfic")
         tags = extra_tags + (post_tags if post_tags else tuple())
         if img is None:
             self.__client.create_text(
