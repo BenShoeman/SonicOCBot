@@ -16,7 +16,7 @@ jobs:
 
     steps:
       - name: Set timezone to US Central
-        uses: szenius/set-timezone@v1.0
+        uses: szenius/set-timezone@v1.1
         with:
           timezoneLinux: "America/Chicago"
 
