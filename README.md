@@ -6,7 +6,7 @@ A bot that randomly generates Sonic OCs, fanfictions, and Sonic Says segments.
 
 ### Package Installation
 
-Install the requirements from [`/requirements`](/requirements/), choosing the right file for your OS, and you should be good to go:
+Install the requirements from [`/requirements`](/requirements/) and you should be good to go:
 
 ```sh
 cd SonicOCBot  # ... wherever you have the repo stored
