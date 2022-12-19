@@ -12,7 +12,7 @@ Install the requirements from [`/requirements`](/requirements/), choosing the ri
 cd SonicOCBot  # ... wherever you have the repo stored
 python -m venv .venv
 source .venv/bin/activate
-pip install -r requirements/{os}.txt
+pip install -r requirements/local.txt
 ```
 
 This repo uses `mypy`, `black`, and `unimport` to check typing, formatting, and unused imports respectively. All are installed during the above requirements installation and you can run all the checks using [`quality-check.sh`](/quality-check.sh).
