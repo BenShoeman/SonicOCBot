@@ -58,7 +58,7 @@ jobs:
         run: pip install -r $GITHUB_WORKSPACE/requirements/gha.txt
 
       - name: Install Chromium browser
-        run: apt install -y chromium-browser
+        run: sudo apt-get install -y chromium-browser
 
       - name: Make post
         run: CHROME_BIN=$(which chromium) python $GITHUB_WORKSPACE/main.py
