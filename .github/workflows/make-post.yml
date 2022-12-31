@@ -61,4 +61,7 @@ jobs:
         run: sudo apt-get install -y chromium-browser
 
       - name: Make post
-        run: CHROME_BIN=$(which chromium) python $GITHUB_WORKSPACE/main.py
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/../tmp
+          export TMPDIR=$(readlink -f $GITHUB_WORKSPACE/../tmp)
+          CHROME_BIN=$(which chromium) python $GITHUB_WORKSPACE/main.py
