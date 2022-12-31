@@ -38,6 +38,9 @@ jobs:
           git clone git@github.com:BenShoeman/SonicOCBot-private-assets.git $GITHUB_WORKSPACE/../PrivateAssets
           rsync -a $GITHUB_WORKSPACE/../PrivateAssets/ $GITHUB_WORKSPACE/
 
+      - name: Set up Chrome browser
+        uses: browser-actions/setup-chrome@latest
+
       - name: Set up Python 3.9
         uses: actions/setup-python@v4
         with:
@@ -57,11 +60,8 @@ jobs:
         if: steps.cache-venv.outputs.cache-hit != 'true'
         run: pip install -r $GITHUB_WORKSPACE/requirements/gha.txt
 
-      - name: Install Chromium browser
-        run: sudo apt-get install -y chromium-browser
-
       - name: Make post
         run: |
           mkdir -p $GITHUB_WORKSPACE/../tmp
           export TMPDIR=$(readlink -f $GITHUB_WORKSPACE/../tmp)
-          CHROME_BIN=$(which chromium) python $GITHUB_WORKSPACE/main.py
+          CHROME_BIN=$(which chrome) python $GITHUB_WORKSPACE/main.py
