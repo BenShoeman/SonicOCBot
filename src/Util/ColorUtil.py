@@ -11,6 +11,7 @@ This module has 4 constants defined that contain colors to use. They are:
   Image containing many different skin tones to pick from.
 """
 
+import logging
 import numpy as np
 from skimage import color
 import os
@@ -21,6 +22,7 @@ from typing import Any, TypedDict, TypeVar, Union
 import src.Directories as Directories
 
 
+_logger = logging.getLogger(__name__)
 _rng = np.random.default_rng()
 
 
@@ -423,7 +425,7 @@ def get_colors_list(filename: Union[str, Path]) -> list[ColorDict]:
             # Finally, create the list of ColorDicts
             colors = [ColorDict(name=color_name, color=color_tuple) for color_tuple, color_name in colorlist]
     except FileNotFoundError:
-        print("Error: colors list not found. Loading a basic colors list")
+        _logger.warn("colors list not found. Loading a basic colors list")
         colors = _BASIC_COLORS
     return colors
 
@@ -445,7 +447,7 @@ _SKIN_TONE_COLORS = get_colors_list(Directories.DATA_DIR / "colors.skintones.txt
 if os.path.exists((_skin_tone_gradient_file := Directories.DATA_DIR / "colors.skintones.gradient.png")):
     _SKIN_TONE_GRADIENT = Image.open(_skin_tone_gradient_file)
 else:
-    print("Error: skin tones gradient not found. Loading a dummy image")
+    _logger.warn("skin tones gradient not found. Loading a dummy image")
     _SKIN_TONE_GRADIENT = Image.new("RGB", (1, 1), (128, 128, 128))
 
 

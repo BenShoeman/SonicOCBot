@@ -17,7 +17,7 @@ class MastodonPoster(Poster):
         """Create the Mastodon poster using the environment variables described above."""
         self.__api = Mastodon(
             access_token=os.environ.get("MASTODON_ACCESS_TOKEN"),
-            api_base_url=os.environ.get("MASTODON_INSTANCE_URL"),
+            api_base_url=os.environ.get("MASTODON_INSTANCE_URL", "https://localhost"),
         )
 
     def make_post(self, post_creator: PostCreator) -> None:

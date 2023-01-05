@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import logging
 from PIL import Image
 import random
 from typing import Optional
@@ -7,6 +8,9 @@ import src.Util.FileUtil as FileUtil
 import src.Directories as Directories
 from src.FillStrategy import FillStrategy
 from src.TextModel import TextModel, MarkovTextModel
+
+
+_logger = logging.getLogger(__name__)
 
 
 def _load_text_model(model_name: str) -> Optional[TextModel]:
@@ -199,7 +203,7 @@ class OC(ABC):
         if len(names) > 0:
             self._name: str = random.choices(tuple(names.keys()), weights=tuple(names.values()), k=1)[0]
         else:
-            print(f"Error: names.{self.gender}.yml could not be loaded or is empty.")
+            _logger.warn(f"names.{self.gender}.yml could not be loaded or is empty.")
 
     def _generate_personalities(self) -> None:
         self._personalities = random.sample(OC._PERSONALITIES, k=random.randint(1, 3))
@@ -226,5 +230,5 @@ class OC(ABC):
         if model is not None:
             self._description = model.get_text_block(mean_words=42, stdev_words=20)
         else:
-            print(f"Error: ocdescriptions.{self.gender} model could not be loaded.")
+            _logger.warn(f"ocdescriptions.{self.gender} model could not be loaded.")
             self._description = ""
