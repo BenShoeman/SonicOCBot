@@ -2,10 +2,10 @@
 
 from html2image import Html2Image
 from jinja2 import Environment, FileSystemLoader
-import markdown
 import os
 from pathlib import Path
 from PIL import Image
+import pycmarkgfm as gfm
 import tempfile
 from typing import Any, Optional, Union
 
@@ -78,7 +78,7 @@ def html_to_image(
         h2i = Html2Image(
             output_path=f_path.parent,
             browser_executable=os.getenv("CHROME_BIN"),
-            custom_flags=["--default-background-color=0", "--hide-scrollbars"],
+            custom_flags=["--default-background-color=0", "--hide-scrollbars", "--disable-gpu", *os.getenv("CHROME_ARGS", "").split()],
         )
         h2i.screenshot(html_str=html_str, css_str=css_str, save_as=f_path.name, size=(width, height))
         text_img = Image.open(f_path).convert("RGBA")
@@ -110,7 +110,7 @@ def md_to_image(md_str: str, **kwargs: Any) -> Image.Image:
     Image.Image
         MD and CSS converted to an image
     """
-    html_str = f"<html><body>{markdown.markdown(md_str)}</body></html>"
+    html_str = f"<html><body>{gfm.gfm_to_html(md_str)}</body></html>"
     return html_to_image(html_str=html_str, **kwargs)
 
 

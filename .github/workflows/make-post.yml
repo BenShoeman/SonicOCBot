@@ -6,18 +6,6 @@ on:
 
   workflow_dispatch:
 
-env:
-  TWITTER_CONSUMER_KEY: ${{ secrets.TWITTER_CONSUMER_KEY }}
-  TWITTER_CONSUMER_SECRET: ${{ secrets.TWITTER_CONSUMER_SECRET }}
-  TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
-  TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
-  TUMBLR_CONSUMER_KEY: ${{ secrets.TUMBLR_CONSUMER_KEY }}
-  TUMBLR_CONSUMER_SECRET: ${{ secrets.TUMBLR_CONSUMER_SECRET }}
-  TUMBLR_OAUTH_TOKEN: ${{ secrets.TUMBLR_OAUTH_TOKEN }}
-  TUMBLR_OAUTH_SECRET: ${{ secrets.TUMBLR_OAUTH_SECRET }}
-  MASTODON_INSTANCE_URL: ${{ secrets.MASTODON_INSTANCE_URL }}
-  MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
-
 jobs:
   make-post:
     runs-on: ubuntu-latest
@@ -28,44 +16,22 @@ jobs:
         with:
           timezoneLinux: "America/Chicago"
 
-      - name: Checkout commit
-        uses: actions/checkout@v3
-
-      - name: Clone private assets repo into checked out directory
-        run: |
-          eval "$(ssh-agent -s)"
-          ssh-add - <<< "${{ secrets.PRIVATE_ASSETS_PRIVATE_KEY }}"
-          git clone git@github.com:BenShoeman/SonicOCBot-private-assets.git $GITHUB_WORKSPACE/../PrivateAssets
-          rsync -a $GITHUB_WORKSPACE/../PrivateAssets/ $GITHUB_WORKSPACE/
-
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v4
+      - name: Run Docker image
+        uses: addnab/docker-run-action@v3
         with:
-          python-version: 3.9
-
-      - name: Set up venv cache
-        uses: syphar/restore-virtualenv@v1
-        id: cache-venv
-        with:
-          requirement_files: requirements/gha.txt
-
-      - name: Set up pip cache
-        uses: syphar/restore-pip-download-cache@v1
-        if: steps.cache-venv.outputs.cache-hit != 'true'
-
-      - name: Install requirements in venv
-        if: steps.cache-venv.outputs.cache-hit != 'true'
-        run: pip install -r $GITHUB_WORKSPACE/requirements/gha.txt
-
-      - name: Install Chromium browser
-        run: |
-          sudo add-apt-repository -y ppa:savoury1/ffmpeg4
-          sudo add-apt-repository -y ppa:savoury1/chromium
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
-
-      - name: Make post
-        run: |
-          mkdir -p $GITHUB_WORKSPACE/../tmp
-          export TMPDIR=$(readlink -f $GITHUB_WORKSPACE/../tmp)
-          CHROME_BIN=$(which chromium) python $GITHUB_WORKSPACE/main.py
+          registry: ${{ secrets.DOCKER_REGISTRY_URL }}
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+          image: ${{ secrets.DOCKER_REGISTRY_USERNAME }}/sonicocbot:latest
+          options: |
+            -e TWITTER_CONSUMER_KEY=${{ secrets.TWITTER_CONSUMER_KEY }}
+            -e TWITTER_CONSUMER_SECRET=${{ secrets.TWITTER_CONSUMER_SECRET }}
+            -e TWITTER_ACCESS_TOKEN=${{ secrets.TWITTER_ACCESS_TOKEN }}
+            -e TWITTER_ACCESS_TOKEN_SECRET=${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+            -e TUMBLR_CONSUMER_KEY=${{ secrets.TUMBLR_CONSUMER_KEY }}
+            -e TUMBLR_CONSUMER_SECRET=${{ secrets.TUMBLR_CONSUMER_SECRET }}
+            -e TUMBLR_OAUTH_TOKEN=${{ secrets.TUMBLR_OAUTH_TOKEN }}
+            -e TUMBLR_OAUTH_SECRET=${{ secrets.TUMBLR_OAUTH_SECRET }}
+            -e MASTODON_INSTANCE_URL=${{ secrets.MASTODON_INSTANCE_URL }}
+            -e MASTODON_ACCESS_TOKEN=${{ secrets.MASTODON_ACCESS_TOKEN }}
+          run: python3 main.py

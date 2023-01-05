@@ -1,6 +1,6 @@
-import markdown
 from pathlib import Path
 from PIL import Image
+import pycmarkgfm as gfm
 import random
 from typing import Any, ClassVar, Optional, Union
 
@@ -115,7 +115,7 @@ class HTMLPostCreator(PostCreator):
             "project_dir": str(Directories.PROJECT_DIR),
             "title": self._title,
             "subtitle": self._subtitle if not self._prefer_long_text else None,
-            "content": (markdown.markdown(self._content) if self._use_markdown else self._content) if not self._prefer_long_text else "",
+            "content": (gfm.gfm_to_html(self._content) if self._use_markdown else self._content) if not self._prefer_long_text else "",
             "image": image_to_data_url(self._image) if self._image else None,
             "primary_color": rgb2hex(self.__palette.get("primary", (0, 0, 0))),
             "secondary_color": rgb2hex(self.__palette.get("secondary", (0, 0, 0))),

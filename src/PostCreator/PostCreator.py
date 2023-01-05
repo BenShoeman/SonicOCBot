@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import time
+import logging
 from pathlib import Path
 from PIL import Image
 import random
@@ -8,6 +9,9 @@ import yaml
 
 import src.Directories as Directories
 from src.Util.ColorUtil import ColorTuple, hex2rgb, rgb2hex
+
+
+_logger = logging.getLogger(__name__)
 
 
 def _get_font_choices(fonts_dir: Union[str, Path]) -> dict:
@@ -25,7 +29,7 @@ def _get_font_choices(fonts_dir: Union[str, Path]) -> dict:
             if not font_file.stem.endswith("-Italic")
         }
     else:
-        print(f"Error: could not load fonts as directory {fonts_dir} doesn't exist.")
+        _logger.warn(f"could not load fonts as directory {fonts_dir} doesn't exist.")
         return {}
 
 
@@ -40,7 +44,7 @@ def _get_color_schedule(schedule_path: Union[str, Path]) -> dict:
             converted_schedule[time_val] = {typ: hex2rgb(color) for typ, color in colors_dict.items()}
         return converted_schedule
     else:
-        print(f"Error: could not load color schedule {schedule_path} as it doesn't exist. Loading fallback.")
+        _logger.warn(f"could not load color schedule {schedule_path} as it doesn't exist. Loading fallback.")
         return {
             time(0, 0): {
                 "bg": (21, 32, 43),
