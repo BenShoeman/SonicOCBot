@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ title }}</title>
+    <style>
+      :root {
+        --primary-color: {{ primary_color }};
+        --secondary-color: {{ secondary_color }};
+        --tertiary-color: {{ tertiary_color }};
+        --primary-text: {{ primary_text }};
+        --secondary-text: {{ secondary_text }};
+        --tertiary-text: {{ tertiary_text }};
+      }
+      {% if regular_font_path %}
+      @font-face {
+        font-family: "__custom_font";
+        {% if italic_font_path %}
+          font-style: normal;
+        {% endif %}
+        src: url(file://{{ regular_font_path }});
+      }
+      {% endif %}
+      {% if italic_font_path %}
+      @font-face {
+        font-family: "__custom_font";
+        font-style: italic;
+        src: url(file://{{ italic_font_path }});
+      }
+      {% endif %}
+      html {
+        font-size: 2vh;
+      }
+      body {
+        {% if regular_font_path %}
+          font-family: "__custom_font", sans-serif;
+        {% else %}
+          font-family: Arial, Helvetica, sans-serif;
+        {% endif %}
+      }
+      #main-container {
+        position: absolute;
+        top: 5vh;
+        right: 5vw;
+        {% if image and content %}
+          width: 47.5vw;
+        {% else %}
+          width: 90vw;
+        {% endif %}
+        height: 90vh;
+        font-size: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      #title, #subtitle {
+        margin: 0 0 0.25rem 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: stretch;
+      }
+      #title {
+        height: 14vh;
+        font-size: 1.5em;
+      }
+      #subtitle {
+        margin-bottom: auto;
+        height: 7vh;
+        font-size: 1.2em;
+        font-style: italic;
+      }
+      #content {
+        margin-top: 1.625rem;
+        font-size: 1em;
+        line-height: 1.33em;
+        text-align: justify;
+        hyphens: auto;
+      }
+      #content h1, #content h2, #content h3,
+      #content h4, #content h5, #content h6,
+      #content p, #content ul, #content ol {
+        margin-top: 0;
+        margin-bottom: 0.5em;
+      }
+      #content h1:last-child, #content h2:last-child, #content h3:last-child,
+      #content h4:last-child, #content h5:last-child, #content h6:last-child,
+      #content p:last-child, #content ul:last-child, #content ol:last-child {
+        margin-bottom: 0;
+      }
+      #content hr {
+        border-top: 1px solid;
+        border-bottom: none;
+      }
+      #image {
+        position: absolute;
+        {% if content %}
+          top: 5vh;
+          left: 5vh;
+          width: 42.5vw;
+          height: 90vh;
+        {% else %}
+          top: 20vh;
+          left: 0;
+          width: 100vw;
+          height: 76vh;
+          filter: drop-shadow(0 0 2vh rgba(0, 0, 0, 0.6));
+        {% endif %}
+        object-fit: contain;
+        {% if not image %}
+          display: none;
+        {% endif %}
+      }
+      /* used only if specified in the template */
+      #header {
+        display: none;
+      }
+      {% block style %}{% endblock %}
+    </style>
+    <script>
+      // Auto-resizing code to squish text into the image
+      function checkOverflow(e) {
+        let curOverflow = e.style.overflow;
+        if (!curOverflow || curOverflow === "visible")
+        {
+          e.style.overflow = "hidden";
+        }
+        let isOverflowing = e.clientWidth < e.scrollWidth || e.clientHeight < e.scrollHeight;
+        e.style.overflow = curOverflow;
+        return isOverflowing;
+      }
+      window.addEventListener("load", function() {
+        ["title", "subtitle", "content"].forEach(function(id) {
+          let e = document.getElementById(id);
+          if (e && e.textContent) {
+            let inc_rate = 0.01;
+            let font_size = 0.1 + inc_rate;
+            e.style.fontSize = `${font_size}rem`;
+            while (!checkOverflow(e) && font_size <= 200) {
+              font_size += inc_rate;
+              e.style.fontSize = `${font_size}rem`;
+            }
+            e.style.fontSize = `${font_size - inc_rate}rem`;
+          }
+        });
+      });
+      {% if header %}
+      // Automatically set header background color if it exists using upper left pixel
+      window.addEventListener("load", function() {
+        const header = document.getElementById("header");
+        if (header.style.display != "none") {
+          const img = new Image();
+          img.onload = function() {
+            const ctx = document.createElement("canvas").getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            const { data } = ctx.getImageData(0, 0, 1, 1);
+            header.style.backgroundColor = `rgb(${data[0]}, ${data[1]}, ${data[2]})`;
+          }
+          img.src = "{{ header }}";
+        }
+      });
+      {% endif %}
+    </script>
+  </head>
+  <body>
+    {% if header %}<div id="header"></div>{% endif %}
+    {% if image %}<img id="image" src="{{ image }}">{% endif %}
+    <div id="main-container">
+      {% if title %}<h1 id="title"><span>{{ title }}</span></h1>{% endif %}
+      {% if subtitle %}<h2 id="subtitle"><span>{{ subtitle }}</span></h2>{% endif %}
+      <div id="content">{{ content }}</div>
+    </div>
+    {% block misc %}{% endblock %}
+  </body>
+</html>

@@ -9,14 +9,14 @@ class OCHTMLPostCreator(HTMLPostCreator):
     """`HTMLPostCreator` that creates a post involving an OC."""
 
     def __init__(self, oc: OC, tags: Optional[Union[list[str], tuple[str, ...]]] = ("oc bot",), **kwargs: Any):
-        """Create a `OCPostCreator`.
+        """Create an `OCHTMLPostCreator`.
 
         Parameters
         ----------
         oc : OC
             `OC` object to create a post for
         tags : Optional[Union[list[str], tuple[str, ...]]], optional
-            list of tags to be used in the post, by default ("ocbot",)
+            list of tags to be used in the post, by default ("oc bot",)
 
         Other Parameters
         ----------------

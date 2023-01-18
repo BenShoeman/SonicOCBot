@@ -6,14 +6,14 @@ The submodules are as follows:
 - **src.PostCreator.PostCreator**: Abstract PostCreator class that represents a post.
 - **src.PostCreator.HTMLPostCreator**: PostCreator class that creates a post using HTML and Jinja2 templating for the image.
 - **src.PostCreator.OCHTMLPostCreator**: HTMLPostCreator subclass that creates a post involving an OC.
-- **src.PostCreator.OCPostCreator**: Older PostCreator class that creates a post involving an OC using Pillow for the image.
-- **src.PostCreator.TextPostCreator**: Older PostCreator class that creates a post having an image with text on it, using Pillow for the image.
+- **src.PostCreator.FanficHTMLPostCreator**: HTMLPostCreator subclass that creates a post using a generator for fanfics.
+- **src.PostCreator.SonicSezHTMLPostCreator**: HTMLPostCreator subclass that creates a post using a generator for Sonic Sez segments.
 - **src.PostCreator.TwitterPostCreator**: PostCreator wrapper that modifies the PostCreator to obey Twitter character limits.
 """
 
 from .PostCreator import PostCreator
 from .HTMLPostCreator import HTMLPostCreator
 from .OCHTMLPostCreator import OCHTMLPostCreator
-from .OCPostCreator import OCPostCreator
-from .TextPostCreator import TextPostCreator
+from .FanficHTMLPostCreator import FanficHTMLPostCreator
+from .SonicSezHTMLPostCreator import SonicSezHTMLPostCreator
 from .TwitterPostCreator import TwitterPostCreator

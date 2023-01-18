@@ -1,0 +1,60 @@
+{% extends "base.j2" %}
+{% block style %}
+body {
+  background-color: {% if night_mode %} black {% else %} white {% endif %};
+  color: {% if night_mode %} white {% else %} black {% endif %};
+}
+{% if header %}
+#main-container {
+  top: 15vh;
+  height: 80vh;
+}
+#header {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: auto;
+  height: 10vh;
+  background-image: url({{ header }});
+  background-size: auto 8vh;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 4.5vh rgba(0, 0, 0, 0.6);
+}
+{% endif %}
+#title {
+  margin-bottom: -0.25rem;
+  {% if not content %}
+    text-align: center;
+  {% endif %}
+}
+#subtitle {
+  height: 4.5vh;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+#content hr {
+  border-top-color: {% if night_mode %} white {% else %} black {% endif %};
+}
+#overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: auto;
+  height: auto;
+  z-index: -1;
+  background-color: var(--primary-color);
+  {% if overlay %}
+    background-image: url({{ overlay }});
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+  {% endif %}
+  opacity: 0.21875;
+}
+{% endblock %}
+{% block misc %}<div id="overlay"></div>{% endblock %}

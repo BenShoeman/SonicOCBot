@@ -148,8 +148,9 @@ images/sonicsez/
 images/octemplate/
 models/*.db
 models/*.db.gz
-templates/**/*.html
 templates/**/*.j2
 templates/**/*.png
+!templates/base.j2
+!templates/basic.j2
 unused/models/*.json
 unused/models/*.onnx
