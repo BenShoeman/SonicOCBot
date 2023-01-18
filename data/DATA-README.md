@@ -95,7 +95,6 @@
   ```
   If the file is not provided, only flat colors will be used for fills.
 - `personalities.txt`: List of personality traits.
-- `schedule-colors.yml`: Provided in repo. YAML file defining background and text colors for image posts starting at the given start times. They don't need to be in order, but the order of the times will be taken into account when figuring the color out.
 - `skills.txt`: List of skills.
 - `sonicmaker-fill.yml`: YAML file defining positioning of body parts and where to flood fill them. Note that the body parts are placed *in the same order* as they are in the file. Below is the format for this file:
   ```yml

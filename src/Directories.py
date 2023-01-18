@@ -19,11 +19,10 @@ This module has 7 constants to use. They are:
   Path for OC template images.
 """
 
-import os
 from pathlib import Path
 from typing import Any, Final
 
-_PROJECT_DIR: Final[Path] = Path(os.path.realpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir)))
+_PROJECT_DIR: Final[Path] = Path(__file__).parent.parent.absolute().resolve()
 _DATA_DIR: Final[Path] = _PROJECT_DIR / "data"
 _FONTS_DIR: Final[Path] = _PROJECT_DIR / "fonts"
 _IMAGES_DIR: Final[Path] = _PROJECT_DIR / "images"

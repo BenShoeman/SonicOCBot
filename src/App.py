@@ -3,7 +3,6 @@ import random
 import tempfile
 from typing import Literal, Optional
 
-import src.Directories as Directories
 from src.Util.FileUtil import file_to_data_url
 from src.OC import generate_oc
 from src.PostCreator import *
@@ -18,13 +17,10 @@ _logger = logging.getLogger(__name__)
 _ffic_generator = TwitterFanfictionGenerator(body_text_model_name="fanfics.bodies", titles_model_name="fanfics.titles", model_class=MarkovTextModel)
 _ssez_generator = SonicSezGenerator(body_text_model_name="sonicsez", model_class=MarkovTextModel)
 
-_ffic_logo_images = list((Directories.IMAGES_DIR / "fanficlogo").glob("*.png"))
-_ssez_bg_images = list((Directories.IMAGES_DIR / "sonicsez").glob("*.png"))
-
 _post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], float] = {
     "oc": 0.85,
-    "sonicsez": 0.075,
-    "fanfic": 0.075,
+    "sonicsez": 0.065,
+    "fanfic": 0.085,
 }
 
 
@@ -74,36 +70,18 @@ def make_post(
     else:
         post_typ = post_type
 
-    use_stylized = random.random() <= 0.5  # Whether to use a stylized HTML post from /templates
     post_creator: PostCreator
-    if post_typ == "fanfic":
-        title, text = _ffic_generator.get_fanfiction()
-        if use_stylized:
-            post_creator = HTMLPostCreator(content=text, title=title, tags=("fanfic bot",))
-        else:
-            post_creator = TextPostCreator(content=text, title=title, tags=("fanfic bot",))
-            if len(_ffic_logo_images) > 0:
-                post_creator.set_banner(random.choice(_ffic_logo_images))
+    if post_typ == "oc":
+        gen_kwargs = {}
+        if sonicmaker or templated:
+            gen_kwargs["pr_original"] = 1.0 if sonicmaker else 0.0
+        oc = generate_oc(**gen_kwargs)
+        post_creator = OCHTMLPostCreator(oc=oc)
+    elif post_typ == "fanfic":
+        post_creator = FanficHTMLPostCreator(fanfic_generator=_ffic_generator)
     elif post_typ == "sonicsez":
         text = _ssez_generator.get_text()
-        if use_stylized:
-            post_creator = HTMLPostCreator(content=text, title="Sonic Says...", tags=("sonic says", "sonic sez"))
-        else:
-            post_creator = TextPostCreator(content=text, title="Sonic Says...", tags=("sonic says", "sonic sez"))
-            post_creator.set_font_size(64)
-            if len(_ssez_bg_images) > 0:
-                post_creator.set_overlay(random.choice(_ssez_bg_images), alpha=56)
-    else:
-        if not (sonicmaker or templated):
-            oc = generate_oc()
-        elif sonicmaker:
-            oc = generate_oc(pr_original=1.0)
-        else:
-            oc = generate_oc(pr_original=0.0)
-        if use_stylized:
-            post_creator = OCHTMLPostCreator(oc=oc)
-        else:
-            post_creator = OCPostCreator(oc=oc)
+        post_creator = SonicSezHTMLPostCreator(sonicsez_generator=_ssez_generator)
 
     for poster in posters:
         curr_post_creator: PostCreator

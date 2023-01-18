@@ -10,6 +10,7 @@ from src.Util.ColorUtil import ColorTuple, hex2rgb, rgb2hex, contrasting_text_co
 from src.Util.FileUtil import yaml_load
 from src.Util.HTMLtoImage import fill_jinja_template, html_to_image
 from src.Util.ImageUtil import image_to_data_url
+from src.Util.TimeUtil import get_day_state
 
 
 class HTMLPostCreator(PostCreator):
@@ -32,6 +33,8 @@ class HTMLPostCreator(PostCreator):
         width: int = 1200,
         height: int = 680,
         use_markdown: bool = True,
+        overlay_path: Optional[Union[str, Path]] = None,
+        header_path: Optional[Union[str, Path]] = None,
         **kwargs: Any,
     ):
         """Create an `HTMLPostCreator`.
@@ -60,6 +63,10 @@ class HTMLPostCreator(PostCreator):
             height of the outputted image, by default 680
         use_markdown : bool, optional
             whether to use markdown in `content`, by default True
+        overlay_path: Optional[Union[str, Path]]
+            path of the background overlay image to use, by default None
+        header_path: Optional[Union[str, Path]]
+            path of the header image to use, by default None
 
         Other Parameters
         ----------------
@@ -68,7 +75,7 @@ class HTMLPostCreator(PostCreator):
         """
         path = Path(template_path if template_path else Directories.TEMPLATES_DIR)
         if path.is_dir():
-            self.__template_file = random.choice(list(path.glob("*.j2")))
+            self.__template_file = random.choice([p for p in path.glob("*.j2") if p.name != "base.j2"])
         else:
             self.__template_file = path
         self._content = content
@@ -83,6 +90,8 @@ class HTMLPostCreator(PostCreator):
         self._post_width = width
         self._post_height = height
         self._use_markdown = use_markdown
+        self._overlay_path = overlay_path
+        self._header_path = header_path
         super().__init__(**kwargs)
 
     def get_image(self) -> Optional[Image.Image]:
@@ -116,7 +125,12 @@ class HTMLPostCreator(PostCreator):
             "title": self._title,
             "subtitle": self._subtitle if not self._prefer_long_text else None,
             "content": (gfm.gfm_to_html(self._content) if self._use_markdown else self._content) if not self._prefer_long_text else "",
+            "regular_font_path": self.regular_font_file,
+            "italic_font_path": self.italic_font_file,
+            "night_mode": get_day_state() == "night",
             "image": image_to_data_url(self._image) if self._image else None,
+            "overlay": image_to_data_url(Image.open(self._overlay_path)) if self._overlay_path else None,
+            "header": image_to_data_url(Image.open(self._header_path)) if self._header_path else None,
             "primary_color": rgb2hex(self.__palette.get("primary", (0, 0, 0))),
             "secondary_color": rgb2hex(self.__palette.get("secondary", (0, 0, 0))),
             "tertiary_color": rgb2hex(self.__palette.get("tertiary", (0, 0, 0))),
