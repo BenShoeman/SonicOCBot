@@ -150,6 +150,7 @@ models/*.db
 models/*.db.gz
 templates/**/*.j2
 templates/**/*.png
+templates/**/*.webp
 !templates/base.j2
 !templates/basic.j2
 unused/models/*.json

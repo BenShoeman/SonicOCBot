@@ -19,6 +19,7 @@ jobs:
           ssh-add - <<< "${{ secrets.PRIVATE_ASSETS_PRIVATE_KEY }}"
           git clone git@github.com:BenShoeman/SonicOCBot-private-assets.git $GITHUB_WORKSPACE/../PrivateAssets
           rsync -a $GITHUB_WORKSPACE/../PrivateAssets/ $GITHUB_WORKSPACE/
+          rm -rf $GITHUB_WORKSPACE/corpus
 
       - name: Set up Docker buildx
         uses: docker/setup-buildx-action@v2

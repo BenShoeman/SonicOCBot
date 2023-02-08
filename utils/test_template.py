@@ -4,6 +4,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.absolute().resolve()))
 
 import argparse
+import json
 from PIL import Image, ImageDraw
 import pycmarkgfm as gfm
 import random
@@ -18,12 +19,6 @@ from src.Util.TimeUtil import get_day_state
 
 utils_dir = Directories.PROJECT_DIR / "utils"
 
-parser = argparse.ArgumentParser()
-parser.add_argument("-t", "--type", type=str, choices=["oc", "sonicsez", "fanfic"], default="oc")
-parser.add_argument("--day-state", type=str, choices=["day", "night"])
-parser.add_argument("template_path", metavar="template-path", type=Path)
-args = parser.parse_args()
-
 post_height = 680
 post_width = {
     True: 907,
@@ -35,6 +30,18 @@ sample_palette = {
     "tertiary": hex2rgb("#ffff00"),
 }
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-t", "--type", type=str, choices=["oc", "sonicsez", "fanfic"], default="oc")
+parser.add_argument("--title", type=str)
+parser.add_argument("--subtitle", type=str)
+parser.add_argument("--content", type=str)
+parser.add_argument("--palette", type=lambda s: {k: hex2rgb(v) for k, v in json.loads(s).items()}, default="{}")
+parser.add_argument("--day-state", type=str, choices=["day", "night"])
+parser.add_argument("template_path", metavar="template-path", type=Path)
+args = parser.parse_args()
+
+override_args = {k: v for k, v in {"title": args.title, "subtitle": args.subtitle, "content": args.content}.items() if v}
+sample_palette.update(args.palette)
 font_choices = _get_font_choices(Directories.FONTS_DIR)
 font_name = random.choice(list(font_choices.keys()))
 regular_font_file = font_choices[font_name]["regular"]
@@ -114,6 +121,7 @@ for no_text in no_text_opts:
     }
     template_args["subtitle"] = template_args.get("subtitle") if not no_text else None
     template_args["content"] = gfm.gfm_to_html(template_args["content"]) if not no_text else ""
+    template_args.update(override_args)
     full_html = fill_jinja_template(args.template_path, **template_args)
     imgs.append(html_to_image(full_html, width=post_width[no_text], height=post_height))
 
