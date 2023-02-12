@@ -6,16 +6,10 @@ from typing import Literal, Optional
 from src.Util.FileUtil import file_to_data_url
 from src.OC import generate_oc
 from src.PostCreator import *
-from src.FanfictionGenerator import TwitterFanfictionGenerator
-from src.SonicSezGenerator import SonicSezGenerator
 from src.Poster import *
-from src.TextModel import MarkovTextModel
 
 
 _logger = logging.getLogger(__name__)
-
-_ffic_generator = TwitterFanfictionGenerator(body_text_model_name="fanfics.bodies", titles_model_name="fanfics.titles", model_class=MarkovTextModel)
-_ssez_generator = SonicSezGenerator(body_text_model_name="sonicsez", model_class=MarkovTextModel)
 
 _post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], float] = {
     "oc": 0.85,
@@ -78,10 +72,9 @@ def make_post(
         oc = generate_oc(**gen_kwargs)
         post_creator = OCHTMLPostCreator(oc=oc)
     elif post_typ == "fanfic":
-        post_creator = FanficHTMLPostCreator(fanfic_generator=_ffic_generator)
+        post_creator = FanficHTMLPostCreator()
     elif post_typ == "sonicsez":
-        text = _ssez_generator.get_text()
-        post_creator = SonicSezHTMLPostCreator(sonicsez_generator=_ssez_generator)
+        post_creator = SonicSezHTMLPostCreator()
 
     for poster in posters:
         curr_post_creator: PostCreator
