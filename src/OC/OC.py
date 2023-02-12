@@ -2,35 +2,17 @@ from abc import ABC, abstractmethod
 import logging
 from PIL import Image
 import random
+from requests import HTTPError
 from typing import Optional
 
 import src.Util.FileUtil as FileUtil
 import src.Directories as Directories
 from src.FillStrategy import FillStrategy
-from src.TextModel import TextModel, MarkovTextModel
+from src.TextGenerator import TextGenerator, OCBioGenerator
+from src.TextModel import TextModel, HuggingFaceTextModel, MarkovTextModel
 
 
 _logger = logging.getLogger(__name__)
-
-
-def _load_text_model(model_name: str) -> Optional[TextModel]:
-    """Load the text model from the model name.
-
-    Parameters
-    ----------
-    model_name : str
-        model name, see `MarkovTextModel` for more details
-
-    Returns
-    -------
-    Optional[TextModel]
-        text model if applicable, else None
-    """
-    try:
-        model = MarkovTextModel(model_name)
-    except:
-        model = None
-    return model
 
 
 class OC(ABC):
@@ -47,16 +29,17 @@ class OC(ABC):
     _SKILLS = FileUtil.list_load(Directories.DATA_DIR / "skills.txt")
     """List of possible skills."""
 
-    _DESC_MODELS = {gender: _load_text_model(f"ocdescriptions.{gender}") for gender in ("m", "f", "x")}
-
-    def __init__(self, auto_populate: bool = True):
+    def __init__(self, desc_generator_class: type[TextGenerator] = OCBioGenerator, auto_populate: bool = True):
         """Create an `OC`.
 
         Parameters
         ----------
+        desc_generator_class : bool, optional
+            which text generator class to use to generate the OC description, by default OCBioGenerator
         auto_populate : bool, optional
             whether all fields should be automatically populated, by default True
         """
+        self.__text_generator_class = desc_generator_class
         self._fill_regions: dict[str, FillStrategy] = {}
         # Start as dummy image that will be populated later
         self._image = Image.new("RGB", (1, 1))
@@ -74,6 +57,7 @@ class OC(ABC):
         self._generate_height()
         self._generate_weight()
         self._generate_skills()
+        self._setup_text_generator()
         self._generate_description()
         self.generate_image()
 
@@ -98,14 +82,16 @@ class OC(ABC):
         return self._gender
 
     @property
+    def gender_full(self) -> str:
+        """Gender of the `OC` as a full word."""
+        gender_map = {"m": "man", "f": "woman", "x": "nonbinary"}
+        return gender_map.get(self._gender, "unknown")
+
+    @property
     def pronouns(self) -> str:
         """Pronouns of the `OC`."""
-        if self._gender == "m":
-            return "he/him"
-        elif self._gender == "f":
-            return "she/her"
-        else:
-            return "they/them"
+        gender_map = {"m": "he/him", "f": "she/her", "x": "they/them"}
+        return gender_map.get(self._gender, "unknown")
 
     @property
     def personalities(self) -> list[str]:
@@ -206,7 +192,8 @@ class OC(ABC):
             _logger.warn(f"names.{self.gender}.yml could not be loaded or is empty.")
 
     def _generate_personalities(self) -> None:
-        self._personalities = random.sample(OC._PERSONALITIES, k=random.randint(1, 3))
+        n_personalities = max(1, round(random.gauss(1.75, 0.6)))
+        self._personalities = random.sample(OC._PERSONALITIES, k=n_personalities)
 
     def _generate_height_weight_units(self) -> None:
         self._metric_units = random.choice((True, False))
@@ -222,13 +209,29 @@ class OC(ABC):
         self._weight = max(25, round(random.gauss(mean_weight, stdev_weight)))
 
     def _generate_skills(self) -> None:
-        n_skills = max(1, round(random.gauss(2, 1.125)))
+        n_skills = max(1, round(random.gauss(1.75, 1)))
         self._skills = random.sample(OC._SKILLS, k=n_skills)
 
-    def _generate_description(self) -> None:
-        model = OC._DESC_MODELS.get(self.gender)
-        if model is not None:
-            self._description = model.get_text_block(mean_words=42, stdev_words=20)
+    def _setup_text_generator(self, model_key: Optional[str] = None) -> None:
+        model_map: dict[str, tuple[type[TextModel], str]] = {
+            "HuggingFace": (HuggingFaceTextModel, "EleutherAI/gpt-j-6B"),
+            "Markov": (MarkovTextModel, "ocdescriptions.{gender}"),
+        }
+        model_probs = {"HuggingFace": 0.9, "Markov": 0.1}
+        if model_key:
+            model_class, model_name_base = model_map[model_key]
         else:
-            _logger.warn(f"ocdescriptions.{self.gender} model could not be loaded.")
-            self._description = ""
+            model_class, model_name_base = random.choices(list(model_map.values()), weights=list(model_probs.values()), k=1)[0]
+        _logger.info(f"Using {model_class.__name__} as the model")
+        model_name = model_name_base.format(gender=self.gender)
+        self.__text_generator = self.__text_generator_class(model_name, model_class, oc=self)
+
+    def _generate_description(self) -> None:
+        try:
+            article = self.__text_generator.get_article()
+        # If we get an HTTPError from an external service, fall back to local MarkovTextModel
+        except HTTPError:
+            _logger.error("Received HTTPError from %s, falling back to MarkovTextModel", self.__text_generator_class.__name__)
+            self._setup_text_generator("Markov")
+            article = self.__text_generator.get_article()
+        self._description = article["body"]
