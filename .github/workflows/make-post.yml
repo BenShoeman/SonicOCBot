@@ -17,6 +17,8 @@ env:
   TUMBLR_OAUTH_SECRET: ${{ secrets.TUMBLR_OAUTH_SECRET }}
   MASTODON_INSTANCE_URL: ${{ secrets.MASTODON_INSTANCE_URL }}
   MASTODON_ACCESS_TOKEN: ${{ secrets.MASTODON_ACCESS_TOKEN }}
+  FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
+  FACEBOOK_ACCESS_TOKEN: ${{ secrets.FACEBOOK_ACCESS_TOKEN }}
   HUGGINGFACE_ACCESS_TOKEN: ${{ secrets.HUGGINGFACE_ACCESS_TOKEN }}
 
 jobs:
@@ -41,5 +43,7 @@ jobs:
             -e TUMBLR_OAUTH_SECRET=${{ secrets.TUMBLR_OAUTH_SECRET }}
             -e MASTODON_INSTANCE_URL=${{ secrets.MASTODON_INSTANCE_URL }}
             -e MASTODON_ACCESS_TOKEN=${{ secrets.MASTODON_ACCESS_TOKEN }}
+            -e FACEBOOK_PAGE_ID=${{ secrets.FACEBOOK_PAGE_ID }}
+            -e FACEBOOK_ACCESS_TOKEN=${{ secrets.FACEBOOK_ACCESS_TOKEN }}
             -e HUGGINGFACE_ACCESS_TOKEN=${{ secrets.HUGGINGFACE_ACCESS_TOKEN }}
           run: python3 main.py -l info

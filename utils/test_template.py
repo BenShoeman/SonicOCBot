@@ -13,7 +13,7 @@ from textwrap import dedent
 import src.Directories as Directories
 from src.PostCreator.PostCreator import _get_font_choices
 from src.Util.ColorUtil import hex2rgb, rgb2hex, contrasting_text_color
-from src.Util.HTMLtoImage import fill_jinja_template, html_to_image
+from src.Util.HTMLUtil import fill_jinja_template, html_to_image
 from src.Util.ImageUtil import image_to_data_url
 from src.Util.TimeUtil import get_day_state
 

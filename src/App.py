@@ -54,6 +54,7 @@ def make_post(
                 TwitterPoster(),
                 TumblrPoster(),
                 MastodonPoster(),
+                FacebookPoster(),
             ]
         )
     if post_type is None:

@@ -12,6 +12,7 @@ The submodules are as follows:
 
 from .Poster import Poster
 from .DummyPoster import DummyPoster
+from .FacebookPoster import FacebookPoster
 from .MastodonPoster import MastodonPoster
 from .TwitterPoster import TwitterPoster
 from .TumblrPoster import TumblrPoster

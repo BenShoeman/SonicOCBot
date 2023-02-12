@@ -1,11 +1,13 @@
 """Utilities to convert HTML and Markdown documents to images."""
 
 from html2image import Html2Image
+from html2text import HTML2Text
 from jinja2 import Environment, FileSystemLoader
 import os
 from pathlib import Path
 from PIL import Image
 import pycmarkgfm as gfm
+import re
 import tempfile
 from typing import Any, Optional, Union
 
@@ -112,6 +114,32 @@ def md_to_image(md_str: str, **kwargs: Any) -> Image.Image:
     """
     html_str = f"<html><body>{gfm.gfm_to_html(md_str)}</body></html>"
     return html_to_image(html_str=html_str, **kwargs)
+
+
+def md_to_plaintext(md_str: str) -> str:
+    """Convert markdown to plain, unformatted text.
+
+    Parameters
+    ----------
+    md_str : str
+        MD string to convert
+
+    Returns
+    -------
+    str
+        plain unformatted text with no markdown elements
+    """
+    h2t = HTML2Text()
+    h2t.ignore_links = True
+    h2t.ignore_images = True
+    h2t.body_width = 2147483647
+    h2t.ul_item_mark = "-"
+    h2t.emphasis_mark = ""
+    h2t.strong_mark = ""
+    # Do some adjustments to make it look better for plaintext
+    html_str = re.sub(r"<(/?)h\d>", r"<\1p>", gfm.gfm_to_html(md_str))
+    plaintext = re.sub(r"^\*\s+\*\s+\*$", "-----", h2t.handle(html_str), flags=re.MULTILINE)
+    return plaintext
 
 
 def dict_to_css(css_dict: CSSDict) -> str:
