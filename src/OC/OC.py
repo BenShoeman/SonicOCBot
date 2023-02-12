@@ -217,7 +217,7 @@ class OC(ABC):
             "HuggingFace": (HuggingFaceTextModel, "EleutherAI/gpt-j-6B"),
             "Markov": (MarkovTextModel, "ocdescriptions.{gender}"),
         }
-        model_probs = {"HuggingFace": 0.9, "Markov": 0.1}
+        model_probs = {"HuggingFace": 0.92, "Markov": 0.08}
         if model_key:
             model_class, model_name_base = model_map[model_key]
         else:

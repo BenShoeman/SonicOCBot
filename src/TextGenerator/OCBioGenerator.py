@@ -1,4 +1,5 @@
 import random
+import re
 from textwrap import dedent
 from typing import Any, Literal
 
@@ -54,4 +55,9 @@ class OCBioGenerator(TextGenerator):
             """
         ).strip()
         body_text = self._text_model.get_text_block(prompt=body_prompt)
+        # Some text cleanup if model ends up regurgitating prompt back, but slightly modified
+        body_text = re.sub(
+            "^(Write a Sonic OC bio for|Name|Species|Gender|Age|Personality|Traits|Skills|Backstory|Bio):.*?$", "", body_text, flags=re.MULTILINE
+        )
+        body_text = re.sub(r"\n\n+", "\n\n", body_text)
         return {"title": f"{self.__oc.name} the {self.__oc.species.title()}", "body": body_text}

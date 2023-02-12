@@ -65,7 +65,7 @@ class HuggingFaceTextModel(TextModel):
 
         if not isinstance(response_json, list):
             response.raise_for_status()
-        gen_text = unidecode(response_json[0].get("generated_text", "").removeprefix(prompt_str.rstrip())).strip()
+        gen_text = unidecode(response_json[0].get("generated_text", "").replace(prompt_str.rstrip(), "")).strip()
 
         cutoff_index = 0
         if self.__strip_to_closed_quote:

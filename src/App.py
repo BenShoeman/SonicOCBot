@@ -12,9 +12,9 @@ from src.Poster import *
 _logger = logging.getLogger(__name__)
 
 _post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], float] = {
-    "oc": 0.85,
-    "sonicsez": 0.065,
-    "fanfic": 0.085,
+    "oc": 0.84,
+    "sonicsez": 0.07,
+    "fanfic": 0.09,
 }
 
 
