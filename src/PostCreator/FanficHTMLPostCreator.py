@@ -41,7 +41,7 @@ class FanficHTMLPostCreator(HTMLPostCreator):
             "HuggingFace": (HuggingFaceTextModel, "EleutherAI/gpt-j-6B"),
             "Markov": (MarkovTextModel, "fanfics.bodies"),
         }
-        model_probs = {"HuggingFace": 0.92, "Markov": 0.08}
+        model_probs = {"HuggingFace": 0.95, "Markov": 0.05}
         model_class, model_name = random.choices(list(model_map.values()), weights=list(model_probs.values()), k=1)[0]
         _logger.info(f"Using {model_class.__name__} as the model")
         self.__text_generator = text_generator_class(model_name, model_class)

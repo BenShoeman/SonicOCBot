@@ -57,34 +57,35 @@ def make_post(
                 FacebookPoster(),
             ]
         )
-    if post_type is None:
-        post_probs = [(post, pr) for post, pr in post_probabilities.items()]
-        posts = [post for post, pr in post_probs]
-        probs = [pr for post, pr in post_probs]
-        post_typ = random.choices(posts, probs, k=1)[0]
-    else:
-        post_typ = post_type
-
-    post_creator: PostCreator
-    if post_typ == "oc":
-        gen_kwargs = {}
-        if sonicmaker or templated:
-            gen_kwargs["pr_original"] = 1.0 if sonicmaker else 0.0
-        oc = generate_oc(**gen_kwargs)
-        post_creator = OCHTMLPostCreator(oc=oc)
-    elif post_typ == "fanfic":
-        post_creator = FanficHTMLPostCreator()
-    elif post_typ == "sonicsez":
-        post_creator = SonicSezHTMLPostCreator()
 
     for poster in posters:
+        if post_type is None:
+            post_probs = [(post, pr) for post, pr in post_probabilities.items()]
+            posts = [post for post, pr in post_probs]
+            probs = [pr for post, pr in post_probs]
+            selected_post_type = random.choices(posts, probs, k=1)[0]
+        else:
+            selected_post_type = post_type
+
+        post_creator: PostCreator
+        if selected_post_type == "oc":
+            gen_kwargs = {}
+            if sonicmaker or templated:
+                gen_kwargs["pr_original"] = 1.0 if sonicmaker else 0.0
+            oc = generate_oc(**gen_kwargs)
+            post_creator = OCHTMLPostCreator(oc=oc)
+        elif selected_post_type == "fanfic":
+            post_creator = FanficHTMLPostCreator()
+        elif selected_post_type == "sonicsez":
+            post_creator = SonicSezHTMLPostCreator()
+
         curr_post_creator: PostCreator
         if isinstance(poster, (TwitterPoster, MastodonPoster)):
             # Wrap in a TwitterPostCreator to apply character limits for Twitter
             curr_post_creator = TwitterPostCreator(post_creator)
         else:
             curr_post_creator = post_creator
-        _logger.info(f"Making a {post_typ} post using a {type(poster).__name__}...")
+        _logger.info(f"Making a {selected_post_type} post using a {type(poster).__name__}...")
         try:
             poster.make_post(curr_post_creator)
             _logger.info("Done.")
