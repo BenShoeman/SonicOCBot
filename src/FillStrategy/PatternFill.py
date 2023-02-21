@@ -62,24 +62,26 @@ class PatternFill(FillStrategy):
         color_list = ColorUtil.SKIN_TONE_COLORS if self._region_type == "skin" else ColorUtil.GENERAL_COLORS
         if bg_color:
             bg_fill = bg_color
-            self._color_name = ColorUtil.get_nearest_color_in_colors_list(bg_fill, color_list)["name"]
+            self._color_name = ColorUtil.get_nearest_color_in_colors_list(bg_fill, color_list)[0]
         else:
             # Randomly pick a color from the color list depending on region type
             if use_skin_tones and self._region_type == "skin":
                 bg_fill = ColorUtil.randomize_color(ImageUtil.get_random_color_from_image(ColorUtil.SKIN_TONE_GRADIENT))
-                self._bg_color_name = ColorUtil.get_nearest_color_in_colors_list(bg_fill, color_list)["name"]
+                self._bg_color_name = ColorUtil.get_nearest_color_in_colors_list(bg_fill, color_list)[0]
             else:
-                new_color = _rng.choice(ColorUtil.GENERAL_COLORS)
-                bg_fill = ColorUtil.randomize_color(new_color["color"])
-                self._bg_color_name = new_color["name"]
+                new_color_name = _rng.choice(list(ColorUtil.GENERAL_COLORS.keys()))
+                new_color_tuple = ColorUtil.GENERAL_COLORS[new_color_name]
+                bg_fill = ColorUtil.randomize_color(new_color_tuple)
+                self._bg_color_name = new_color_name
         if fg_color:
             fg_fill = fg_color
-            self._fg_color_name = ColorUtil.get_nearest_color_in_colors_list(fg_fill, color_list)["name"]
+            self._fg_color_name = ColorUtil.get_nearest_color_in_colors_list(fg_fill, color_list)[0]
         else:
             # Randomly pick a color from the color list regardless of region type
-            new_color = _rng.choice(ColorUtil.GENERAL_COLORS)
-            fg_fill = ColorUtil.randomize_color(new_color["color"])
-            self._fg_color_name = new_color["name"]
+            new_color_name = _rng.choice(list(ColorUtil.GENERAL_COLORS.keys()))
+            new_color_tuple = ColorUtil.GENERAL_COLORS[new_color_name]
+            fg_fill = ColorUtil.randomize_color(new_color_tuple)
+            self._fg_color_name = new_color_name
         if not pattern_type:
             pattern_imgs = [path.stem for path in (Directories.IMAGES_DIR / "pattern").glob("*.png")]
             pattern_type = _rng.choice(pattern_imgs) if len(pattern_imgs) > 0 else None

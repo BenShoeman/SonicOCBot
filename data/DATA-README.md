@@ -42,10 +42,10 @@
   - `allow`: An allow-list of which parts to allow for each body type; any parts not present in the list will not be allowed. In the above example, elephants will only be allowed elephant ears and trunks. Any parts not defined here will have all parts allowed.
   - `deny`: A deny-list of which parts are not allowed for each body type; any parts present in the list will be excluded. In the above example, elephants will not be allowed to have a shell or wings. Any parts not defined here will not have any parts denied, unless present in the allow-list.
   - `omit`: A list of which parts to omit entirely for this animal type. Overrides the `required` attribute in `sonicmaker-fill.yml` too.
-- `colors.{general,skintones}.txt`: Provided in repo. List of colors with their RGB triplets, in the following format:
+- `colors.{general,skintones}.yml`: Provided in repo. List of colors with their RGB triplets, in the following format:
   ```
   ...
-  RRR,GGG,BBB:color name
+  color name: '#RRGGBB'
   ...
   ```
 - `colors.skintones.gradient.png`: Provided in repo. Gradient of various skin tones to pick from.

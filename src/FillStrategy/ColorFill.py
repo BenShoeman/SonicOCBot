@@ -49,16 +49,17 @@ class ColorFill(FillStrategy):
         color_list = ColorUtil.SKIN_TONE_COLORS if self._region_type == "skin" else ColorUtil.GENERAL_COLORS
         if color:
             self._fill = color
-            self._color_name = ColorUtil.get_nearest_color_in_colors_list(self._fill, color_list)["name"]
+            self._color_name = ColorUtil.get_nearest_color_in_colors_list(self._fill, color_list)[0]
         else:
             # Randomly pick a color from the color list depending on region type
             if use_skin_tones and self._region_type == "skin":
                 self._fill = ColorUtil.randomize_color(ImageUtil.get_random_color_from_image(ColorUtil.SKIN_TONE_GRADIENT))
-                self._color_name = ColorUtil.get_nearest_color_in_colors_list(self._fill, color_list)["name"]
+                self._color_name = ColorUtil.get_nearest_color_in_colors_list(self._fill, color_list)[0]
             else:
-                new_color = _rng.choice(ColorUtil.GENERAL_COLORS)
-                self._fill = ColorUtil.randomize_color(new_color["color"])
-                self._color_name = new_color["name"]
+                new_color_name = _rng.choice(list(ColorUtil.GENERAL_COLORS.keys()))
+                new_color_tuple = ColorUtil.GENERAL_COLORS[new_color_name]
+                self._fill = ColorUtil.randomize_color(new_color_tuple)
+                self._color_name = new_color_name
         self._threshold = threshold
         self._multiply_fill = multiply_fill
 
