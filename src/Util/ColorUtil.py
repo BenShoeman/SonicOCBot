@@ -1,12 +1,12 @@
 """Utilities for reading and manipulating colors.
 
 This module has 4 constants defined that contain colors to use. They are:
-- **BASIC_COLORS**: list[ColorDict]<br>
-  List of color dictionaries, containing only the most basic colors and their RGB 3-tuples.
-- **GENERAL_COLORS**: list[ColorDict]<br>
-  List of color dictionaries, containing general color names and their RGB 3-tuples.
-- **SKIN_TONE_COLORS**: list[ColorDict]<br>
-  List of color dictionaries, containing skin tone color names and their RGB 3-tuples.
+- **BASIC_COLORS**: dict[str, ColorTuple]<br>
+  Dict of color tuples, containing only the most basic colors.
+- **GENERAL_COLORS**: dict[str, ColorTuple]<br>
+  Dict of color tuples, containing general color names.
+- **SKIN_TONE_COLORS**: dict[str, ColorTuple]<br>
+  Dict of color tuples, containing skin tone color names.
 - **SKIN_TONE_GRADIENT**: PIL.Image.Image<br>
   Image containing many different skin tones to pick from.
 """
@@ -17,7 +17,8 @@ from skimage import color
 import os
 from pathlib import Path
 from PIL import Image
-from typing import Any, TypedDict, TypeVar, Union
+from typing import Any, TypeVar, Union
+import yaml
 
 import src.Directories as Directories
 
@@ -31,13 +32,6 @@ ColorTuple = tuple[_Number, _Number, _Number]
 """Type that describes a triplet of color values, for RGB, HSL, XYZ, and CIE-Lab color spaces."""
 ColorOrImage = TypeVar("ColorOrImage", ColorTuple, np.ndarray)
 """Type that is either a ColorTuple or image array."""
-
-
-class ColorDict(TypedDict):
-    """Dictionary type containing color names and their corresponding RGB 3-tuples."""
-
-    name: str
-    color: ColorTuple
 
 
 def to_pil_color_tuple(color_tup: ColorTuple) -> tuple[int, int, int]:
@@ -176,20 +170,22 @@ def hsl2rgb(hsl: np.ndarray) -> np.ndarray:
     return (color.hsv2rgb(hsl2hsv(hsl)) * 255).astype(np.uint8)
 
 
-def get_nearest_color_in_colors_list(rgb: ColorTuple, colors_list: list[ColorDict]) -> ColorDict:
+def get_nearest_color_in_colors_list(rgb: ColorTuple, colors_dict: dict[str, ColorTuple]) -> tuple[str, ColorTuple]:
     """Get the closest color in the colors list to the input color.
 
     Parameters
     ----------
     rgb : ColorTuple
         RGB 3-tuple to find the closest color of
-    colors_list : list[ColorDict]
-        list of `ColorDict` dictionaries with colors to reference
+    colors_list : dict[str, ColorTuple]
+        dict of color names to color tuples to reference
 
     Returns
     -------
-    ColorDict
-        `ColorDict` of the closest color
+    str
+        name of the closest color
+    ColorTuple
+        color tuple of the closest color
     """
     # Get delta E between input color and all colors in colors list, then pick the minimum one
     def get_rgb_delta(color_tup1: ColorTuple, color_tup2: ColorTuple) -> _Number:
@@ -198,7 +194,8 @@ def get_nearest_color_in_colors_list(rgb: ColorTuple, colors_list: list[ColorDic
             color.rgb2lab(np.asarray(color_tup2, dtype=np.uint8)),
         )
 
-    return min(colors_list, key=lambda color_dict: get_rgb_delta(color_dict["color"], rgb))
+    closest_color_name = min(colors_dict.keys(), key=lambda k: get_rgb_delta(colors_dict[k], rgb))
+    return closest_color_name, colors_dict[closest_color_name]
 
 
 def randomize_color(rgb: ColorTuple) -> ColorTuple:
@@ -388,22 +385,15 @@ def contrasting_text_color(rgb: ColorTuple) -> ColorTuple:
     return (0, 0, 0) if l >= 0.5 else (255, 255, 255)
 
 
-def get_colors_list(filename: Union[str, Path]) -> list[ColorDict]:
-    """Reads a text file containing RGB triplets and their corresponding names into a list.
+def get_colors_list(filename: Union[str, Path]) -> dict[str, ColorTuple]:
+    """Reads a yaml file containing color names and their corresponding RGB triplets into a dict of color names to color tuples.
 
-    The input list will be in the following format:
+    The input yaml file will be in the following format:
     ```
-    RRR,GGG,BBB:color name
-    ```
-
-    For example, below could be a color list:
-    ```
-    255,  0,  0:red
-      0,255,255:cyan
+    color name: '#RRGGBB'
     ```
 
-    The output list contains dictionaries with keys `"name"` and `"color"` for each color.
-    See `ColorDict` type for more information on this.
+    The output dict is similar to the yaml file, but with ColorTuple RGB triplets instead of the string hex values.
 
     Parameters
     ----------
@@ -412,38 +402,32 @@ def get_colors_list(filename: Union[str, Path]) -> list[ColorDict]:
 
     Returns
     -------
-    list[ColorDict]
-        list of dictionaries containing name and color information for each color
+    dict[str, ColorTuple]
+        dictionary name of color names to color tuples from the yaml file
     """
-
-    try:
-        with open(filename, "r") as f:
-            colorlist: list[list[Any]] = [line.strip().split(":") for line in f.readlines()]
-            # Convert the first half of each line into color triplets
-            for i in range(len(colorlist)):
-                colorlist[i][0] = tuple(np.clip(int(value.strip()), 0, 255) for value in colorlist[i][0].split(","))
-            # Finally, create the list of ColorDicts
-            colors = [ColorDict(name=color_name, color=color_tuple) for color_tuple, color_name in colorlist]
-    except FileNotFoundError:
-        _logger.warn("colors list not found. Loading a basic colors list")
-        colors = _BASIC_COLORS
-    return colors
+    filepath = Path(filename)
+    if filepath.is_file():
+        colors_dict = yaml.safe_load(filepath.read_text())
+        return {name: hex2rgb(value) for name, value in colors_dict.items()}
+    else:
+        _logger.warn("colors list not found. Loading a basic colors dict")
+        return _BASIC_COLORS
 
 
 # Module constants defined below
 
-_BASIC_COLORS = [
-    ColorDict(name="red", color=(255, 0, 0)),
-    ColorDict(name="yellow", color=(255, 255, 0)),
-    ColorDict(name="green", color=(0, 255, 0)),
-    ColorDict(name="cyan", color=(0, 255, 255)),
-    ColorDict(name="blue", color=(0, 0, 255)),
-    ColorDict(name="magenta", color=(255, 0, 255)),
-    ColorDict(name="black", color=(0, 0, 0)),
-    ColorDict(name="white", color=(255, 255, 255)),
-]
-_GENERAL_COLORS = get_colors_list(Directories.DATA_DIR / "colors.general.txt")
-_SKIN_TONE_COLORS = get_colors_list(Directories.DATA_DIR / "colors.skintones.txt")
+_BASIC_COLORS: dict[str, ColorTuple] = {
+    "red": (255, 0, 0),
+    "yellow": (255, 255, 0),
+    "green": (0, 255, 0),
+    "cyan": (0, 255, 255),
+    "blue": (0, 0, 255),
+    "magenta": (255, 0, 255),
+    "black": (0, 0, 0),
+    "white": (255, 255, 255),
+}
+_GENERAL_COLORS = get_colors_list(Directories.DATA_DIR / "colors.general.yml")
+_SKIN_TONE_COLORS = get_colors_list(Directories.DATA_DIR / "colors.skintones.yml")
 if os.path.exists((_skin_tone_gradient_file := Directories.DATA_DIR / "colors.skintones.gradient.png")):
     _SKIN_TONE_GRADIENT = Image.open(_skin_tone_gradient_file)
 else:

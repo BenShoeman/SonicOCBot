@@ -60,7 +60,7 @@ class HuggingFaceTextModel(TextModel):
 
         api_url = "https://api-inference.huggingface.co/models"
         headers = {"Authorization": f"Bearer {self.__api_token}"}
-        response = requests.post(f"{self.__api_url}/{self.__model_id}", headers=headers, json=payload)
+        response = requests.post(f"{self.__api_url}/{self.__model_id}", headers=headers, json=payload, timeout=120)
         response_json = response.json()
 
         if not isinstance(response_json, list):

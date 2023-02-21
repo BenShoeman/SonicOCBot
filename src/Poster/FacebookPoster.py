@@ -20,6 +20,7 @@ class FacebookPoster(Poster):
         self.__page_id = os.getenv("FACEBOOK_PAGE_ID", "")
         self.__text_url = f"https://graph.facebook.com/{self.__page_id}/feed"
         self.__photo_url = f"https://graph.facebook.com/{self.__page_id}/photos"
+        self.__timeout = 15
 
     def make_post(self, post_creator: PostCreator) -> None:
         """Make a post to Facebook using the given `PostCreator`.
@@ -42,6 +43,7 @@ class FacebookPoster(Poster):
                     "access_token": self.__access_token,
                     "message": md_to_plaintext(f"{title_txt}\n\n{body_txt}"),
                 },
+                timeout=self.__timeout,
             )
             response.raise_for_status()
         else:
@@ -58,5 +60,6 @@ class FacebookPoster(Poster):
                     files={
                         "file": f,
                     },
+                    timeout=self.__timeout,
                 )
                 response.raise_for_status()

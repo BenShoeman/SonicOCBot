@@ -2,6 +2,7 @@ from PIL import Image
 from typing import Any, Optional, Union
 
 from .HTMLPostCreator import HTMLPostCreator
+from src.Util.HTMLUtil import md_to_plaintext
 from src.OC import OC
 
 
@@ -117,5 +118,5 @@ class OCHTMLPostCreator(HTMLPostCreator):
             oc_text += f"{md('- ')}{k.title()}: {v.title()}\n"
         if use_markdown:
             oc_text += "\n-----\n"
-        oc_text += f"\n{oc.description}"
+        oc_text += f"\n{md_to_plaintext(oc.description)}"
         return oc_text

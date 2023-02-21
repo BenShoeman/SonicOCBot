@@ -8,7 +8,7 @@ from .PostCreator import PostCreator
 import src.Directories as Directories
 from src.Util.ColorUtil import ColorTuple, hex2rgb, rgb2hex, contrasting_text_color
 from src.Util.FileUtil import yaml_load
-from src.Util.HTMLUtil import fill_jinja_template, html_to_image
+from src.Util.HTMLUtil import fill_jinja_template, html_to_image, md_to_plaintext
 from src.Util.ImageUtil import image_to_data_url
 from src.Util.TimeUtil import get_day_state
 
@@ -74,19 +74,13 @@ class HTMLPostCreator(PostCreator):
             Same as in `PostCreator`.
         """
         path = Path(template_path if template_path else Directories.TEMPLATES_DIR)
-        if path.is_dir():
-            self.__template_file = random.choice([p for p in path.glob("*.j2") if p.name != "base.j2"])
-        else:
-            self.__template_file = path
+        self.__template_file = random.choice([p for p in path.glob("*.j2") if p.name != "base.j2"]) if path.is_dir() else path
         self._content = content
         self._title = title
         self._subtitle = subtitle
         self._image = image
         self._tags = tags
-        if palette:
-            self.__palette = palette
-        else:
-            self.__palette = random.choice(list(self.__class__._PALETTES.values()))
+        self.__palette = palette if palette else random.choice(list(self.__class__._PALETTES.values()))
         self._post_width = width
         self._post_height = height
         self._use_markdown = use_markdown
@@ -149,9 +143,7 @@ class HTMLPostCreator(PostCreator):
         str
             alt text using the body text in the image
         """
-        single_newline = "\n"
-        double_newline = "\n\n"
-        return f"{(self._title + double_newline) if self._title else ''}{self._content.replace(single_newline, double_newline)}"
+        return f"{self._title or ''}\n\n{md_to_plaintext(self._content)}".strip()
 
     def get_title(self) -> Optional[str]:
         """Implements `get_title` in `PostCreator` by returning the title of the post.
