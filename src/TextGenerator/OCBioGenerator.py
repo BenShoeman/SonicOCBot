@@ -59,5 +59,7 @@ class OCBioGenerator(TextGenerator):
         body_text = re.sub(
             "^(Write a Sonic OC bio for|Name|Species|Gender|Age|Personality|Traits|Skills|Backstory|Bio):.*?$", "", body_text, flags=re.MULTILINE
         )
-        body_text = re.sub(r"\n\n+", "\n\n", body_text)
+        body_text = re.sub(r"\n\n+", "\n\n", body_text).strip()
+        # Force capitalization on first sentence if it's not capitalized, and if we got nothing from the model then just add filler text
+        body_text = body_text[0].upper() + body_text[1:] if body_text else "*UNDER CONSTRUCTION*"
         return {"title": f"{self.__oc.name} the {self.__oc.species.title()}", "body": body_text}

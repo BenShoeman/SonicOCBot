@@ -49,7 +49,10 @@ class SonicSezGenerator(TextGenerator):
         dict[Literal["title", "body"], str]
             dictionary containing the title and body of the Sonic Says segment
         """
-        salt = self.__salt_model.get_text_block() if self.__salt_model else ""
+        salt = (self.__salt_model.get_text_block() if self.__salt_model else "").strip()
         body_prompt = f'What is some advice Sonic the Hedgehog would give?\n\n"{salt}'.rstrip()
-        body_text = f"{salt.strip()} {self._text_model.get_text_block(prompt=body_prompt)}"
+        gen_text = self._text_model.get_text_block(prompt=body_prompt)
+        space_between = "" if (salt and salt[-1] in "#$'(-[{") or (gen_text and gen_text[0] in "!')-,.:;?]}") else " "
+        body_text = f"{salt}{space_between}{gen_text}"
+
         return {"title": "Sonic Says...", "body": body_text}

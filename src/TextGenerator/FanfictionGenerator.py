@@ -92,8 +92,10 @@ class FanfictionGenerator(TextGenerator):
         if title[-1] in ".,:;!?" and random.random() < 0.8:
             title = title[:-1]
 
-        salt = self.__salt_model.get_text_block() if self.__salt_model else ""
+        salt = (self.__salt_model.get_text_block() if self.__salt_model else "").strip()
         body_prompt = f"Write a Sonic the Hedgehog fanfiction.\n\nTitle: {title}\n\n{salt}".rstrip()
-        body_text = f"{salt.strip()} {self._text_model.get_text_block(prompt=body_prompt)}"
+        gen_text = self._text_model.get_text_block(prompt=body_prompt)
+        space_between = "" if (salt and salt[-1] in "#$'(-[{") or (gen_text and gen_text[0] in "!')-,.:;?]}") else " "
+        body_text = f"{salt}{space_between}{gen_text}"
 
         return {"title": title, "body": body_text}

@@ -35,8 +35,8 @@ class FacebookPoster(Poster):
         # Get the image and text from the post creator
         img = post_creator.get_image()
         title_txt = post_creator.get_title()
-        body_txt = post_creator.get_long_text()
         if img is None:
+            body_txt = post_creator.get_long_text()
             response = requests.post(
                 self.__text_url,
                 data={
@@ -47,6 +47,7 @@ class FacebookPoster(Poster):
             )
             response.raise_for_status()
         else:
+            body_txt = post_creator.get_alt_text() or ""
             with tempfile.NamedTemporaryFile(suffix=".png", mode="w+b") as f:
                 # Create a temporary file to post
                 img.save(f.name, format="PNG")
@@ -55,7 +56,7 @@ class FacebookPoster(Poster):
                     self.__photo_url,
                     data={
                         "access_token": self.__access_token,
-                        "caption": md_to_plaintext(body_txt),
+                        "caption": body_txt,
                     },
                     files={
                         "file": f,
