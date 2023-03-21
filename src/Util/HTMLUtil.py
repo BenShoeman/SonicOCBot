@@ -139,6 +139,7 @@ def md_to_plaintext(md_str: str) -> str:
     # Do some adjustments to make it look better for plaintext
     html_str = re.sub(r"<(/?)h\d>", r"<\1p>", gfm.gfm_to_html(md_str))
     plaintext = re.sub(r"^\*\s+\*\s+\*$", "-----", h2t.handle(html_str), flags=re.MULTILINE)
+    plaintext = re.sub(r"\\([^\s\\])", r"\1", plaintext).replace("\\\\", "\\")
     return plaintext
 
 

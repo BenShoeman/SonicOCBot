@@ -50,15 +50,20 @@ class OCHTMLPostCreator(HTMLPostCreator):
         self._post_width = round(self._post_height * (4 / 3 if self._prefer_long_text else 30 / 17))
         return super().get_image()
 
-    def get_alt_text(self) -> Optional[str]:
+    def get_alt_text(self, include_title: bool = True) -> Optional[str]:
         """Implements `get_alt_text` in `PostCreator` by using the description of the `OC`.
+
+        Parameters
+        ----------
+        include_title : bool
+            whether to include the post's title in the alt text; by default True
 
         Returns
         -------
         Optional[str]
             alt text of the post from the `OC` description
         """
-        return self.__get_oc_text(use_markdown=False)
+        return self.__get_oc_text(use_markdown=False, include_name=include_title)
 
     def get_title(self) -> Optional[str]:
         """Implements `get_title` in `PostCreator` by using the name and species of the `OC`.
