@@ -81,19 +81,15 @@ def html_to_image(
             output_path=f_path.parent,
             size=(width, height),
             custom_flags=[
-                f"--window-size={width},{height+80}",  # Add 80 to account for title/address bars
                 "--default-background-color=00000000",
                 "--hide-scrollbars",
                 "--disable-gpu",
+                "--force-device-scale-factor=1.00",
                 *os.getenv("CHROME_ARGS", "").split(),
             ],
         )
         h2i.screenshot(html_str=html_str, css_str=css_str, save_as=f_path.name)
         text_img = Image.open(f_path).convert("RGBA")
-    # Resize image to match expected width if it doesn't match, for hidpi issues
-    text_img_width, text_img_height = text_img.size
-    resize_ratio = width / text_img_width
-    text_img = text_img.resize((width, int(text_img_height * resize_ratio)))
     if crop_transparency:
         bbox = text_img.getbbox()
         text_img = text_img.crop(bbox)

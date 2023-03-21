@@ -7,7 +7,7 @@ ENV CHROME_ARGS=--no-sandbox
 WORKDIR /app
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends chromium chafa && \
+    apt-get install -y --no-install-recommends chromium chafa xorg && \
     rm -rf /var/lib/apt/lists/*
 RUN ln -s /usr/bin/chafa /usr/bin/www-browser
 
