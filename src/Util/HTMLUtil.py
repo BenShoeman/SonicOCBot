@@ -80,7 +80,7 @@ def html_to_image(
         h2i = Html2Image(
             output_path=f_path.parent,
             browser_executable=os.getenv("CHROME_BIN"),
-            custom_flags=["--default-background-color=0", "--hide-scrollbars", "--disable-gpu", *os.getenv("CHROME_ARGS", "").split()],
+            custom_flags=["--default-background-color=00000000", "--hide-scrollbars", "--disable-gpu", *os.getenv("CHROME_ARGS", "").split()],
         )
         h2i.screenshot(html_str=html_str, css_str=css_str, save_as=f_path.name, size=(width, height))
         text_img = Image.open(f_path).convert("RGBA")
