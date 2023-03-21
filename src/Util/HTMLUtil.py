@@ -72,17 +72,17 @@ def html_to_image(
         HTML and CSS converted to an image
     """
     css_str = dict_to_css(css).strip() if isinstance(css, dict) else css
-    # Add page size details to CSS
+    # Set height if it's not defined
     height = height if height else width * 5
-    css_str += f"@page {{ size: {width}px {height}px; margin: 0; }}\n"
     with tempfile.NamedTemporaryFile(suffix=".png") as f:
         f_path = Path(f.name)
         h2i = Html2Image(
-            output_path=f_path.parent,
             browser_executable=os.getenv("CHROME_BIN"),
+            output_path=f_path.parent,
+            size=(width, height),
             custom_flags=["--default-background-color=00000000", "--hide-scrollbars", "--disable-gpu", *os.getenv("CHROME_ARGS", "").split()],
         )
-        h2i.screenshot(html_str=html_str, css_str=css_str, save_as=f_path.name, size=(width, height))
+        h2i.screenshot(html_str=html_str, css_str=css_str, save_as=f_path.name)
         text_img = Image.open(f_path).convert("RGBA")
     # Resize image to match expected width if it doesn't match, for hidpi issues
     text_img_width, text_img_height = text_img.size
