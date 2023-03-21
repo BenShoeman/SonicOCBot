@@ -3,8 +3,10 @@
 from base64 import b64encode
 from io import BytesIO
 import numpy as np
+import os
 from PIL import Image
 import random
+import requests
 from scipy.ndimage import label
 from typing import Callable, Optional, TypeVar, Union
 
@@ -188,3 +190,48 @@ def image_to_data_url(img: Image.Image) -> str:
         f.seek(0)
         b64_contents = b64encode(f.read()).decode("utf-8")
     return f"data:image/png;base64,{b64_contents}"
+
+
+def imgur_upload(img: Image.Image) -> dict:
+    """Upload an image to imgur for temporary usage (specifically, APIs that require images be at a public URL).
+
+    Uses environment variable `IMGUR_CLIENT_ID` to upload to Imgur.
+
+    Parameters
+    ----------
+    img : Image.Image
+        PIL image to upload to imgur
+
+    Returns
+    -------
+    dict
+        dictionary containing keys "url" and "delete_hash"
+    """
+    response = requests.post(
+        "https://api.imgur.com/3/image",
+        headers={"Authorization": f"Client-ID {os.getenv('IMGUR_CLIENT_ID')}"},
+        data={"image": image_to_data_url(img).removeprefix("data:image/png;base64,"), "type": "base64"},
+        timeout=15,
+    )
+    response.raise_for_status()
+    content = response.json().get("data", {})
+    return {
+        "url": content.get("link"),
+        "delete_hash": content.get("deletehash"),
+    }
+
+
+def imgur_delete(delete_hash: str) -> None:
+    """Delete an image from imgur when done with it.
+
+    Parameters
+    ----------
+    delete_hash : str
+        delete hash acquired from Imgur in `imgur_upload`
+    """
+    response = requests.delete(
+        f"https://api.imgur.com/3/image/{delete_hash}",
+        headers={"Authorization": f"Client-ID {os.getenv('IMGUR_CLIENT_ID')}"},
+        timeout=10,
+    )
+    response.raise_for_status()

@@ -135,15 +135,20 @@ class HTMLPostCreator(PostCreator):
         full_html = fill_jinja_template(self.__template_file, **template_args)
         return html_to_image(full_html, width=self._post_width, height=self._post_height)
 
-    def get_alt_text(self) -> Optional[str]:
+    def get_alt_text(self, include_title: bool = True) -> Optional[str]:
         """Implements `get_alt_text` in `PostCreator` by using the body text in the post image.
+
+        Parameters
+        ----------
+        include_title : bool
+            whether to include the post's title in the alt text; by default True
 
         Returns
         -------
         str
             alt text using the body text in the image
         """
-        return f"{self._title or ''}\n\n{md_to_plaintext(self._content)}".strip()
+        return f"{self._title if include_title and self._title else ''}\n\n{md_to_plaintext(self._content)}".strip()
 
     def get_title(self) -> Optional[str]:
         """Implements `get_title` in `PostCreator` by returning the title of the post.

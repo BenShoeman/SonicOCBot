@@ -87,8 +87,13 @@ class PostCreator(ABC):
         """
 
     @abstractmethod
-    def get_alt_text(self) -> Optional[str]:
+    def get_alt_text(self, include_title: bool = True) -> Optional[str]:
         """Returns alt text for the post image, if there is alt text.
+
+        Parameters
+        ----------
+        include_title : bool
+            whether to include the post's title in the alt text; by default True
 
         Returns
         -------

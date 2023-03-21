@@ -55,6 +55,7 @@ def make_post(
                 TumblrPoster(),
                 MastodonPoster(),
                 FacebookPoster(),
+                InstagramPoster(),
             ]
         )
 

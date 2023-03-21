@@ -30,7 +30,7 @@ class FacebookPoster(Poster):
         post_creator : PostCreator
             post creator to make the post
         """
-        # Set post creator to not prefer long text
+        # Set post creator to prefer long text
         post_creator.prefer_long_text = True
         # Get the image and text from the post creator
         img = post_creator.get_image()

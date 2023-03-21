@@ -55,15 +55,20 @@ class TwitterPostCreator(PostCreator):
         """
         return self.__post_creator.get_image()
 
-    def get_alt_text(self) -> Optional[str]:
+    def get_alt_text(self, include_title: bool = True) -> Optional[str]:
         """Returns alt text for the post image, truncated to Twitter's alt text character limit.
+
+        Parameters
+        ----------
+        include_title : bool
+            whether to include the post's title in the alt text; by default True
 
         Returns
         -------
         Optional[str]
             alt text for the post's image, or None if there is none
         """
-        alt_text = self.__post_creator.get_alt_text()
+        alt_text = self.__post_creator.get_alt_text(include_title)
         if alt_text is None or len(alt_text) <= self.__alt_char_limit:
             return alt_text
         else:
