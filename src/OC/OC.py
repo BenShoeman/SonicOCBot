@@ -214,7 +214,7 @@ class OC(ABC):
 
     def _setup_text_generator(self, model_key: Optional[str] = None) -> None:
         model_map: dict[str, tuple[type[TextModel], str]] = {
-            "HuggingFace": (HuggingFaceTextModel, "EleutherAI/gpt-j-6B"),
+            "HuggingFace": (HuggingFaceTextModel, "togethercomputer/GPT-JT-6B-v1"),
             "Markov": (MarkovTextModel, "ocdescriptions.{gender}"),
         }
         model_probs = {"HuggingFace": 0.95, "Markov": 0.05}

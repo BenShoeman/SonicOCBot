@@ -1,6 +1,8 @@
+from concurrent.futures import ThreadPoolExecutor
 import logging
 import random
 import tempfile
+import traceback
 from typing import Literal, Optional
 
 from src.Util.FileUtil import file_to_data_url
@@ -18,7 +20,7 @@ _post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], float] = {
 }
 
 
-def make_post(
+def do_posts(
     post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], float] = _post_probabilities,
     dummy_post: Optional[Literal["short", "long"]] = None,
     post_type: Optional[Literal["oc", "sonicsez", "fanfic"]] = None,
@@ -59,45 +61,75 @@ def make_post(
             ]
         )
 
-    for poster in posters:
-        if post_type is None:
-            post_probs = [(post, pr) for post, pr in post_probabilities.items()]
-            posts = [post for post, pr in post_probs]
-            probs = [pr for post, pr in post_probs]
-            selected_post_type = random.choices(posts, probs, k=1)[0]
-        else:
-            selected_post_type = post_type
+    # Submit requests for posters in threads since APIs can be laggy
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        for poster in posters:
+            executor.submit(
+                make_post,
+                poster=poster,
+                post_probabilities=post_probabilities,
+                post_type=post_type,
+                sonicmaker=sonicmaker,
+                templated=templated,
+                print_data_url=print_data_url,
+            )
 
-        post_creator: PostCreator
-        if selected_post_type == "oc":
-            gen_kwargs = {}
-            if sonicmaker or templated:
-                gen_kwargs["pr_original"] = 1.0 if sonicmaker else 0.0
-            oc = generate_oc(**gen_kwargs)
-            post_creator = OCHTMLPostCreator(oc=oc)
-        elif selected_post_type == "fanfic":
-            post_creator = FanficHTMLPostCreator()
-        elif selected_post_type == "sonicsez":
-            post_creator = SonicSezHTMLPostCreator()
 
-        curr_post_creator: PostCreator
-        if isinstance(poster, (TwitterPoster, MastodonPoster)):
-            # Wrap in a TwitterPostCreator to apply character limits for Twitter
-            curr_post_creator = TwitterPostCreator(post_creator)
-        else:
-            curr_post_creator = post_creator
-        _logger.info(f"Making a {selected_post_type} post using a {type(poster).__name__}...")
-        try:
-            poster.make_post(curr_post_creator)
-            _logger.info("Done.")
-        except Exception as e:
-            _logger.error(f"{type(e).__name__} encountered in posting from {type(poster).__name__}: {e}")
-        else:
-            if isinstance(poster, DummyPoster) and print_data_url:
-                if post_creator_img := curr_post_creator.get_image():
-                    with tempfile.NamedTemporaryFile(suffix=".png") as f:
-                        post_creator_img.save(f.name, format="PNG")
-                        print(file_to_data_url(f.name))
+def make_post(
+    poster: Poster,
+    post_probabilities: dict[Literal["oc", "sonicsez", "fanfic"], float] = _post_probabilities,
+    post_type: Optional[Literal["oc", "sonicsez", "fanfic"]] = None,
+    sonicmaker: bool = False,
+    templated: bool = False,
+    print_data_url: bool = False,
+) -> None:
+    """Actually make the post using the inputted poster.
+
+    Has most of the same parameters as `do_posts` (except `dummy_post`) along with an additional one:
+
+    Parameters
+    ----------
+    poster : Poster
+        the service to post to
+    """
+    if post_type is None:
+        post_probs = [(post, pr) for post, pr in post_probabilities.items()]
+        posts = [post for post, pr in post_probs]
+        probs = [pr for post, pr in post_probs]
+        selected_post_type = random.choices(posts, probs, k=1)[0]
+    else:
+        selected_post_type = post_type
+    _logger.info(f"{type(poster).__name__}: making a {selected_post_type} post...")
+
+    post_creator: PostCreator
+    if selected_post_type == "oc":
+        gen_kwargs = {}
+        if sonicmaker or templated:
+            gen_kwargs["pr_original"] = 1.0 if sonicmaker else 0.0
+        oc = generate_oc(**gen_kwargs)
+        post_creator = OCHTMLPostCreator(oc=oc)
+    elif selected_post_type == "fanfic":
+        post_creator = FanficHTMLPostCreator()
+    elif selected_post_type == "sonicsez":
+        post_creator = SonicSezHTMLPostCreator()
+
+    curr_post_creator: PostCreator
+    if isinstance(poster, (TwitterPoster, MastodonPoster)):
+        # Wrap in a TwitterPostCreator to apply character limits for Twitter
+        curr_post_creator = TwitterPostCreator(post_creator)
+    else:
+        curr_post_creator = post_creator
+    try:
+        poster.make_post(curr_post_creator)
+        _logger.info(f"{type(poster).__name__}: Done posting.")
+    except Exception as e:
+        _logger.error(f"{type(poster).__name__}: {type(e).__name__} encountered:\n{traceback.format_exc()}")
+    else:
+        if isinstance(poster, DummyPoster) and print_data_url:
+            if post_creator_img := curr_post_creator.get_image():
+                with tempfile.NamedTemporaryFile(suffix=".png") as f:
+                    post_creator_img.save(f.name, format="PNG")
+                    print(file_to_data_url(f.name))
 
 
 def main(
@@ -108,4 +140,4 @@ def main(
     print_data_url: bool = False,
 ) -> None:
     """Main app function. Parameters are same as those in `App.make_post`."""
-    make_post(dummy_post=dummy_post, post_type=post_type, sonicmaker=sonicmaker, templated=templated, print_data_url=print_data_url)
+    do_posts(dummy_post=dummy_post, post_type=post_type, sonicmaker=sonicmaker, templated=templated, print_data_url=print_data_url)

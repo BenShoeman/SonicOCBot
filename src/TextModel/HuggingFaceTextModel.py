@@ -26,6 +26,7 @@ class HuggingFaceTextModel(TextModel):
         self.max_length = max_length
         self.__strip_last_incomplete_sentence = strip_last_incomplete_sentence
         self.__strip_to_closed_quote = strip_to_closed_quote
+        self.__timeout = 600
 
     def get_next_word(self) -> str:
         """Not implemented as the API will return a block of text all at once.
@@ -52,15 +53,18 @@ class HuggingFaceTextModel(TextModel):
         """
         prompt_str = prompt or "Write some text:"
         payload = {
-            "inputs": prompt,
+            "inputs": prompt_str,
+            "options": {
+                "use_cache": False,
+                "wait_for_model": True,
+            },
             "parameters": {
                 "max_length": self.max_length if self.max_length > 0 else 50,
             },
         }
 
-        api_url = "https://api-inference.huggingface.co/models"
         headers = {"Authorization": f"Bearer {self.__api_token}"}
-        response = requests.post(f"{self.__api_url}/{self.__model_id}", headers=headers, json=payload, timeout=120)
+        response = requests.post(f"{self.__api_url}/{self.__model_id}", headers=headers, json=payload, timeout=self.__timeout)
         response_json = response.json()
 
         if not isinstance(response_json, list):
@@ -69,8 +73,8 @@ class HuggingFaceTextModel(TextModel):
 
         cutoff_index = 0
         if self.__strip_to_closed_quote:
-            cutoff_index = max(cutoff_index, gen_text.find('"'))
+            cutoff_index = max(cutoff_index, gen_text.find('"'), *(gen_text.rfind(f'{punc}"') + 1 for punc in ".,:;?!"))
         if cutoff_index == 0 and self.__strip_last_incomplete_sentence:
-            cutoff_index = max(cutoff_index, gen_text.rfind(".") + 1, gen_text.rfind("?") + 1, gen_text.rfind("!") + 1)
+            cutoff_index = max(cutoff_index, *(gen_text.rfind(punc) + 1 for punc in ".?!"), *(gen_text.rfind(f'{punc}"') + 2 for punc in ".,:;?!"))
 
         return gen_text[: cutoff_index if cutoff_index > 0 else len(gen_text)].removesuffix("<|endoftext|>").strip()
