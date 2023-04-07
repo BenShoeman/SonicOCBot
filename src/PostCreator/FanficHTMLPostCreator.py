@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 import random
-from requests import HTTPError
+from requests import ConnectionError, HTTPError, ReadTimeout
 from typing import Any, ClassVar, List, Optional, Union
 
 from .HTMLPostCreator import HTMLPostCreator
@@ -41,15 +41,15 @@ class FanficHTMLPostCreator(HTMLPostCreator):
             "HuggingFace": (HuggingFaceTextModel, "togethercomputer/GPT-JT-6B-v1"),
             "Markov": (MarkovTextModel, "fanfics.bodies"),
         }
-        model_probs = {"HuggingFace": 0.95, "Markov": 0.05}
+        model_probs = {"HuggingFace": 0.5, "Markov": 0.5}
         model_class, model_name = random.choices(list(model_map.values()), weights=list(model_probs.values()), k=1)[0]
         _logger.info(f"Using {model_class.__name__} as the model")
         self.__text_generator = text_generator_class(model_name, model_class)
         try:
             article = self.__text_generator.get_article()
-        # If we get an HTTPError from an external service, fall back to local MarkovTextModel
-        except HTTPError:
-            _logger.error("Received HTTPError from %s, falling back to MarkovTextModel", model_class.__name__)
+        # If we get an HTTP-related error from an external service, fall back to local MarkovTextModel
+        except (ConnectionError, HTTPError, ReadTimeout) as e:
+            _logger.error("Received %s from %s, falling back to MarkovTextModel", type(e).__name__, model_class.__name__)
             model_class, model_name = model_map["Markov"]
             self.__text_generator = text_generator_class(model_name, model_class)
             article = self.__text_generator.get_article()

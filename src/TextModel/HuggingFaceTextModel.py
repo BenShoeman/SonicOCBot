@@ -26,7 +26,7 @@ class HuggingFaceTextModel(TextModel):
         self.max_length = max_length
         self.__strip_last_incomplete_sentence = strip_last_incomplete_sentence
         self.__strip_to_closed_quote = strip_to_closed_quote
-        self.__timeout = 300
+        self.__timeout = 360
 
     def get_next_word(self) -> str:
         """Not implemented as the API will return a block of text all at once.

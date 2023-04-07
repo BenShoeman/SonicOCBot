@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import logging
 import random
 import tempfile
@@ -60,15 +61,18 @@ def do_posts(
             ]
         )
 
-    for poster in posters:
-        make_post(
-            poster=poster,
-            post_probabilities=post_probabilities,
-            post_type=post_type,
-            sonicmaker=sonicmaker,
-            templated=templated,
-            print_data_url=print_data_url,
-        )
+    # Submit requests for posters in threads since APIs can be laggy
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        for poster in posters:
+            executor.submit(
+                make_post,
+                poster=poster,
+                post_probabilities=post_probabilities,
+                post_type=post_type,
+                sonicmaker=sonicmaker,
+                templated=templated,
+                print_data_url=print_data_url,
+            )
 
 
 def make_post(

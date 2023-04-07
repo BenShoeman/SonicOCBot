@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import logging
 from PIL import Image
 import random
-from requests import HTTPError
+from requests import ConnectionError, HTTPError, ReadTimeout
 from typing import Optional
 
 import src.Util.FileUtil as FileUtil
@@ -217,7 +217,7 @@ class OC(ABC):
             "HuggingFace": (HuggingFaceTextModel, "togethercomputer/GPT-JT-6B-v1"),
             "Markov": (MarkovTextModel, "ocdescriptions.{gender}"),
         }
-        model_probs = {"HuggingFace": 0.95, "Markov": 0.05}
+        model_probs = {"HuggingFace": 0.5, "Markov": 0.5}
         if model_key:
             model_class, model_name_base = model_map[model_key]
         else:
@@ -229,9 +229,9 @@ class OC(ABC):
     def _generate_description(self) -> None:
         try:
             article = self.__text_generator.get_article()
-        # If we get an HTTPError from an external service, fall back to local MarkovTextModel
-        except HTTPError:
-            _logger.error("Received HTTPError from %s, falling back to MarkovTextModel", self.__text_generator_class.__name__)
+        # If we get an HTTP-related error from an external service, fall back to local MarkovTextModel
+        except (ConnectionError, HTTPError, ReadTimeout) as e:
+            _logger.error("Received %s from %s, falling back to MarkovTextModel", type(e).__name__, self.__text_generator_class.__name__)
             self._setup_text_generator("Markov")
             article = self.__text_generator.get_article()
         self._description = article["body"]
