@@ -30,7 +30,7 @@ class OCBioGenerator(TextGenerator):
         self._text_model: TextModel = model_class(model_name)
         self._text_model.mean_words = 42
         self._text_model.stdev_words = 20
-        self._text_model.max_length = 165
+        self._text_model.max_length = 150
         self.__oc = oc
 
     def get_article(self) -> dict[Literal["title", "body"], str]:

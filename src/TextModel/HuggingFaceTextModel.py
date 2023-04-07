@@ -60,6 +60,7 @@ class HuggingFaceTextModel(TextModel):
             },
             "parameters": {
                 "max_length": self.max_length if self.max_length > 0 else 50,
+                "repetition_penalty": 7.5,
             },
         }
 

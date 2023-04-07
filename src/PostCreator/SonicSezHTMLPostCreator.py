@@ -38,10 +38,10 @@ class SonicSezHTMLPostCreator(HTMLPostCreator):
             Same as in `HTMLPostCreator`.
         """
         model_map: dict[str, tuple[type[TextModel], str]] = {
-            "HuggingFace": (HuggingFaceTextModel, "togethercomputer/GPT-JT-6B-v1"),
+            "gpt-neo-125m": (HuggingFaceTextModel, "EleutherAI/gpt-neo-125m"),
             "Markov": (MarkovTextModel, "sonicsez"),
         }
-        model_probs = {"HuggingFace": 0.5, "Markov": 0.5}
+        model_probs = {"gpt-neo-125m": 0.95, "Markov": 0.05}
         model_class, model_name = random.choices(list(model_map.values()), weights=list(model_probs.values()), k=1)[0]
         _logger.info(f"Using {model_class.__name__} as the model")
         self.__text_generator = text_generator_class(model_name, model_class)
