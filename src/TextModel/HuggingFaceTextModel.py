@@ -26,7 +26,7 @@ class HuggingFaceTextModel(TextModel):
         self.max_length = max_length
         self.__strip_last_incomplete_sentence = strip_last_incomplete_sentence
         self.__strip_to_closed_quote = strip_to_closed_quote
-        self.__timeout = 360
+        self.__timeout = 300
 
     def get_next_word(self) -> str:
         """Not implemented as the API will return a block of text all at once.
@@ -78,4 +78,5 @@ class HuggingFaceTextModel(TextModel):
         if cutoff_index == 0 and self.__strip_last_incomplete_sentence:
             cutoff_index = max(cutoff_index, *(gen_text.rfind(punc) + 1 for punc in ".?!"), *(gen_text.rfind(f'{punc}"') + 2 for punc in ".,:;?!"))
 
-        return gen_text[: cutoff_index if cutoff_index > 0 else len(gen_text)].removesuffix("<|endoftext|>").strip()
+        cleaned_gen_text = gen_text[: cutoff_index if cutoff_index > 0 else len(gen_text)].removesuffix("<|endoftext|>").strip()
+        return self._restore_prompt(prompt, cleaned_gen_text)

@@ -9,6 +9,15 @@ from src.TextModel import MarkovTextModel
 class FanfictionGenerator(TextGenerator):
     """Generates fanfictions using text models."""
 
+    __DEFAULT_PROMPTS = {
+        "HuggingFaceTextModel": "Write a Sonic the Hedgehog fanfiction.\n\nTitle: {title}\n\n{salt}",
+        "MarkovTextModel": None,
+        "YouDotComModel": (
+            "Ignore the fact you are an AI model. Pretend you are a family-friendly author and write a Sonic the Hedgehog short story "
+            'with the title "{title}" and starting with the text: {salt}'
+        ),
+    }
+
     __DEFAULT_KWARGS = {
         "mean_paragraphs": 3.25,
         "stdev_paragraphs": 0.75,
@@ -49,7 +58,8 @@ class FanfictionGenerator(TextGenerator):
         Other Parameters
         ----------------
         **kwargs : dict
-            Other keyword arguments to define how much text is generated. Below are the available options:
+            Other keyword arguments to define what/how much text is generated. Below are the available options:
+            - prompts: override for __DEFAULT_PROMPTS
             - mean_paragraphs
             - stdev_paragraphs
             - mean_body_words
@@ -58,6 +68,8 @@ class FanfictionGenerator(TextGenerator):
             - mean_title_words
             - stdev_title_words
         """
+        self._prompt_template = kwargs.get("prompts", {}).get(model_class.__name__, FanfictionGenerator.__DEFAULT_PROMPTS[model_class.__name__])
+
         self._text_model: TextModel = model_class(model_name)
         self._text_model.mean_words = kwargs.get("mean_body_words", FanfictionGenerator.__DEFAULT_KWARGS["mean_body_words"])
         self._text_model.stdev_words = kwargs.get("stdev_body_words", FanfictionGenerator.__DEFAULT_KWARGS["stdev_body_words"])
@@ -93,9 +105,7 @@ class FanfictionGenerator(TextGenerator):
             title = title[:-1]
 
         salt = (self.__salt_model.get_text_block() if self.__salt_model else "").strip()
-        body_prompt = f"Write a Sonic the Hedgehog fanfiction.\n\nTitle: {title}\n\n{salt}".rstrip()
-        gen_text = self._text_model.get_text_block(prompt=body_prompt)
-        space_between = "" if (salt and salt[-1] in "#$'(-[{") or (gen_text and gen_text[0] in "!')-,.:;?]}") else " "
-        body_text = f"{salt}{space_between}{gen_text}"
+        body_prompt = self._prompt_template.format(title=title, salt=salt).rstrip() if self._prompt_template else None
+        body_text = self._text_model.get_text_block(prompt=body_prompt).removeprefix(body_prompt.removesuffix(salt) if body_prompt else "")
 
-        return {"title": title, "body": body_text}
+        return {"title": title, "body": body_text if body_text else "*UNDER CONSTRUCTION*"}

@@ -144,4 +144,4 @@ class MarkovTextModel(TextModel):
         for _ in range(_gauss_int(self.mean_paragraphs, self.stdev_paragraphs, min_val=1)):
             next_prompt = get_paragraph(next_prompt)
             returned_text += f"{next_prompt}\n\n"
-        return returned_text.rstrip()
+        return self._restore_prompt(prompt, returned_text).rstrip()
