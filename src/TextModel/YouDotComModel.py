@@ -2,7 +2,6 @@ import os
 import regex
 import requests
 from typing import Any, Optional
-from unidecode import unidecode
 
 from .TextModel import TextModel
 
