@@ -9,7 +9,7 @@ import src.Util.FileUtil as FileUtil
 import src.Directories as Directories
 from src.FillStrategy import FillStrategy
 from src.TextGenerator import TextGenerator, OCBioGenerator
-from src.TextModel import TextModel, HuggingFaceTextModel, MarkovTextModel
+from src.TextModel import TextModel, HuggingFaceTextModel, MarkovTextModel, YouDotComModel
 
 
 _logger = logging.getLogger(__name__)
@@ -215,9 +215,10 @@ class OC(ABC):
     def _setup_text_generator(self, model_key: Optional[str] = None) -> None:
         model_map: dict[str, tuple[type[TextModel], str]] = {
             "gpt-neo-125m": (HuggingFaceTextModel, "EleutherAI/gpt-neo-125m"),
+            "you.com": (YouDotComModel, ""),
             "Markov": (MarkovTextModel, "ocdescriptions.{gender}"),
         }
-        model_probs = {"gpt-neo-125m": 0.95, "Markov": 0.05}
+        model_probs = {"gpt-neo-125m": 0.5, "you.com": 0.45, "Markov": 0.05}
         if model_key:
             model_class, model_name_base = model_map[model_key]
         else:

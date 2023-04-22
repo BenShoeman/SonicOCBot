@@ -7,7 +7,7 @@ from typing import Any, ClassVar, List, Optional, Union
 from .HTMLPostCreator import HTMLPostCreator
 import src.Directories as Directories
 from src.TextGenerator import TextGenerator, FanfictionGenerator
-from src.TextModel import TextModel, HuggingFaceTextModel, MarkovTextModel
+from src.TextModel import TextModel, HuggingFaceTextModel, MarkovTextModel, YouDotComModel
 
 _logger = logging.getLogger(__name__)
 
@@ -39,9 +39,10 @@ class FanficHTMLPostCreator(HTMLPostCreator):
         """
         model_map: dict[str, tuple[type[TextModel], str]] = {
             "gpt-neo-125m": (HuggingFaceTextModel, "EleutherAI/gpt-neo-125m"),
+            "you.com": (YouDotComModel, ""),
             "Markov": (MarkovTextModel, "fanfics.bodies"),
         }
-        model_probs = {"gpt-neo-125m": 0.95, "Markov": 0.05}
+        model_probs = {"gpt-neo-125m": 0.5, "you.com": 0.45, "Markov": 0.05}
         model_class, model_name = random.choices(list(model_map.values()), weights=list(model_probs.values()), k=1)[0]
         _logger.info(f"Using {model_class.__name__} as the model")
         self.__text_generator = text_generator_class(model_name, model_class)

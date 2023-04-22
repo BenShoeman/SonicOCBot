@@ -102,16 +102,20 @@ def make_post(
     _logger.info(f"{type(poster).__name__}: making a {selected_post_type} post...")
 
     post_creator: PostCreator
-    if selected_post_type == "oc":
-        gen_kwargs = {}
-        if sonicmaker or templated:
-            gen_kwargs["pr_original"] = 1.0 if sonicmaker else 0.0
-        oc = generate_oc(**gen_kwargs)
-        post_creator = OCHTMLPostCreator(oc=oc)
-    elif selected_post_type == "fanfic":
-        post_creator = FanficHTMLPostCreator()
-    elif selected_post_type == "sonicsez":
-        post_creator = SonicSezHTMLPostCreator()
+    try:
+        if selected_post_type == "oc":
+            gen_kwargs = {}
+            if sonicmaker or templated:
+                gen_kwargs["pr_original"] = 1.0 if sonicmaker else 0.0
+            oc = generate_oc(**gen_kwargs)
+            post_creator = OCHTMLPostCreator(oc=oc)
+        elif selected_post_type == "fanfic":
+            post_creator = FanficHTMLPostCreator()
+        elif selected_post_type == "sonicsez":
+            post_creator = SonicSezHTMLPostCreator()
+    except Exception as e:
+        _logger.error(f"{type(poster).__name__}: {type(e).__name__} encountered when creating {selected_post_type} post.\n{traceback.format_exc()}")
+        raise e
 
     curr_post_creator: PostCreator
     if isinstance(poster, (TwitterPoster, MastodonPoster)):
@@ -123,7 +127,7 @@ def make_post(
         poster.make_post(curr_post_creator)
         _logger.info(f"{type(poster).__name__}: Done posting.")
     except Exception as e:
-        _logger.error(f"{type(poster).__name__}: {type(e).__name__} encountered.\n{traceback.format_exc()}")
+        _logger.error(f"{type(poster).__name__}: {type(e).__name__} encountered when posting.\n{traceback.format_exc()}")
     else:
         if isinstance(poster, DummyPoster) and print_data_url:
             if post_creator_img := curr_post_creator.get_image():

@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 from PIL import Image
 import pycmarkgfm as gfm
-import re
+import regex
 import tempfile
 from typing import Any, Optional, Union
 
@@ -139,9 +139,9 @@ def md_to_plaintext(md_str: str) -> str:
     h2t.emphasis_mark = ""
     h2t.strong_mark = ""
     # Do some adjustments to make it look better for plaintext
-    html_str = re.sub(r"<(/?)h\d>", r"<\1p>", gfm.gfm_to_html(md_str))
-    plaintext = re.sub(r"^\*\s+\*\s+\*$", "-----", h2t.handle(html_str), flags=re.MULTILINE)
-    plaintext = re.sub(r"\\([^\s\\])", r"\1", plaintext).replace("\\\\", "\\")
+    html_str = regex.sub(r"<(/?)h\d>", r"<\1p>", gfm.gfm_to_html(md_str))
+    plaintext = regex.sub(r"^\*\s+\*\s+\*$", "-----", h2t.handle(html_str), flags=regex.MULTILINE)
+    plaintext = regex.sub(r"\\([^\s\\])", r"\1", plaintext).replace("\\\\", "\\")
     return plaintext
 
 
