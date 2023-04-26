@@ -218,7 +218,7 @@ class OC(ABC):
             "you.com": (YouDotComModel, ""),
             "Markov": (MarkovTextModel, "ocdescriptions.{gender}"),
         }
-        model_probs = {"gpt-neo-125m": 0.5, "you.com": 0.45, "Markov": 0.05}
+        model_probs = {"gpt-neo-125m": 0.4, "you.com": 0.55, "Markov": 0.05}  # TODO: separate this out to be reused among all classes
         if model_key:
             model_class, model_name_base = model_map[model_key]
         else:

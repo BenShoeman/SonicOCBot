@@ -42,7 +42,7 @@ class FanficHTMLPostCreator(HTMLPostCreator):
             "you.com": (YouDotComModel, ""),
             "Markov": (MarkovTextModel, "fanfics.bodies"),
         }
-        model_probs = {"gpt-neo-125m": 0.5, "you.com": 0.45, "Markov": 0.05}
+        model_probs = {"gpt-neo-125m": 0.4, "you.com": 0.55, "Markov": 0.05}  # TODO: separate this out to be reused among all classes
         model_class, model_name = random.choices(list(model_map.values()), weights=list(model_probs.values()), k=1)[0]
         _logger.info(f"Using {model_class.__name__} as the model")
         self.__text_generator = text_generator_class(model_name, model_class)

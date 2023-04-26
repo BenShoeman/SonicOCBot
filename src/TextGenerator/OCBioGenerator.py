@@ -26,7 +26,7 @@ class OCBioGenerator(TextGenerator):
         "MarkovTextModel": None,
         "YouDotComModel": dedent(
             """
-                Write a backstory (2 paragraphs max) for the following Sonic OC:
+                Write a backstory (1 paragraph max) for the following Sonic OC:
 
                 Name: {name}
                 Species: {species}
