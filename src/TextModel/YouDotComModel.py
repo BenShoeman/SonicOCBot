@@ -22,7 +22,7 @@ class YouDotComModel(TextModel):
         """
         super().__init__(model_name, **kwargs)
         self.return_prompt = kwargs.get("return_prompt", False)
-        self.__api_url = "https://api.betterapi.net/youdotcom/chat"
+        self.__api_url = "https://api.betterapi.net/youchat"
         self.__api_key = os.getenv("YOUDOTCOM_API_KEY", "")
         self.__strip_to_closed_quote = strip_to_closed_quote
         self.__timeout = 300
@@ -57,14 +57,14 @@ class YouDotComModel(TextModel):
             response = requests.get(
                 self.__api_url,
                 params={
-                    "message": prompt_str,
+                    "inputs": prompt_str,
                     "key": self.__api_key,
                 },
                 timeout=self.__timeout,
             )
         response.raise_for_status()
         content = response.json()
-        gen_text = content["message"]
+        gen_text = content["generated_text"]
 
         cutoff_index = 0
         if self.__strip_to_closed_quote:
