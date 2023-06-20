@@ -81,7 +81,7 @@ def html_to_image(
             output_path=f_path.parent,
             size=(width, height),
             custom_flags=[
-                "--default-background-color=0",  # TODO: once newer chrome fixes headless window size, change back to 00000000
+                "--default-background-color=00000000",
                 "--hide-scrollbars",
                 "--disable-gpu",
                 "--force-device-scale-factor=1.00",
