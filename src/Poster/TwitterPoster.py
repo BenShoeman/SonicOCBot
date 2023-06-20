@@ -23,7 +23,14 @@ class TwitterPoster(Poster):
             access_token=os.environ.get("TWITTER_ACCESS_TOKEN"),
             access_token_secret=os.environ.get("TWITTER_ACCESS_TOKEN_SECRET"),
         )
-        self.__api: tweepy.API = tweepy.API(auth, wait_on_rate_limit=True)
+        self.__v1_api: tweepy.API = tweepy.API(auth, wait_on_rate_limit=True)
+        self.__v2_client: tweepy.Client = tweepy.Client(
+            consumer_key=os.environ.get("TWITTER_CONSUMER_KEY", ""),
+            consumer_secret=os.environ.get("TWITTER_CONSUMER_SECRET", ""),
+            access_token=os.environ.get("TWITTER_ACCESS_TOKEN"),
+            access_token_secret=os.environ.get("TWITTER_ACCESS_TOKEN_SECRET"),
+            wait_on_rate_limit=True,
+        )
 
     def make_post(self, post_creator: PostCreator) -> None:
         """Make a post to Twitter using the given `PostCreator`.
@@ -40,12 +47,12 @@ class TwitterPoster(Poster):
         post_txt = post_creator.get_short_text()
         alt_txt = post_creator.get_alt_text()
         if img is None:
-            self.__api.update_status(status=post_txt)
+            self.__v2_client.create_tweet(text=post_txt)
         else:
             with tempfile.NamedTemporaryFile(suffix=".png") as f:
                 # Create a temporary file to post
                 img.save(f.name, format="PNG")
-                media = self.__api.media_upload(f.name)
+                media = self.__v1_api.media_upload(f.name)
                 if alt_txt is not None:
-                    self.__api.create_media_metadata(media.media_id, alt_txt)
-                self.__api.update_status(status=post_txt, media_ids=[media.media_id])
+                    self.__v1_api.create_media_metadata(media.media_id, alt_txt)
+                self.__v2_client.create_tweet(text=post_txt, media_ids=[media.media_id])
