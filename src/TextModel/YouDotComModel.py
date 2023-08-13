@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 from .TextModel import TextModel
 
-api_lock = Lock()
+_api_lock = Lock()
 
 
 class YouDotComModel(TextModel):
@@ -53,7 +53,7 @@ class YouDotComModel(TextModel):
         prompt_str = prompt or "Write some random text."
 
         # you.com api doesn't work well with concurrent requests, so lock the request call
-        with api_lock:
+        with _api_lock:
             response = requests.get(
                 self.__api_url,
                 params={
