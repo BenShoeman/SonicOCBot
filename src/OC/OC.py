@@ -9,7 +9,7 @@ import src.Util.FileUtil as FileUtil
 import src.Directories as Directories
 from src.FillStrategy import FillStrategy
 from src.TextGenerator import TextGenerator, OCBioGenerator
-from src.TextModel import TextModel, HuggingFaceTextModel, MarkovTextModel, YouDotComModel
+from src.TextModel.ModelMap import MODEL_CLASSES, MODEL_NAMES, MODEL_PROBABILITIES
 
 
 _logger = logging.getLogger(__name__)
@@ -213,16 +213,9 @@ class OC(ABC):
         self._skills = random.sample(OC._SKILLS, k=n_skills)
 
     def _setup_text_generator(self, model_key: Optional[str] = None) -> None:
-        model_map: dict[str, tuple[type[TextModel], str]] = {
-            "gpt-neo-125m": (HuggingFaceTextModel, "EleutherAI/gpt-neo-125m"),
-            "you.com": (YouDotComModel, ""),
-            "Markov": (MarkovTextModel, "ocdescriptions.{gender}"),
-        }
-        model_probs = {"gpt-neo-125m": 0.4, "you.com": 0.55, "Markov": 0.05}  # TODO: separate this out to be reused among all classes
-        if model_key:
-            model_class, model_name_base = model_map[model_key]
-        else:
-            model_class, model_name_base = random.choices(list(model_map.values()), weights=list(model_probs.values()), k=1)[0]
+        chosen_model_key = model_key if model_key else random.choices(list(MODEL_PROBABILITIES.keys()), weights=list(MODEL_PROBABILITIES.values()), k=1)[0]
+        model_class = MODEL_CLASSES[chosen_model_key]
+        model_name_base = name["oc"] if isinstance(name := MODEL_NAMES.get(chosen_model_key, ""), dict) else name
         _logger.info(f"Using {model_class.__name__} as the model")
         model_name = model_name_base.format(gender=self.gender)
         self.__text_generator = self.__text_generator_class(model_name, model_class, oc=self)

@@ -7,7 +7,7 @@ from typing import Any, ClassVar, List, Optional, Union
 from .HTMLPostCreator import HTMLPostCreator
 import src.Directories as Directories
 from src.TextGenerator import TextGenerator, SonicSezGenerator
-from src.TextModel import TextModel, HuggingFaceTextModel, MarkovTextModel, YouDotComModel
+from src.TextModel.ModelMap import MODEL_CLASSES, MODEL_NAMES, MODEL_PROBABILITIES
 
 _logger = logging.getLogger(__name__)
 
@@ -37,13 +37,9 @@ class SonicSezHTMLPostCreator(HTMLPostCreator):
         **kwargs : dict
             Same as in `HTMLPostCreator`.
         """
-        model_map: dict[str, tuple[type[TextModel], str]] = {
-            "gpt-neo-125m": (HuggingFaceTextModel, "EleutherAI/gpt-neo-125m"),
-            "you.com": (YouDotComModel, ""),
-            "Markov": (MarkovTextModel, "sonicsez"),
-        }
-        model_probs = {"gpt-neo-125m": 0.4, "you.com": 0.55, "Markov": 0.05}  # TODO: separate this out to be reused among all classes
-        model_class, model_name = random.choices(list(model_map.values()), weights=list(model_probs.values()), k=1)[0]
+        model_key = random.choices(list(MODEL_PROBABILITIES.keys()), weights=list(MODEL_PROBABILITIES.values()), k=1)[0]
+        model_class = MODEL_CLASSES[model_key]
+        model_name = name["sonicsez"] if isinstance(name := MODEL_NAMES.get(model_key, ""), dict) else name
         _logger.info(f"Using {model_class.__name__} as the model")
         self.__text_generator = text_generator_class(model_name, model_class)
         try:
@@ -51,7 +47,8 @@ class SonicSezHTMLPostCreator(HTMLPostCreator):
         # If we get an HTTP-related error from an external service, fall back to local MarkovTextModel
         except (ConnectionError, HTTPError, ReadTimeout) as e:
             _logger.error("Received %s from %s, falling back to MarkovTextModel", type(e).__name__, model_class.__name__)
-            model_class, model_name = model_map["Markov"]
+            model_class = MODEL_CLASSES["Markov"]
+            model_name = MODEL_NAMES["Markov"]["sonicsez"]  # TODO: don't couple this so tightly to MarkovModel
             self.__text_generator = text_generator_class(model_name, model_class)
             article = self.__text_generator.get_article()
         overlay_path = random.choice(self.__class__._bg_images) if len(self.__class__._bg_images) > 0 else None
