@@ -1,20 +1,15 @@
 """Utilities to convert HTML and Markdown documents to images."""
 
-from html2image import Html2Image
 from html2text import HTML2Text
 from jinja2 import Environment, FileSystemLoader
-import os
 from pathlib import Path
 from PIL import Image
 import pycmarkgfm as gfm
 import regex
-import tempfile
-from typing import Any, Optional, Union
+from typing import Any, Optional, Type, Union
 
 import src.Directories as Directories
-
-CSSDict = dict[str, Union[dict[str, str], list[dict[str, str]]]]
-"""Dictionary type containing CSS attributes and values."""
+from src.Util.HTML2ImageStrategy import HTML2ImageStrategy, CSSDict, PlaywrightStrategy
 
 
 def fill_jinja_template(template_file: Union[str, Path], **kwargs: Any) -> str:
@@ -48,10 +43,9 @@ def html_to_image(
     width: int = 1000,
     height: Optional[int] = None,
     crop_transparency: bool = True,
+    html2image_strategy: Type[HTML2ImageStrategy] = PlaywrightStrategy,
 ) -> Image.Image:
-    """Convert HTML to an image using `html2image`.
-
-    If `html2image` is not detecting the Chrome/Chromium path, pass it in using the `CHROME_BIN` environment variable.
+    """Convert HTML to an image using the specified strategy.
 
     Parameters
     ----------
@@ -62,38 +56,24 @@ def html_to_image(
     width : int, optional
         width of the exported image, by default 1000
     height : int, optional
-        height of the exported image, by default 5*width (intended to be cropped off later)
+        height of the exported image; will attempt to get the whole page if None
     crop_transparency : bool, optional
         whether to crop transparency, by default True
+    html2image_strategy : HTML2ImageStrategy
+        class of the strategy to use for this image conversion, by default PlaywrightStrategy
 
     Returns
     -------
     Image.Image
         HTML and CSS converted to an image
     """
-    css_str = dict_to_css(css).strip() if isinstance(css, dict) else css
-    # Set height if it's not defined
-    height = height if height else width * 5
-    with tempfile.NamedTemporaryFile(suffix=".png") as f:
-        f_path = Path(f.name)
-        h2i = Html2Image(
-            browser_executable=os.getenv("CHROME_BIN"),
-            output_path=f_path.parent,
-            size=(width, height),
-            custom_flags=[
-                "--default-background-color=00000000",
-                "--hide-scrollbars",
-                "--disable-gpu",
-                "--force-device-scale-factor=1.00",
-                *os.getenv("CHROME_ARGS", "").split(),
-            ],
-        )
-        h2i.screenshot(html_str=html_str, css_str=css_str, save_as=f_path.name)
-        text_img = Image.open(f_path).convert("RGBA")
-    if crop_transparency:
-        bbox = text_img.getbbox()
-        text_img = text_img.crop(bbox)
-    return text_img
+    return html2image_strategy().to_image(
+        html_str=html_str,
+        css=css,
+        width=width,
+        height=height,
+        crop_transparency=crop_transparency,
+    )
 
 
 def md_to_image(md_str: str, **kwargs: Any) -> Image.Image:
@@ -143,34 +123,3 @@ def md_to_plaintext(md_str: str) -> str:
     plaintext = regex.sub(r"^\*\s+\*\s+\*$", "-----", h2t.handle(html_str), flags=regex.MULTILINE)
     plaintext = regex.sub(r"\\([^\s\\])", r"\1", plaintext).replace("\\\\", "\\")
     return plaintext
-
-
-def dict_to_css(css_dict: CSSDict) -> str:
-    """Convert the dictionary to a CSS string.
-
-    Parameters
-    ----------
-    css_dict : dict
-        CSS dict containing selectors as keys and attribute subdicts
-
-    Returns
-    -------
-    str
-        CSS string
-    """
-    css_str = ""
-    for selector, attrs in css_dict.items():
-        if isinstance(attrs, list):
-            for attrs_dict in attrs:
-                css_str += selector + " {"
-                for attr, value in attrs_dict.items():
-                    css_str += f"{attr}:{value};"
-                css_str += "}\n"
-
-        else:  # is a dict
-            css_str += selector + " {"
-            for attr, value in attrs.items():
-                css_str += f"{attr}:{value};"
-            css_str += "}\n"
-
-    return css_str
