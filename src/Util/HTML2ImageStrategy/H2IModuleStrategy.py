@@ -9,9 +9,10 @@ from typing import Optional, Union
 
 from .HTML2ImageStrategy import HTML2ImageStrategy, CSSDict, dict_to_css
 
+
 class H2IModuleStrategy(HTML2ImageStrategy):
     """Represents a strategy to convert HTML/CSS to an image using the module `html2image`.
-    
+
     If `html2image` is not detecting the Chrome/Chromium path, pass it in using the `CHROME_BIN` environment variable.
     """
 

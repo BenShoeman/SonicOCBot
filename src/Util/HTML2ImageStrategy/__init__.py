@@ -11,5 +11,6 @@ The submodules are as follows:
 """
 
 from .HTML2ImageStrategy import HTML2ImageStrategy, CSSDict
-# from .H2IModuleStrategy import H2IModuleStrategy
 from .PlaywrightStrategy import PlaywrightStrategy
+
+# from .H2IModuleStrategy import H2IModuleStrategy
