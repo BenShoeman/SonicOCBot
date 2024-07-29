@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+.github
+.ipynb_checkpoints
+.mypy_cache
+.venv
+.vscode
+corpus
+docs
+utils
