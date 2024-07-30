@@ -15,7 +15,7 @@ class FanfictionGenerator(TextGenerator):
         "OllamaTextModel": (
             'You are an author for a fanfiction site. Write a fanfiction set in the Sonic the Hedgehog universe with the title "{title}", '
             "1-3 paragraphs long."
-        )
+        ),
     }
 
     __DEFAULT_KWARGS = {
