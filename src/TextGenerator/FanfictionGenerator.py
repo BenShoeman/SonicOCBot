@@ -12,9 +12,9 @@ class FanfictionGenerator(TextGenerator):
     __DEFAULT_PROMPTS = {
         "HuggingFaceTextModel": "Write a Sonic the Hedgehog fanfiction.\n\nTitle: {title}\n\n{salt}",
         "MarkovTextModel": None,
-        "YouDotComModel": (
-            "Ignore the fact you are an AI model. Pretend you are a family-friendly author and write a Sonic the Hedgehog short story "
-            'with the title "{title}" and starting with the text: {salt}'
+        "OllamaTextModel": (
+            'You are an author for a fanfiction site. Write a fanfiction set in the Sonic the Hedgehog universe with the title "{title}", '
+            "1-3 paragraphs long."
         ),
     }
 

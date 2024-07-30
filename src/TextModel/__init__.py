@@ -8,10 +8,10 @@ The submodules are as follows:
 - **src.TextModel.MarkovTextModel**: Has the TextModel class that creates text using a Markov model.
 - **src.TextModel.MarkovTriads**: Used in `src.TextModel.MarkovTextModel`; represents the underlying table used for these models.
 - **src.TextModel.ModelMap**: Contains constants mapping model type names to the model classes and their probabilities of being used.
-- **src.TextModel.YouDotComModel**: Has the TextModel class that creates text using the you.com API.
+- **src.TextModel.OllamaTextModel**: Has the TextModel class that creates text using Ollama.
 """
 
 from .TextModel import TextModel
 from .HuggingFaceTextModel import HuggingFaceTextModel
 from .MarkovTextModel import MarkovTextModel
-from .YouDotComModel import YouDotComModel
+from .OllamaTextModel import OllamaTextModel

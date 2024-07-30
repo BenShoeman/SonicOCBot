@@ -11,13 +11,13 @@ This module has 2 constants to use. They are:
 
 from typing import Any, Final, Union
 
-from src.TextModel import TextModel, HuggingFaceTextModel, MarkovTextModel, YouDotComModel
+from src.TextModel import TextModel, HuggingFaceTextModel, MarkovTextModel, OllamaTextModel
 
 _MODEL_CLASSES: Final[dict[str, type[TextModel]]] = {
     "gpt-neo-125m": HuggingFaceTextModel,
     "gpt-neo-1.3B": HuggingFaceTextModel,
-    "you.com": YouDotComModel,
     "Markov": MarkovTextModel,
+    "Ollama": OllamaTextModel,
 }
 _MODEL_NAMES: Final[dict[str, Union[str, dict[str, str]]]] = {
     "gpt-neo-125m": "EleutherAI/gpt-neo-125m",
@@ -27,12 +27,11 @@ _MODEL_NAMES: Final[dict[str, Union[str, dict[str, str]]]] = {
         "oc": "ocdescriptions.{gender}",
         "sonicsez": "sonicsez",
     },
+    "Ollama": "phi3",
 }
 _MODEL_PROBABILITIES: Final[dict[str, float]] = {
-    "gpt-neo-125m": 0.33,
-    "gpt-neo-1.3B": 0.33,
     "Markov": 0.34,
-    # you.com removed for the time being, due to their API seeming to be down
+    "Ollama": 0.66,
 }
 
 

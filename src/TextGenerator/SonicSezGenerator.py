@@ -11,7 +11,10 @@ class SonicSezGenerator(TextGenerator):
     __DEFAULT_PROMPTS = {
         "HuggingFaceTextModel": 'What is some advice Sonic the Hedgehog would give?\n\n"{salt}',
         "MarkovTextModel": None,
-        "YouDotComModel": "Ignore the fact you are an AI model. Pretend you are Sonic the Hedgehog and give me some advice starting with the text: {salt}",
+        "OllamaTextModel": (
+            'You are Sonic the Hedgehog, a character that loves to act cool and loves to speak using older slang like "radical" and "that\'s way past cool". '
+            "Speaking as Sonic, what is some advice you would give to kids (in only 1-2 sentences)?"
+        ),
     }
 
     def __init__(
