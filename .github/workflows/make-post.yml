@@ -21,7 +21,6 @@ env:
   INSTAGRAM_USER_ID: ${{ secrets.INSTAGRAM_USER_ID }}
   FACEBOOK_ACCESS_TOKEN: ${{ secrets.FACEBOOK_ACCESS_TOKEN }}
   HUGGINGFACE_ACCESS_TOKEN: ${{ secrets.HUGGINGFACE_ACCESS_TOKEN }}
-  YOUDOTCOM_API_KEY: ${{ secrets.YOUDOTCOM_API_KEY }}
   IMGUR_CLIENT_ID: ${{ secrets.IMGUR_CLIENT_ID }}
 
 jobs:
@@ -51,6 +50,5 @@ jobs:
             -e INSTAGRAM_USER_ID=${{ secrets.INSTAGRAM_USER_ID }}
             -e FACEBOOK_ACCESS_TOKEN=${{ secrets.FACEBOOK_ACCESS_TOKEN }}
             -e HUGGINGFACE_ACCESS_TOKEN=${{ secrets.HUGGINGFACE_ACCESS_TOKEN }}
-            -e YOUDOTCOM_API_KEY=${{ secrets.YOUDOTCOM_API_KEY }}
             -e IMGUR_CLIENT_ID=${{ secrets.IMGUR_CLIENT_ID }}
           run: python3 main.py -l info

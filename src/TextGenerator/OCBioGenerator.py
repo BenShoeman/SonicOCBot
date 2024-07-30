@@ -24,9 +24,9 @@ class OCBioGenerator(TextGenerator):
             """
         ).strip(),
         "MarkovTextModel": None,
-        "YouDotComModel": dedent(
+        "OllamaTextModel": dedent(
             """
-                Write a backstory (1 paragraph max) for the following Sonic OC:
+                Write a short bio (no longer than 3 paragraphs) for an original character in the Sonic the Hedgehog universe with the following info:
 
                 Name: {name}
                 Species: {species}

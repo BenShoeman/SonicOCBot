@@ -25,7 +25,7 @@ class TextModel(ABC):
             standard deviation of number of paragraphs, default set on a per object basis, by default 0
         max_length : int, optional
             max number of words or tokens to generate, only used for some text models; by default -1
-        return_prompt : bool, optional
+        restore_prompt : bool, optional
             whether to return the prompt when generating a text block, by default True
         **kwargs : dict
             Other keyword arguments to define how the text model is created; per object specific
@@ -35,7 +35,7 @@ class TextModel(ABC):
         self.mean_paragraphs = kwargs.get("mean_paragraphs", 1)
         self.stdev_paragraphs = kwargs.get("stdev_paragraphs", 0)
         self.max_length = kwargs.get("max_length", -1)
-        self.return_prompt = kwargs.get("return_prompt", True)
+        self.restore_prompt = kwargs.get("restore_prompt", True)
 
     @abstractmethod
     def get_next_word(self) -> str:
@@ -77,7 +77,7 @@ class TextModel(ABC):
         str
             generated text with prompt prepended if `restore_prompt` is True
         """
-        if self.return_prompt:
+        if self.restore_prompt:
             space_between = "" if (not prompt) or (prompt and prompt[-1] in "#$'(-[{") or (generated_text and generated_text[0] in "!')-,.:;?]}") else " "
             return f"{prompt if prompt else ''}{space_between}{generated_text}"
         else:
