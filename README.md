@@ -20,6 +20,8 @@ pip install -r requirements/minimal.txt # or full.txt if running notebooks
 playwright install # installs playwright requirements
 ```
 
+This also uses [Ollama](https://github.com/ollama/ollama) to run some text generation; follow the instructions there to set it up. You can also disable it by removing `Ollama` in `_MODEL_PROBABILITIES` in [the `ModelMap` module](src/TextModel/ModelMap.py), and setting the `Markov` probability to 1.0.
+
 ### Quality Checks
 
 This repo uses `mypy`, `black`, and `unimport` to check typing, formatting, and unused imports on a PR. All are installed during the above requirements installation and you can run all the checks using [`quality-check.sh`](/quality-check.sh).
