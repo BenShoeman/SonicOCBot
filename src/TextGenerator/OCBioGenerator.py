@@ -26,7 +26,7 @@ class OCBioGenerator(TextGenerator):
         "MarkovTextModel": None,
         "OllamaTextModel": dedent(
             """
-                Write a short bio (no longer than 3 paragraphs) for an original character in the Sonic the Hedgehog universe with the following info:
+                Write a short bio (1-3 paragraphs) for an original character in the Sonic the Hedgehog universe with the following info:
 
                 Name: {name}
                 Species: {species}
@@ -34,6 +34,8 @@ class OCBioGenerator(TextGenerator):
                 Age: {age}
                 Personality: {personalities}
                 Skills: {skills}
+
+                If you don't think this info is enough, pretend you create Sonic the Hedgehog OCs all the time and make up something for the bio.
             """
         ).strip(),
     }

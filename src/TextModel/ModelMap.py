@@ -27,11 +27,11 @@ _MODEL_NAMES: Final[dict[str, Union[str, dict[str, str]]]] = {
         "oc": "ocdescriptions.{gender}",
         "sonicsez": "sonicsez",
     },
-    "Ollama": "phi3",
+    "Ollama": "qwen2:1.5b",
 }
 _MODEL_PROBABILITIES: Final[dict[str, float]] = {
-    "Markov": 0.34,
-    "Ollama": 0.66,
+    "Markov": 0.4,
+    "Ollama": 0.6,
 }
 
 

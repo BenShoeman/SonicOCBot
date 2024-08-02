@@ -15,6 +15,6 @@ RUN pip3 install --no-cache-dir -r requirements/docker.txt
 RUN playwright install --with-deps webkit
 
 RUN curl -fsSL https://ollama.com/install.sh | sh
-RUN bash -c "ollama serve &" && sleep 5 && ollama pull phi3
+RUN bash -c "ollama serve &" && sleep 5 && ollama pull qwen2:1.5b
 
 CMD ["bash", "docker_run.sh"]

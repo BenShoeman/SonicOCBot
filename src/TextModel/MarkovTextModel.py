@@ -6,6 +6,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.engine import Engine
 from typing import Any, ClassVar, Optional, Union
+import uuid
 
 from .TextModel import TextModel
 from .MarkovTriads import MarkovTriads
@@ -70,7 +71,8 @@ class MarkovTextModel(TextModel):
 
     def __load_db(self) -> None:
         """Decompress and load the database."""
-        self.__tmp_path = f"{self.__db_path}_tmp.db"
+        # Add uuid to the temp path to avoid concurrent thread issues
+        self.__tmp_path = f"{self.__db_path}_tmp_{str(uuid.uuid4())}.db"
         with gzip.open(self.__db_path, "rb") as f_src, open(self.__tmp_path, "wb") as f_dst:
             f_dst.writelines(f_src)
         self.__engine = create_engine(f"sqlite:///{self.__tmp_path}")

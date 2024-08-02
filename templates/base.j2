@@ -129,7 +129,7 @@
         return isOverflowing;
       }
       window.addEventListener("load", function() {
-        ["title", "subtitle", "content"].forEach(function(id) {
+        ["content", "title", "subtitle"].forEach(function(id) {
           let e = document.getElementById(id);
           if (e && e.textContent) {
             let inc_rate = 0.01;

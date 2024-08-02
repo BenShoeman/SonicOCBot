@@ -49,35 +49,29 @@ class OllamaTextModel(TextModel):
             random block of text from the model
         """
         prompt_str = prompt or "Write some text."
-        # Specify a format to generate this text in, for easy parsing, and redo it if it doesn't do it right
         prompt_str = (
-            "You will format your response in the following JSON list format, strictly following the format and not wrapping it in ```json:\n\n"
-            + dedent(
-                """
-                    [
-                        "response 1st paragraph",
-                        "response 2nd paragraph",
-                        ...
-                    ]
-                """
-            ).strip()
-            + "\n\n"
-            + prompt_str
+            "Ignore the fact you are an AI, and give me your responses directly and plainly without prefacing your responses with anything. " + prompt_str
         )
         succeeded = False
-        max_attempts = 10
         attempts = 0
+        max_attempts = 10
         while not succeeded and attempts < max_attempts:
-            result = subprocess.check_output(["ollama", "run", self.__model_name, prompt_str]).decode().strip()
-            try:
-                text = json.loads(result)
-                assert isinstance(text, list)
-                assert all(isinstance(line, str) for line in text)
-            except (json.JSONDecodeError, AssertionError):
-                _logger.debug("Retrying to get properly formatted text")
+            result = unidecode(subprocess.check_output(["ollama", "run", self.__model_name, prompt_str]).decode()).strip().strip('"')
+            # Ensure that we don't get a response saying the model can't do that
+            result_start = result[:50]
+            is_bad_response = (
+                len(result) <= 40
+                or result.startswith("Sorry,")
+                or result.startswith("Sure")
+                or "As " in result_start
+                or any(
+                    phrase in result_start.lower()
+                    for phrase in ("ai language", "model", "i can't assist", "i can't help", "i don't understand", "unable", "not possible")
+                )
+            )
+            succeeded = not is_bad_response
+            if not succeeded:
                 attempts += 1
-            else:
-                succeeded = True
-        if attempts == max_attempts:
-            raise Exception("Took too many attempts to get properly formatted text")
-        return unidecode("\n\n".join(text))
+        if not succeeded:
+            raise Exception(f"Failed to get text block from Ollama after {max_attempts} attempts")
+        return result

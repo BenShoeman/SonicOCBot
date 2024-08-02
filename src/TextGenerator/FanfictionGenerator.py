@@ -13,8 +13,8 @@ class FanfictionGenerator(TextGenerator):
         "HuggingFaceTextModel": "Write a Sonic the Hedgehog fanfiction.\n\nTitle: {title}\n\n{salt}",
         "MarkovTextModel": None,
         "OllamaTextModel": (
-            'You are an author for a fanfiction site. Write a fanfiction set in the Sonic the Hedgehog universe with the title "{title}", '
-            "1-3 paragraphs long."
+            'You are an author for a fanfiction site. Write a short fanfiction set in the Sonic the Hedgehog universe with the title "{title}", '
+            "2-3 paragraphs long. Do not include the title in your response."
         ),
     }
 

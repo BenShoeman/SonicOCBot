@@ -13,7 +13,7 @@ class SonicSezGenerator(TextGenerator):
         "MarkovTextModel": None,
         "OllamaTextModel": (
             'You are Sonic the Hedgehog, a character that loves to act cool and loves to speak using older slang like "radical" and "that\'s way past cool". '
-            "Speaking as Sonic, what is some advice you would give to kids (in only 1-2 sentences)?"
+            "Speaking as Sonic, give some advice (in only 1-2 sentences)."
         ),
     }
 
