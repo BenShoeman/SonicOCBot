@@ -381,7 +381,7 @@ def contrasting_text_color(rgb: ColorTuple) -> ColorTuple:
     ColorTuple
         3-tuple of colors representing white or black
     """
-    h, s, l = rgb2hsl(np.asarray(rgb, dtype=np.uint8))
+    _, _, l = rgb2hsl(np.asarray(rgb, dtype=np.uint8))
     return (0, 0, 0) if l >= 0.5 else (255, 255, 255)
 
 
@@ -410,7 +410,7 @@ def get_colors_list(filename: Union[str, Path]) -> dict[str, ColorTuple]:
         colors_dict = yaml.safe_load(filepath.read_text())
         return {name: hex2rgb(value) for name, value in colors_dict.items()}
     else:
-        _logger.warn("colors list not found. Loading a basic colors dict")
+        _logger.warning("colors list not found. Loading a basic colors dict")
         return _BASIC_COLORS
 
 
@@ -431,7 +431,7 @@ _SKIN_TONE_COLORS = get_colors_list(Directories.DATA_DIR / "colors.skintones.yml
 if os.path.exists((_skin_tone_gradient_file := Directories.DATA_DIR / "colors.skintones.gradient.png")):
     _SKIN_TONE_GRADIENT = Image.open(_skin_tone_gradient_file)
 else:
-    _logger.warn("skin tones gradient not found. Loading a dummy image")
+    _logger.warning("skin tones gradient not found. Loading a dummy image")
     _SKIN_TONE_GRADIENT = Image.new("RGB", (1, 1), (128, 128, 128))
 
 

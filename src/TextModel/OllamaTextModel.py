@@ -1,20 +1,17 @@
-import json
-import logging
-import subprocess
-from textwrap import dedent
+import os
+import requests
 from typing import Any, Optional
 from unidecode import unidecode
 
 from .TextModel import TextModel
-
-_logger = logging.getLogger(__name__)
+from src.Errors import OllamaError
 
 
 class OllamaTextModel(TextModel):
     """Text model that uses a local Ollama instance to generate text."""
 
     def __init__(self, model_name: str, **kwargs: Any):
-        """Create a `OllamaTextModel`. Uses API token in environment variable `HUGGINGFACE_ACCESS_TOKEN`.
+        """Create an `OllamaTextModel`.
 
         Parameters
         ----------
@@ -56,7 +53,16 @@ class OllamaTextModel(TextModel):
         attempts = 0
         max_attempts = 10
         while not succeeded and attempts < max_attempts:
-            result = unidecode(subprocess.check_output(["ollama", "run", self.__model_name, prompt_str]).decode()).strip().strip('"')
+            response = requests.post(
+                f"{os.getenv('OLLAMA_PROTOCOL', 'http')}://{os.getenv('OLLAMA_URL', 'localhost:11434')}/api/generate",
+                json={"model": self.__model_name, "prompt": prompt_str, "stream": False},
+                timeout=180,
+            )
+            if not response.ok:
+                print(response.text)
+                attempts += 1
+                continue
+            result = unidecode(response.json()["response"]).strip().strip('"')
             # Ensure that we don't get a response saying the model can't do that
             result_start = result[:50]
             is_bad_response = (
@@ -73,5 +79,5 @@ class OllamaTextModel(TextModel):
             if not succeeded:
                 attempts += 1
         if not succeeded:
-            raise Exception(f"Failed to get text block from Ollama after {max_attempts} attempts")
+            raise OllamaError(f"Failed to get text block from Ollama after {max_attempts} attempts")
         return result

@@ -17,10 +17,12 @@ cd SonicOCBot  # ... wherever you have the repo stored
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements/minimal.txt # or full.txt if running notebooks
-playwright install # installs playwright requirements
+playwright install --with-deps webkit # installs playwright requirements
 ```
 
 This also uses [Ollama](https://github.com/ollama/ollama) to run some text generation; follow the instructions there to set it up. You can also disable it by removing `Ollama` in `_MODEL_PROBABILITIES` in [the `ModelMap` module](src/TextModel/ModelMap.py), and setting the `Markov` probability to 1.0.
+
+For Playwright, you can choose another browser besides `webkit`. Just change the browser in the `playwright install` command and then pass in `PLAYWRIGHT_BROWSER=<browser name>` when running `main.py`.
 
 ### Quality Checks
 

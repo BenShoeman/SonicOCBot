@@ -98,6 +98,32 @@ def md_to_image(md_str: str, **kwargs: Any) -> Image.Image:
     return html_to_image(html_str=html_str, **kwargs)
 
 
+def html_to_plaintext(html_str: str) -> str:
+    """Convert HTML to plain, unformatted text.
+
+    Parameters
+    ----------
+    html_str : str
+        HTML string to convert
+
+    Returns
+    -------
+    str
+        plain unformatted text with no html elements
+    """
+    h2t = HTML2Text()
+    h2t.ignore_links = True
+    h2t.ignore_images = True
+    h2t.body_width = 2147483647
+    h2t.ul_item_mark = "-"
+    h2t.emphasis_mark = ""
+    h2t.strong_mark = ""
+    # Do some adjustments to make it look better for plaintext
+    plaintext = h2t.handle(regex.sub(r"<(/?)h\d>", r"<\1p>", html_str))
+    plaintext = regex.sub(r"^\*\s+\*\s+\*$", "-----", plaintext, flags=regex.MULTILINE)
+    return plaintext.strip("\n")
+
+
 def md_to_plaintext(md_str: str) -> str:
     """Convert markdown to plain, unformatted text.
 
@@ -111,15 +137,7 @@ def md_to_plaintext(md_str: str) -> str:
     str
         plain unformatted text with no markdown elements
     """
-    h2t = HTML2Text()
-    h2t.ignore_links = True
-    h2t.ignore_images = True
-    h2t.body_width = 2147483647
-    h2t.ul_item_mark = "-"
-    h2t.emphasis_mark = ""
-    h2t.strong_mark = ""
-    # Do some adjustments to make it look better for plaintext
-    html_str = regex.sub(r"<(/?)h\d>", r"<\1p>", gfm.gfm_to_html(md_str))
-    plaintext = regex.sub(r"^\*\s+\*\s+\*$", "-----", h2t.handle(html_str), flags=regex.MULTILINE)
+    plaintext = html_to_plaintext(gfm.gfm_to_html(md_str))
+    # Make sure we don't have any escaped characters
     plaintext = regex.sub(r"\\([^\s\\])", r"\1", plaintext).replace("\\\\", "\\")
     return plaintext

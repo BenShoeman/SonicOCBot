@@ -26,11 +26,11 @@ def get_latlong(ip: Optional[str] = None) -> Tuple[str, str]:
         if len(loc) > 1:
             return loc[0], loc[1]
         else:
-            _logger.warn(f"malformed location received from {url}: {loc}; falling back to 0.0, 0.0")
+            _logger.warning(f"malformed location received from {url}: {loc}; falling back to 0.0, 0.0")
             return "0.0", "0.0"
     except requests.HTTPError as e:
-        _logger.warn(f"encountered {e.response.status_code} error from {url}, falling back to 0.0, 0.0")
+        _logger.warning(f"encountered {e.response.status_code} error from {url}, falling back to 0.0, 0.0")
         return "0.0", "0.0"
     except (requests.ConnectionError, requests.ReadTimeout) as e:
-        _logger.warn(f"encountered {type(e).__name__} from {url}, falling back to 0.0, 0.0")
+        _logger.warning(f"encountered {type(e).__name__} from {url}, falling back to 0.0, 0.0")
         return "0.0", "0.0"

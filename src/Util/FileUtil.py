@@ -29,7 +29,7 @@ def list_load(filepath: Union[str, Path], fallback_factory: Callable = list) -> 
         with open(filepath) as f:
             return [line.strip() for line in f.readlines()]
     else:
-        _logger.warn(f"{filepath} does not exist, falling back")
+        _logger.warning(f"{filepath} does not exist, falling back")
         return fallback_factory()
 
 
@@ -53,10 +53,10 @@ def json_load(filepath: Union[str, Path], fallback_factory: Callable = dict) -> 
             with open(filepath) as f:
                 return json.load(f)
         except json.JSONDecodeError:
-            _logger.warn(f"JSON decode error reading {f}, falling back")
+            _logger.warning(f"JSON decode error reading {f}, falling back")
             return fallback_factory()
     else:
-        _logger.warn(f"{filepath} does not exist, falling back")
+        _logger.warning(f"{filepath} does not exist, falling back")
         return fallback_factory()
 
 
@@ -80,10 +80,10 @@ def yaml_load(filepath: Union[str, Path], fallback_factory: Callable = dict) -> 
             with open(filepath) as f:
                 return yaml.safe_load(f)
         except yaml.parser.ParserError:
-            _logger.warn(f"YAML parser error reading {f}, falling back")
+            _logger.warning(f"YAML parser error reading {f}, falling back")
             return fallback_factory()
     else:
-        _logger.warn(f"{filepath} does not exist, falling back")
+        _logger.warning(f"{filepath} does not exist, falling back")
         return fallback_factory()
 
 
@@ -101,10 +101,10 @@ def file_to_data_url(filepath: Union[str, Path]) -> str:
         data URL of the file
     """
     filepath = Path(filepath)
-    mime_type, encoding = mimetypes.guess_type(filepath)
+    mime_type, _ = mimetypes.guess_type(filepath)
     if filepath.is_file():
         b64_text = base64.b64encode(filepath.read_bytes()).decode("utf-8")
         return f"data:{mime_type};base64,{b64_text}"
     else:
-        _logger.warn(f"{filepath} does not exist, returning empty string")
+        _logger.warning(f"{filepath} does not exist, returning empty string")
         return ""
