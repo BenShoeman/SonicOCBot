@@ -1,9 +1,6 @@
 name: Make post
 
 on:
-  schedule:
-  - cron: "30 * * * *"
-
   workflow_dispatch:
 
 env:
