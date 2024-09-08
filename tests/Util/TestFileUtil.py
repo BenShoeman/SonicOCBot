@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from src.Util import FileUtil
 
@@ -29,5 +30,7 @@ class TestFileUtil(unittest.TestCase):
         """Test converting a file to a data url."""
         filepath = "tests/resources/example.yml"
         expected = "data:application/yaml;base64,dGVzdDoKICB2YWx1ZTogMQo="
-        actual = FileUtil.file_to_data_url(filepath)
+        # Workaround for guess_type not working properly in github actions
+        with patch("mimetypes.guess_type", return_value=("application/yaml", "utf-8")):
+            actual = FileUtil.file_to_data_url(filepath)
         self.assertEqual(actual, expected)
