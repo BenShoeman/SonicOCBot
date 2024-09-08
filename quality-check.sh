@@ -10,19 +10,19 @@ echo
 
 # MyPy type checking
 echo "--- MyPy type checking ---"
-mypy --ignore-missing-imports --disallow-untyped-defs --disallow-incomplete-defs -p src -p main -p train -p utils
+mypy --ignore-missing-imports --disallow-untyped-defs --disallow-incomplete-defs -p src -p main -p train -p tests -p utils
 mypy_exit_code=$?
 echo
 
 # Unimport unused import checking
 echo "--- Unimport unused import checking ---"
-python -m unimport --ignore-init src main.py train.py utils
+python -m unimport --ignore-init src main.py train.py tests utils
 unimport_exit_code=$?
 echo
 
 # Black format checking
 echo "--- Black format checking ---"
-black --check --line-length 160 src main.py train.py utils/**/*.py
+black --check --line-length 160 src main.py train.py tests utils/**/*.py
 black_exit_code=$?
 echo
 

@@ -15,7 +15,7 @@ class TestUpsertTable(unittest.TestCase):
         test_table = UpsertTable("test", [Column("id", Integer, primary_key=True), Column("value", Integer)])
         test_table.create_table(self.engine)
         inspector = inspect(self.engine)
-        self.assertTrue(inspector.has_table('test'))
+        self.assertTrue(inspector.has_table("test"))
 
     def test_upsert(self) -> None:
         """Test upserting into a table with the upsert function."""
