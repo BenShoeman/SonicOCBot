@@ -17,6 +17,16 @@ ImageLike = TypeVar("ImageLike", Image.Image, np.ndarray)
 """Image-like; i.e., a PIL image or numpy image array."""
 
 
+def _image_to_rgb(img: Image.Image) -> Image.Image:
+    """Convert an image to RGB if it's not already."""
+    if img.mode not in ("RGB", "RGBA"):
+        if img.mode.endswith("A") or img.mode.endswith("a"):
+            img = img.convert("RGBA")
+        else:
+            img = img.convert("RGB")
+    return img
+
+
 def get_random_color_from_image(img: Image.Image) -> ColorTuple:
     """Get a random color from the input image.
 
@@ -52,6 +62,10 @@ def tile_image_to_size(img: ImageLike, size: tuple[int, int]) -> ImageLike:
     ImageLike
         a new PIL image or numpy array of the tiled image, same type as input
     """
+    # Convert pillow images to RGB
+    if isinstance(img, Image.Image):
+        img = _image_to_rgb(img)
+
     img_arr = np.array(img)
     w_tgt, h_tgt = size
     h_fill, w_fill = img_arr.shape[:2]
@@ -103,7 +117,13 @@ def floodfill(
     """
     # Just use the target color to fill if method is undefined
     if not method:
-        method = lambda orig, new: new
+        method = lambda _, new: new
+
+    # Convert pillow images to RGB
+    if isinstance(img, Image.Image):
+        img = _image_to_rgb(img)
+    if isinstance(fill, Image.Image):
+        fill = _image_to_rgb(fill)
 
     if in_place:
         img_arr = np.asarray(img)
@@ -124,7 +144,6 @@ def floodfill(
     # Find where difference between initial color and all colors in image is less than threshold for all channels
     diffs = np.abs(img_rgb - init_color)
     match_regions = np.logical_and(np.logical_and(diffs[:, :, 0] <= threshold, diffs[:, :, 1] <= threshold), diffs[:, :, 2] <= threshold)
-    # match_regions = np.sum(np.abs(img_rgb - init_color), axis=2) <= (threshold * 3)
     # Then, get contiguous region starting at initial color using scipy.ndimage.label
     labels, _ = label(match_regions)
     # If fill is just a color, convert it to numpy array; else, get where pattern overlaps image

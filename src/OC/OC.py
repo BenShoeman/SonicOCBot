@@ -7,6 +7,7 @@ from typing import Optional
 
 import src.Util.FileUtil as FileUtil
 import src.Directories as Directories
+from src.Errors import OllamaError
 from src.FillStrategy import FillStrategy
 from src.TextGenerator import TextGenerator, OCBioGenerator
 from src.TextModel.ModelMap import MODEL_CLASSES, MODEL_NAMES, MODEL_PROBABILITIES
@@ -189,7 +190,7 @@ class OC(ABC):
         if len(names) > 0:
             self._name: str = random.choices(tuple(names.keys()), weights=tuple(names.values()), k=1)[0]
         else:
-            _logger.warn(f"names.{self.gender}.yml could not be loaded or is empty.")
+            _logger.warning(f"names.{self.gender}.yml could not be loaded or is empty.")
 
     def _generate_personalities(self) -> None:
         n_personalities = max(1, round(random.gauss(1.75, 0.6)))
@@ -224,7 +225,7 @@ class OC(ABC):
         try:
             article = self.__text_generator.get_article()
         # If we get an HTTP-related error from an external service, fall back to local MarkovTextModel
-        except (ConnectionError, HTTPError, ReadTimeout) as e:
+        except (ConnectionError, HTTPError, ReadTimeout, OllamaError) as e:
             _logger.error("Received %s from %s, falling back to MarkovTextModel", type(e).__name__, self.__text_generator_class.__name__)
             self._setup_text_generator("Markov")
             article = self.__text_generator.get_article()

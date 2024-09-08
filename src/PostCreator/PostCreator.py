@@ -26,7 +26,7 @@ def _get_font_choices(fonts_dir: Union[str, Path]) -> dict:
             if not font_file.stem.endswith("-Italic")
         }
     else:
-        _logger.warn(f"could not load fonts as directory {fonts_dir} doesn't exist.")
+        _logger.warning(f"could not load fonts as directory {fonts_dir} doesn't exist.")
         return {}
 
 

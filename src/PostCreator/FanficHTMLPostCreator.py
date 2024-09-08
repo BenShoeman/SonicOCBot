@@ -6,6 +6,7 @@ from typing import Any, ClassVar, List, Optional, Union
 
 from .HTMLPostCreator import HTMLPostCreator
 import src.Directories as Directories
+from src.Errors import OllamaError
 from src.TextGenerator import TextGenerator, FanfictionGenerator
 from src.TextModel.ModelMap import MODEL_CLASSES, MODEL_NAMES, MODEL_PROBABILITIES
 
@@ -45,7 +46,7 @@ class FanficHTMLPostCreator(HTMLPostCreator):
         try:
             article = self.__text_generator.get_article()
         # If we get an HTTP-related error from an external service, fall back to local MarkovTextModel
-        except (ConnectionError, HTTPError, ReadTimeout) as e:
+        except (ConnectionError, HTTPError, ReadTimeout, OllamaError) as e:
             _logger.error("Received %s from %s, falling back to MarkovTextModel", type(e).__name__, model_class.__name__)
             model_class = MODEL_CLASSES["Markov"]
             model_name = MODEL_NAMES["Markov"]["fanfic"]  # TODO: don't couple this so tightly to MarkovModel

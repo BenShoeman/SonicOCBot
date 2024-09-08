@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-import pandas as pd
 from sqlalchemy import Table, MetaData, Column, select, delete
 from sqlalchemy.dialects.sqlite import insert
 from sqlalchemy.engine import Engine
@@ -7,23 +6,23 @@ from sqlalchemy.schema import DropTable
 from typing import Iterator, Literal
 
 
-def batch_df(df: pd.DataFrame, batch_size: int = 100) -> Iterator[pd.DataFrame]:
+def batch_list(records: list[dict], batch_size: int = 100) -> Iterator[list[dict]]:
     """Chunk a dataframe into smaller batches.
 
     Parameters
     ----------
-    df : pd.DataFrame
-        Pandas dataframe to chunk into batches
+    records : list[dict]
+        list of records to chunk into batches
     batch_size : int, optional
         size of each batch, by default 100
 
     Yields
     ------
-    Iterator[pd.DataFrame]
-        iterator of dataframe batches
+    Iterator[list[dict]]
+        iterator of batches of records
     """
-    for i in range(0, len(df), batch_size):
-        yield df.iloc[i : i + batch_size]
+    for i in range(0, len(records), batch_size):
+        yield records[i : i + batch_size]
 
 
 @dataclass
@@ -48,7 +47,7 @@ class UpsertTable:
         """
         self.metadata.create_all(engine)
 
-    def upsert(self, engine: Engine, df: pd.DataFrame, upsert_type: Literal["overwrite", "add"] = "overwrite") -> None:
+    def upsert(self, engine: Engine, records: list[dict], upsert_type: Literal["overwrite", "add"] = "overwrite") -> None:
         """Upsert the dataframe into this table with the specified engine.
 
         Note that the dataframe must have all the PK columns of this table, or it will raise a `ValueError`.
@@ -57,8 +56,8 @@ class UpsertTable:
         ----------
         engine : Engine
             SQLAlchemy engine to create the table in
-        df : pd.DataFrame
-            Pandas dataframe to upsert; must have all PK columns of this table
+        records : list[dict]
+            list of records to upsert; must have all PK columns of this table
         upsert_type : Literal["overwrite", "add"]
             "overwrite" if upserted values should be overwritten; "add" if upserted values should be added to existing values
 
@@ -71,29 +70,29 @@ class UpsertTable:
             - Input dataframe has no value columns to upsert with
         """
         UPSERT_CHUNK_SIZE = 50000
-        table_col_names = [col.name for col in self.columns]
         table_pk_names = [col.name for col in self.columns if col.primary_key]
-        table_upd_names = [name for name in df.columns if name not in table_pk_names]
-        if not all(df_col in table_col_names for df_col in df.columns):
-            raise ValueError(f"Dataframe with columns {df.columns} has one or more columns that don't match this schema")
-        elif not all(pk_col in df.columns for pk_col in table_pk_names):
-            raise ValueError(f"Dataframe with columns {df.columns} doesn't contain all PK columns {table_pk_names}")
-        elif len(table_upd_names) == 0:
-            raise ValueError(f"Dataframe with columns {df.columns} has no value columns to upsert with")
+        table_upd_names = [col.name for col in self.columns if not col.primary_key]
+        # Check that each record has the required columns
+        for record in records:
+            for field in table_pk_names:
+                if field not in record:
+                    raise ValueError(f"Input record {record} does not have PK column {field}")
+            for field in table_upd_names:
+                if field not in record:
+                    raise ValueError(f"Input record {record} does not have value column {field}")
 
-        # Create temp table and load pandas data into it
+        # Create temp table and load data into it
         temp_table_name = f"load_{self.table_name}"
         temp_metadata = MetaData()
         temp_table = self.table_def.to_metadata(temp_metadata, name=temp_table_name)
         temp_metadata.create_all(engine)
 
-        for microdf in batch_df(df, batch_size=UPSERT_CHUNK_SIZE):
+        for batch in batch_list(records, batch_size=UPSERT_CHUNK_SIZE):
             # Do all as a single transaction
             with engine.begin() as conn:
-                # Wipe the table between chunks
+                # Overwrite the table between chunks
                 conn.execute(delete(temp_table))
-
-                microdf.to_sql(temp_table_name, conn, index=False, if_exists="append", method="multi")
+                conn.execute(insert(temp_table), batch)
 
                 # Then do upsert from this table, dependent on upsert type chosen
                 ins_stmt = insert(self.table_def).from_select(table_pk_names + table_upd_names, select(temp_table).where(True))

@@ -1,14 +1,13 @@
 import argparse
 from dataclasses import dataclass, field
 import gzip
+from itertools import groupby
 import nltk
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 import numpy as np
 import os
-import pandas as pd
-from sqlalchemy import create_engine, Column, Integer, String, select, delete, func
+from sqlalchemy import create_engine, Column, Integer, String, and_, select, delete, func
 from sqlalchemy.engine import Engine, Row
-from sqlalchemy.sql import and_
 from typing import Optional
 
 import src.Directories as Directories
@@ -53,16 +52,27 @@ class MarkovTriads(UpsertTable):
         tokens = nltk.word_tokenize(text)
         if len(tokens) < 3:
             raise ValueError("Input text has less than 3 tokens; triads cannot be made")
-        df = pd.DataFrame(
+        records = [
             {
-                "first_token": tokens,
-                "second_token": tokens[1:] + tokens[:1],
-                "third_token": tokens[2:] + tokens[:2],
+                "first_token": token,
+                "second_token": tokens[(i + 1) % len(tokens)],
+                "third_token": tokens[(i + 2) % len(tokens)],
                 "occurrences": 1,
             }
-        )
-        df = df.groupby(["first_token", "second_token", "third_token"])["occurrences"].sum().reset_index()
-        self.upsert(engine, df, upsert_type="overwrite" if overwrite_probs else "add")
+            for i, token in enumerate(tokens)
+        ]
+        group_key = lambda rec: (rec["first_token"], rec["second_token"], rec["third_token"])
+        grouped_iter = groupby(sorted(records, key=group_key), key=group_key)
+        grouped_records = [
+            {
+                "first_token": key[0],
+                "second_token": key[1],
+                "third_token": key[2],
+                "occurrences": sum(rec["occurrences"] for rec in group),
+            }
+            for key, group in grouped_iter
+        ]
+        self.upsert(engine, grouped_records, upsert_type="overwrite" if overwrite_probs else "add")
         # Delete triads where all 3 words are the same, to avoid repeating symbols too much
         engine.execute(
             delete(self.table_def).where(

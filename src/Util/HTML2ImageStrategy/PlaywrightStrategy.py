@@ -1,6 +1,7 @@
 """Method of getting screenshots using Playwright."""
 
 from io import BytesIO
+import os
 from PIL import Image
 from playwright.sync_api import sync_playwright, Browser
 from typing import Optional, Union
@@ -12,7 +13,7 @@ from .HTML2ImageStrategy import HTML2ImageStrategy, CSSDict, dict_to_css
 class PlaywrightStrategy(HTML2ImageStrategy):
     """Represents a strategy to convert HTML/CSS to an image using Playwright."""
 
-    def __init__(self, browser: str = "webkit") -> None:
+    def __init__(self, browser: str = os.getenv("PLAYWRIGHT_BROWSER", "webkit")) -> None:
         """Create a `PlaywrightStrategy` optionally with a choice of browser."""
         self._browser = browser
 
